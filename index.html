@@ -390,7 +390,7 @@
       <div class="card-body">
 
         <!-- Temperatura -->
-        <div class="control-group">
+        <div class="control-group" id="group-temp">
           <div class="field-label">
             Temperatura
             <span class="field-readout" id="temp-val">Normal (4)</span>
@@ -400,35 +400,83 @@
         </div>
 
         <!-- nA -->
-        <div class="control-group">
+        <div class="control-group" id="group-na">
           <div class="field-label">
             Moléculas A (reactivo)
-            <span class="field-readout"><span id="na-val">20</span></span>
+            <span class="field-readout"><span id="na-val">16</span></span>
           </div>
-          <input type="range" id="ui-na-slider" min="5" max="40" value="20" step="1">
+          <input type="range" id="ui-na-slider" min="4" max="30" value="16" step="1">
         </div>
 
         <!-- nB -->
-        <div class="control-group">
+        <div class="control-group" id="group-nb">
           <div class="field-label">
             Moléculas B (reactivo)
-            <span class="field-readout"><span id="nb-val">20</span></span>
+            <span class="field-readout"><span id="nb-val">16</span></span>
           </div>
-          <input type="range" id="ui-nb-slider" min="5" max="40" value="20" step="1">
+          <input type="range" id="ui-nb-slider" min="4" max="30" value="16" step="1">
         </div>
 
-        <!-- Catalizador -->
-        <div class="control-group" style="margin-top:4px;">
-          <button id="ui-btn-catalyst" class="btn-emission-toggle is-off" title="Activa o desactiva el catalizador">
-            <span>Catalizador</span>
+        <!-- Catalizadores -->
+        <div class="control-group" id="group-cat" style="margin-top:4px;">
+          <div class="field-label">
+            Catalizadores
+            <span class="field-readout"><span id="cat-val">0</span></span>
+          </div>
+          <input type="range" id="ui-cat-slider" min="0" max="6" value="0" step="1">
+          <p class="field-hint">Moléculas que capturan A y B y los hacen reaccionar sin requisito de energía ni orientación.</p>
+        </div>
+
+        <!-- Play/pausa + Reset -->
+        <div class="control-group" style="margin-top:8px; display:flex; gap:8px;">
+          <button id="ui-btn-playpause" class="btn-primary">⏸ Pausar</button>
+          <button id="ui-btn-reset" class="btn-secondary">↺ Reiniciar</button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Comparación -->
+    <div class="card is-expanded">
+      <button class="card-trigger">
+        Comparación
+        <span class="card-chevron">▼</span>
+      </button>
+      <div class="card-body">
+
+        <div class="control-group">
+          <button id="ui-btn-compare" class="btn-emission-toggle is-off" title="Divide la pantalla en dos cámaras para comparar una variable">
+            <span>Modo comparación</span>
             <span class="toggle-pill"></span>
           </button>
-          <p class="field-hint">Reduce la energía de activación: más colisiones eficaces.</p>
         </div>
 
-        <!-- Reset -->
-        <div class="control-group" style="margin-top:8px;">
-          <button id="ui-btn-reset" class="btn-secondary">↺ Reiniciar simulación</button>
+        <div id="compare-extra" style="display:none;">
+          <div class="control-group">
+            <div class="field-label">Variable a comparar</div>
+            <select id="ui-compare-var">
+              <option value="catalyst">Presencia de catalizador</option>
+              <option value="energy">Energía (temperatura)</option>
+              <option value="count">Cantidad de moléculas</option>
+            </select>
+            <p class="field-hint">Las otras dos variables quedan bloqueadas (iguales en ambas cámaras) con los sliders de arriba.</p>
+          </div>
+
+          <div class="control-group">
+            <div class="field-label">
+              <span><span class="cmp-var-name">Catalizadores</span> · ◀ Izquierda</span>
+              <span class="field-readout"><span id="cmpl-val">0</span></span>
+            </div>
+            <input type="range" id="ui-cmp-left" min="0" max="6" value="0" step="1">
+          </div>
+
+          <div class="control-group">
+            <div class="field-label">
+              <span><span class="cmp-var-name">Catalizadores</span> · ▶ Derecha</span>
+              <span class="field-readout"><span id="cmpr-val">4</span></span>
+            </div>
+            <input type="range" id="ui-cmp-right" min="0" max="6" value="4" step="1">
+          </div>
         </div>
 
       </div>
@@ -487,7 +535,15 @@
           <div class="legend-dot" style="background:#34c782;"></div>
           <span>Molécula C (producto)</span>
         </div>
+        <div class="legend-row">
+          <div class="legend-dot" style="background:#a78bfa;"></div>
+          <span>Catalizador (K)</span>
+        </div>
         <div class="legend-row" style="margin-top:6px;">
+          <div class="legend-dot" style="background:#fff5d2; border:1.5px solid #ffc859;"></div>
+          <span>Sitio reactivo (extremo activo)</span>
+        </div>
+        <div class="legend-row">
           <div class="legend-dot" style="background:#ffd700; border-radius: 3px;"></div>
           <span>Destello de reacción</span>
         </div>
@@ -502,10 +558,11 @@
       </button>
       <div class="card-body">
         <div class="info-section">
-          <p>Las moléculas <b>A</b> y <b>B</b> se mueven con velocidades distribuidas según la <b>distribución de Maxwell-Boltzmann</b>. Al aumentar la temperatura, las velocidades se desplazan hacia valores más altos.</p>
-          <p>Una colisión entre A y B es <b>eficaz</b> (produce C) solo si la velocidad relativa supera la <b>energía de activación E<sub>a</sub></b>, mostrada como línea discontinua en la curva de distribución.</p>
-          <p>El <b>catalizador</b> reduce E<sub>a</sub>, aumentando la proporción de colisiones eficaces sin cambiar las velocidades.</p>
-          <p>El gráfico inferior muestra la <b>velocidad de reacción</b> (reacciones/s) en tiempo real.</p>
+          <p>Las moléculas <b>A</b> y <b>B</b> son <b>poliatómicas</b>: tienen una orientación y un <b>sitio reactivo</b> (el extremo claro resaltado). Sus velocidades siguen la <b>distribución de Maxwell-Boltzmann</b> y aumentan con la temperatura.</p>
+          <p><b>Vía térmica.</b> Una colisión directa solo produce C si se cumplen <b>dos</b> condiciones a la vez: que la velocidad relativa supere la <b>energía de activación E<sub>a</sub></b> (energía suficiente) <b>y</b> que ambos sitios reactivos choquen de frente (<b>orientación correcta</b>). Por eso es poco frecuente.</p>
+          <p><b>Vía catalizada.</b> El <b>catalizador (K)</b> atrae a una A y a una B hacia sus dos cavidades. Cuando ambas quedan acopladas, reaccionan <b>sin</b> requisito de energía ni de orientación, y el catalizador se libera intacto para volver a actuar.</p>
+          <p>El recuadro muestra la curva de velocidades con E<sub>a</sub>; el gráfico inferior, la <b>velocidad de reacción</b> (reacciones/s) en tiempo real.</p>
+          <p><b>Modo comparación.</b> Divide la pantalla en dos cámaras. Eliges <b>una</b> variable a comparar —energía, cantidad de moléculas o catalizador— y se aplica un valor distinto a cada cámara; las otras dos quedan <b>bloqueadas e iguales</b>. El gráfico inferior superpone las dos curvas (◀ izquierda / ▶ derecha) para comparar directamente la velocidad de reacción.</p>
         </div>
       </div>
     </div>
@@ -517,6 +574,7 @@
 <div id="canvas-holder"></div>
 
 <script src="js/Molecule.js"></script>
+<script src="js/World.js"></script>
 <script src="js/sketch.js"></script>
 
 <script>
