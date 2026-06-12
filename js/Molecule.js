@@ -122,31 +122,53 @@ class Molecule {
   }
 
   drawProduct(theme) {
+    // C = 4 átomos en rombo: 2 azules (de A, eje de ángulo) + 2 naranjas (de B, perpendicular)
     let dark = theme !== "light";
-    let g = color(52, 199, 130);
     let ca = Math.cos(this.angle), sa = Math.sin(this.angle);
-    let off = 5;
+    let px = -sa, py = ca;
+
+    let D = 6.5;
+    let a1 = { x: this.pos.x + ca*D,  y: this.pos.y + sa*D  };
+    let a2 = { x: this.pos.x - ca*D,  y: this.pos.y - sa*D  };
+    let b1 = { x: this.pos.x + px*D,  y: this.pos.y + py*D  };
+    let b2 = { x: this.pos.x - px*D,  y: this.pos.y - py*D  };
 
     noStroke();
-    fill(red(g), green(g), blue(g), dark ? 30 : 40);
-    ellipse(this.pos.x, this.pos.y, (this.radius + 5) * 2);
+    fill(110, 200, 150, dark ? 30 : 42);
+    ellipse(this.pos.x, this.pos.y, (this.radius + 6) * 2);
 
     if (this.flash > 0) {
       let a = map(this.flash, 0, 18, 0, 180);
-      fill(255, 240, 80, a);
+      noStroke(); fill(255, 240, 80, a);
       ellipse(this.pos.x, this.pos.y, (this.radius + 9) * 2);
     }
 
-    // Dos lóbulos fusionados: A y B unidos
-    fill(g);
-    ellipse(this.pos.x - ca * off, this.pos.y - sa * off, 15, 15);
-    ellipse(this.pos.x + ca * off, this.pos.y + sa * off, 15, 15);
-    fill(255, 255, 255, dark ? 55 : 85);
-    ellipse(this.pos.x - ca * off - 2, this.pos.y - sa * off - 2, 5, 5);
+    stroke(160, 180, 160, 190); strokeWeight(3.5);
+    line(a1.x, a1.y, b1.x, b1.y);
+    line(b1.x, b1.y, a2.x, a2.y);
+    line(a2.x, a2.y, b2.x, b2.y);
+    line(b2.x, b2.y, a1.x, a1.y);
 
-    fill(255, 255, 255, dark ? 235 : 255);
-    textAlign(CENTER, CENTER); textStyle(BOLD); textSize(10);
+    noStroke();
+    fill(79, 142, 247);
+    ellipse(a1.x, a1.y, 12, 12);
+    ellipse(a2.x, a2.y, 12, 12);
+    fill(180, 210, 255, dark ? 100 : 140);
+    ellipse(a1.x - 2, a1.y - 2, 4, 4);
+    ellipse(a2.x - 2, a2.y - 2, 4, 4);
+
+    fill(247, 130, 60);
+    ellipse(b1.x, b1.y, 12, 12);
+    ellipse(b2.x, b2.y, 12, 12);
+    fill(255, 210, 170, dark ? 100 : 140);
+    ellipse(b1.x - 2, b1.y - 2, 4, 4);
+    ellipse(b2.x - 2, b2.y - 2, 4, 4);
+
+    noStroke();
+    fill(255, 255, 255, dark ? 230 : 255);
+    textAlign(CENTER, CENTER); textStyle(BOLD); textSize(9);
     text('C', this.pos.x, this.pos.y + 0.5);
+    textStyle(NORMAL);
   }
 
   drawCatalyst(theme) {

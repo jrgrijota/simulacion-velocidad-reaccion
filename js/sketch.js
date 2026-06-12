@@ -1,10 +1,11 @@
 // ─── Estado global ─────────────────────────────────────────────────────────
 let worlds = [];               // 1 mundo (single) o 2 (compare: [izquierda, derecha])
-let mode = "single";           // "single" | "compare"
+let mode = "single";           // "single" | "compare" | "collision"
 let compareVar = "catalyst";   // "energy" | "count" | "catalyst"
 let themeMode = "dark";
 let paused = false;            // pausa la física (sigue dibujando)
 let compareDone = false;       // una cámara ha agotado su reactivo limitante
+let collisionMode = null;      // instancia de CollisionMode cuando mode === "collision"
 
 const ACCENT_SINGLE = [120, 200, 160];
 const ACCENT_LEFT   = [56, 189, 248];   // cian
@@ -50,6 +51,13 @@ function windowResized() {
 }
 
 function computeLayout() {
+  if (mode === "collision") {
+    regionX = PAD; regionY = PAD;
+    regionW = width - 2*PAD;
+    regionH = height - 2*PAD;
+    grH = 0; grX = 0; grY = 0; grW = 0;
+    return;
+  }
   grH = max(85, Math.floor(height * 0.20));
   regionX = PAD; regionY = PAD;
   regionW = width - 2*PAD;
@@ -98,6 +106,12 @@ function readConfig() {
 
 function rebuildWorlds() {
   computeLayout();
+  if (mode === "collision") {
+    worlds = [];
+    if (!collisionMode) collisionMode = new CollisionMode();
+    else collisionMode.reset();
+    return;
+  }
   let cfg = readConfig();
   worlds = cfg.map(spec => new World(spec));
   layoutWorlds();
@@ -110,6 +124,14 @@ function rebuildWorlds() {
 function draw() {
   background(themeMode === "light" ? [215, 222, 232] :
              themeMode === "high-contrast" ? [0, 0, 0] : [11, 12, 16]);
+
+  if (mode === "collision") {
+    if (collisionMode) {
+      collisionMode.step();
+      collisionMode.draw(regionX, regionY, regionW, regionH, themeMode);
+    }
+    return;
+  }
 
   if (!paused) for (let w of worlds) w.step();
 
@@ -126,6 +148,18 @@ function draw() {
 
   drawRateGraph();
   updateCounters();
+}
+
+function mousePressed() {
+  if (mode === "collision" && collisionMode) {
+    collisionMode.mousePressed(mouseX, mouseY, regionX, regionY, regionW, regionH);
+  }
+}
+function mouseDragged() {
+  if (mode === "collision" && collisionMode) collisionMode.mouseDragged(mouseX, mouseY);
+}
+function mouseReleased() {
+  if (mode === "collision" && collisionMode) collisionMode.mouseReleased();
 }
 
 // Muestra el porcentaje de conversión en grande en cada cámara
@@ -281,14 +315,27 @@ function applySharedCatalysts() {
 
 // ─── UI: visibilidad y configuración del par ────────────────────────────────
 function updateUIVisibility() {
-  let compareOn = (mode === "compare");
+  let compareOn   = (mode === "compare");
+  let collisionOn = (mode === "collision");
   let show = (id, on) => { let e = document.getElementById(id); if (e) e.style.display = on ? "" : "none"; };
 
   show("compare-extra", compareOn);
-  show("group-temp", !(compareOn && compareVar === "energy"));
-  show("group-na",   !(compareOn && compareVar === "count"));
-  show("group-nb",   !(compareOn && compareVar === "count"));
-  show("group-cat",  !(compareOn && compareVar === "catalyst"));
+  show("group-temp", !(compareOn && compareVar === "energy") && !collisionOn);
+  show("group-na",   !(compareOn && compareVar === "count")  && !collisionOn);
+  show("group-nb",   !(compareOn && compareVar === "count")  && !collisionOn);
+  show("group-cat",  !(compareOn && compareVar === "catalyst") && !collisionOn);
+
+  // Panel de choque
+  show("group-collision-controls", collisionOn);
+
+  // Ocultar compare toggle cuando estamos en modo choque
+  show("card-compare", !collisionOn);
+
+  // Play/pausa y reset solo en modos normales
+  let btnPP = document.getElementById("ui-btn-playpause");
+  if (btnPP) btnPP.style.display = collisionOn ? "none" : "";
+  let btnR = document.getElementById("ui-btn-reset");
+  if (btnR) btnR.style.display = collisionOn ? "none" : "";
 }
 
 function configureComparePair() {
@@ -388,6 +435,53 @@ function setupEventListeners() {
       themeMode = e.target.value;
       root.setAttribute("data-theme", e.target.value);
       try { localStorage.setItem("sim-ui-theme-vr", e.target.value); } catch (_) {}
+    });
+  }
+
+  // Slider de energía del modo choque
+  let collEnergySlider = document.getElementById("ui-collision-energy");
+  if (collEnergySlider) {
+    collEnergySlider.addEventListener("input", (e) => {
+      let el = document.getElementById("collision-energy-val");
+      if (el) el.innerText = e.target.value;
+    });
+  }
+
+  // Modo choque
+  let btnCollision = document.getElementById("ui-btn-collision");
+  if (btnCollision) {
+    btnCollision.addEventListener("click", () => {
+      let on = btnCollision.classList.contains("is-on");
+      btnCollision.classList.toggle("is-on", !on);
+      btnCollision.classList.toggle("is-off", on);
+      if (!on) {
+        mode = "collision";
+        if (!collisionMode) collisionMode = new CollisionMode();
+        else collisionMode.reset();
+      } else {
+        mode = "single";
+        collisionMode = null;
+      }
+      updateUIVisibility();
+      computeLayout();
+      if (mode !== "collision") rebuildWorlds();
+    });
+  }
+
+  let btnLaunch = document.getElementById("ui-btn-launch");
+  if (btnLaunch) {
+    btnLaunch.addEventListener("click", () => {
+      if (collisionMode) {
+        let e = intVal("ui-collision-energy");
+        collisionMode.launch(e);
+      }
+    });
+  }
+
+  let btnCollReset = document.getElementById("ui-btn-collision-reset");
+  if (btnCollReset) {
+    btnCollReset.addEventListener("click", () => {
+      if (collisionMode) collisionMode.reset();
     });
   }
 

@@ -433,11 +433,44 @@
           <button id="ui-btn-reset" class="btn-secondary">↺ Reiniciar</button>
         </div>
 
+        <!-- Controles del modo choque (ocultos por defecto) -->
+        <div id="group-collision-controls" style="display:none;">
+          <div class="control-group" style="margin-top:6px;">
+            <div class="field-label">
+              Energía del choque
+              <span class="field-readout"><span id="collision-energy-val">5</span></span>
+            </div>
+            <input type="range" id="ui-collision-energy" min="1" max="10" value="5" step="1">
+            <p class="field-hint">Controla la velocidad de las moléculas al lanzarlas. La energía de activación E<sub>a</sub> corresponde a nivel 4.</p>
+          </div>
+          <div class="control-group" style="display:flex; gap:8px;">
+            <button id="ui-btn-launch" class="btn-primary">▶ Lanzar</button>
+            <button id="ui-btn-collision-reset" class="btn-secondary">↺ Reset</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Modo Choque -->
+    <div class="card is-expanded">
+      <button class="card-trigger">
+        Modo Choque
+        <span class="card-chevron">▼</span>
+      </button>
+      <div class="card-body">
+        <div class="control-group">
+          <button id="ui-btn-collision" class="btn-emission-toggle is-off" title="Activa el modo choque individual para estudiar condiciones de reacción">
+            <span>Modo choque</span>
+            <span class="toggle-pill"></span>
+          </button>
+        </div>
+        <p class="field-hint" style="margin-top:4px;">Muestra dos moléculas grandes. Rótalas arrastrando y lánzalas una contra la otra. Verás si el choque es efectivo según la energía y la orientación.</p>
       </div>
     </div>
 
     <!-- Comparación -->
-    <div class="card is-expanded">
+    <div class="card is-expanded" id="card-compare">
       <button class="card-trigger">
         Comparación
         <span class="card-chevron">▼</span>
@@ -575,6 +608,7 @@
 
 <script src="js/Molecule.js"></script>
 <script src="js/World.js"></script>
+<script src="js/CollisionMode.js"></script>
 <script src="js/sketch.js"></script>
 
 <script>
