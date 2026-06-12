@@ -319,23 +319,25 @@ function updateUIVisibility() {
   let collisionOn = (mode === "collision");
   let show = (id, on) => { let e = document.getElementById(id); if (e) e.style.display = on ? "" : "none"; };
 
-  show("compare-extra", compareOn);
+  // Hints descriptivos del modo
+  show("mode-hint-reaction",  mode === "single");
+  show("mode-hint-compare",   compareOn);
+  show("mode-hint-collision", collisionOn);
+
+  // Controles de parámetros: ocultar los que la variable comparada ya controla, y todos en modo choque
   show("group-temp", !(compareOn && compareVar === "energy") && !collisionOn);
   show("group-na",   !(compareOn && compareVar === "count")  && !collisionOn);
   show("group-nb",   !(compareOn && compareVar === "count")  && !collisionOn);
   show("group-cat",  !(compareOn && compareVar === "catalyst") && !collisionOn);
 
-  // Panel de choque
+  // Card de comparación: solo en modo comparación
+  show("card-compare", compareOn);
+
+  // Play/pausa y reset: solo en modos reacción y comparación
+  show("group-play-reset", !collisionOn);
+
+  // Controles de choque: solo en modo choque
   show("group-collision-controls", collisionOn);
-
-  // Ocultar compare toggle cuando estamos en modo choque
-  show("card-compare", !collisionOn);
-
-  // Play/pausa y reset solo en modos normales
-  let btnPP = document.getElementById("ui-btn-playpause");
-  if (btnPP) btnPP.style.display = collisionOn ? "none" : "";
-  let btnR = document.getElementById("ui-btn-reset");
-  if (btnR) btnR.style.display = collisionOn ? "none" : "";
 }
 
 function configureComparePair() {
@@ -371,15 +373,18 @@ function setupEventListeners() {
     applySharedCatalysts();
   });
 
-  // Toggle modo comparación
-  document.getElementById("ui-btn-compare").addEventListener("click", () => {
-    let btn = document.getElementById("ui-btn-compare");
-    let on = btn.classList.contains("is-on");
-    btn.classList.toggle("is-on", !on);
-    btn.classList.toggle("is-off", on);
-    mode = on ? "single" : "compare";
+  // Selector de modo único
+  document.getElementById("ui-mode-select").addEventListener("change", (e) => {
+    mode = e.target.value;
+    if (mode === "collision") {
+      if (!collisionMode) collisionMode = new CollisionMode();
+      else collisionMode.reset();
+    } else {
+      collisionMode = null;
+    }
     updateUIVisibility();
-    rebuildWorlds();
+    computeLayout();
+    if (mode !== "collision") rebuildWorlds();
   });
 
   // Selector de variable comparada
@@ -439,51 +444,17 @@ function setupEventListeners() {
   }
 
   // Slider de energía del modo choque
-  let collEnergySlider = document.getElementById("ui-collision-energy");
-  if (collEnergySlider) {
-    collEnergySlider.addEventListener("input", (e) => {
-      let el = document.getElementById("collision-energy-val");
-      if (el) el.innerText = e.target.value;
-    });
-  }
+  document.getElementById("ui-collision-energy").addEventListener("input", (e) => {
+    document.getElementById("collision-energy-val").innerText = e.target.value;
+  });
 
-  // Modo choque
-  let btnCollision = document.getElementById("ui-btn-collision");
-  if (btnCollision) {
-    btnCollision.addEventListener("click", () => {
-      let on = btnCollision.classList.contains("is-on");
-      btnCollision.classList.toggle("is-on", !on);
-      btnCollision.classList.toggle("is-off", on);
-      if (!on) {
-        mode = "collision";
-        if (!collisionMode) collisionMode = new CollisionMode();
-        else collisionMode.reset();
-      } else {
-        mode = "single";
-        collisionMode = null;
-      }
-      updateUIVisibility();
-      computeLayout();
-      if (mode !== "collision") rebuildWorlds();
-    });
-  }
-
-  let btnLaunch = document.getElementById("ui-btn-launch");
-  if (btnLaunch) {
-    btnLaunch.addEventListener("click", () => {
-      if (collisionMode) {
-        let e = intVal("ui-collision-energy");
-        collisionMode.launch(e);
-      }
-    });
-  }
-
-  let btnCollReset = document.getElementById("ui-btn-collision-reset");
-  if (btnCollReset) {
-    btnCollReset.addEventListener("click", () => {
-      if (collisionMode) collisionMode.reset();
-    });
-  }
+  // Botones del modo choque
+  document.getElementById("ui-btn-launch").addEventListener("click", () => {
+    if (collisionMode) collisionMode.launch(intVal("ui-collision-energy"));
+  });
+  document.getElementById("ui-btn-collision-reset").addEventListener("click", () => {
+    if (collisionMode) collisionMode.reset();
+  });
 
   // Engranaje
   let gear = document.getElementById("ui-dropdown-trigger");

@@ -381,6 +381,26 @@
       </div>
     </div>
 
+    <!-- Selector de modo -->
+    <div class="card is-expanded">
+      <button class="card-trigger">
+        Modo
+        <span class="card-chevron">▼</span>
+      </button>
+      <div class="card-body">
+        <div class="control-group">
+          <select id="ui-mode-select">
+            <option value="single">Modo reacción</option>
+            <option value="compare">Modo comparación</option>
+            <option value="collision">Modo choque</option>
+          </select>
+        </div>
+        <p class="field-hint" id="mode-hint-reaction">Una cámara con A, B y opcionalmente catalizadores.</p>
+        <p class="field-hint" id="mode-hint-compare" style="display:none;">Dos cámaras: elige una variable a comparar; las otras dos quedan iguales en ambas.</p>
+        <p class="field-hint" id="mode-hint-collision" style="display:none;">Dos moléculas grandes. Rótalas arrastrando y lánzalas una contra la otra para ver si el choque es efectivo.</p>
+      </div>
+    </div>
+
     <!-- Parámetros -->
     <div class="card is-expanded">
       <button class="card-trigger">
@@ -427,8 +447,8 @@
           <p class="field-hint">Moléculas que capturan A y B y los hacen reaccionar sin requisito de energía ni orientación.</p>
         </div>
 
-        <!-- Play/pausa + Reset -->
-        <div class="control-group" style="margin-top:8px; display:flex; gap:8px;">
+        <!-- Play/pausa + Reset (modos reacción y comparación) -->
+        <div class="control-group" style="margin-top:8px; display:flex; gap:8px;" id="group-play-reset">
           <button id="ui-btn-playpause" class="btn-primary">⏸ Pausar</button>
           <button id="ui-btn-reset" class="btn-secondary">↺ Reiniciar</button>
         </div>
@@ -441,7 +461,7 @@
               <span class="field-readout"><span id="collision-energy-val">5</span></span>
             </div>
             <input type="range" id="ui-collision-energy" min="1" max="10" value="5" step="1">
-            <p class="field-hint">Controla la velocidad de las moléculas al lanzarlas. La energía de activación E<sub>a</sub> corresponde a nivel 4.</p>
+            <p class="field-hint">Controla la velocidad al lanzar. La energía de activación E<sub>a</sub> equivale aproximadamente al nivel 4.</p>
           </div>
           <div class="control-group" style="display:flex; gap:8px;">
             <button id="ui-btn-launch" class="btn-primary">▶ Lanzar</button>
@@ -452,39 +472,14 @@
       </div>
     </div>
 
-    <!-- Modo Choque -->
-    <div class="card is-expanded">
-      <button class="card-trigger">
-        Modo Choque
-        <span class="card-chevron">▼</span>
-      </button>
-      <div class="card-body">
-        <div class="control-group">
-          <button id="ui-btn-collision" class="btn-emission-toggle is-off" title="Activa el modo choque individual para estudiar condiciones de reacción">
-            <span>Modo choque</span>
-            <span class="toggle-pill"></span>
-          </button>
-        </div>
-        <p class="field-hint" style="margin-top:4px;">Muestra dos moléculas grandes. Rótalas arrastrando y lánzalas una contra la otra. Verás si el choque es efectivo según la energía y la orientación.</p>
-      </div>
-    </div>
-
-    <!-- Comparación -->
-    <div class="card is-expanded" id="card-compare">
+    <!-- Comparación (visible solo en modo comparación) -->
+    <div class="card is-expanded" id="card-compare" style="display:none;">
       <button class="card-trigger">
         Comparación
         <span class="card-chevron">▼</span>
       </button>
       <div class="card-body">
-
-        <div class="control-group">
-          <button id="ui-btn-compare" class="btn-emission-toggle is-off" title="Divide la pantalla en dos cámaras para comparar una variable">
-            <span>Modo comparación</span>
-            <span class="toggle-pill"></span>
-          </button>
-        </div>
-
-        <div id="compare-extra" style="display:none;">
+        <div id="compare-extra">
           <div class="control-group">
             <div class="field-label">Variable a comparar</div>
             <select id="ui-compare-var">
@@ -511,7 +506,6 @@
             <input type="range" id="ui-cmp-right" min="0" max="6" value="4" step="1">
           </div>
         </div>
-
       </div>
     </div>
 

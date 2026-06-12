@@ -98,8 +98,13 @@ class Molecule {
     line(bx, by, sx, sy);
 
     // Átomo trasero (apéndice, marca la orientación)
+    // A: mismo azul que el cuerpo; B: naranja oscuro para distinción
     noStroke();
-    fill(red(base) * 0.7, green(base) * 0.7, blue(base) * 0.7);
+    if (this.type === 'A') {
+      fill(base);
+    } else {
+      fill(red(base) * 0.7, green(base) * 0.7, blue(base) * 0.7);
+    }
     ellipse(bx, by, 9, 9);
 
     // Átomo central (cuerpo)

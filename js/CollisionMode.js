@@ -269,8 +269,9 @@ class CollisionMode {
     strokeWeight(12);
     line(rearX, rearY, siteX, siteY);
 
-    // Átomo trasero
-    noStroke(); fill(red(base)*0.65, green(base)*0.65, blue(base)*0.65);
+    // Átomo trasero (A: mismo azul; B: naranja oscuro)
+    noStroke();
+    if (type === 'A') { fill(base); } else { fill(red(base)*0.65, green(base)*0.65, blue(base)*0.65); }
     ellipse(rearX, rearY, 28, 28);
     fill(255,255,255, dark ? 40 : 60);
     ellipse(rearX - 5, rearY - 5, 10, 10);
