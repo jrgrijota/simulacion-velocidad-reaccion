@@ -458,9 +458,12 @@ class World {
     noStroke();
     fill(dark ? color(100, 120, 160) : color(70, 90, 120));
     textAlign(LEFT, TOP); textSize(8);
-    text("Velocidades (T = " + this.tIdx + ")", bX + 5, bY + 5);
+    text("Velocidad relativa de los choques (T = " + this.tIdx + ")", bX + 5, bY + 5);
 
-    let sigma = this.getSigma();
+    // La reacción compara con Ea la velocidad RELATIVA del par (ver step), así que
+    // se dibuja su distribución: componentes con σ·√2, no la de una sola molécula.
+    // Así el área verde es la fracción real de choques con energía suficiente.
+    let sigma = this.getSigma() * Math.SQRT2;
     let ea = EA, vMax = sigma * 4.5, N = 120;
 
     let fMax = 0;
