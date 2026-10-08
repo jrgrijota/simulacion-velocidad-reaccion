@@ -5,7 +5,11 @@ const SITE_CONTACT    = 11;   // distancia entre sitios reactivos para reacciona
 const CAT_ATTRACT_R   = 115;  // radio de atracción del catalizador
 const CAT_PULL        = 0.11; // aceleración hacia la cavidad
 const CAT_CAPTURE_DIST = 18;  // distancia para fijar la molécula en la cavidad
-const CAT_BIND_FRAMES = 28;   // frames con ambas cavidades llenas antes de reaccionar
+const CAT_BIND_FRAMES = 28;   // frames con ambas cavidades llenas antes de intentar reaccionar
+// El catalizador no elimina la barrera: la rebaja. Con A y B sujetas en sus
+// cavidades (ya bien orientadas), cada intento reacciona con la probabilidad
+// de que el par supere esta Ea menor; si no, lo vuelve a intentar.
+const EA_CAT          = 2.9;  // energía de activación (vía catalizada)
 
 function gaussianRandom() {
   let u, v;
@@ -70,6 +74,13 @@ class World {
   }
 
   getSigma() { return BASE_SIGMA * Math.sqrt(this.tIdx); }
+
+  // Fracción de pares cuya velocidad relativa supera ea (distribución 2D de la
+  // velocidad relativa, σ·√2): es el área verde del recuadro de velocidades.
+  fractionAbove(ea) {
+    let s = this.getSigma() * Math.SQRT2;
+    return Math.exp(-(ea * ea) / (2 * s * s));
+  }
 
   randomVel(scale) {
     let s = this.getSigma() * (scale || 1);
@@ -319,7 +330,7 @@ class World {
     for (let p of newProducts) this.spawnProduct(p.x, p.y, p.vx, p.vy);
   }
 
-  // Captura en cavidades + reacción por vía CATALIZADA (sin requisitos)
+  // Captura en cavidades + reacción por vía CATALIZADA (Ea rebajada)
   processCatalysis() {
     let cats = this.molecules.filter(m => m.type === 'K' && !m.dead);
 
@@ -345,7 +356,9 @@ class World {
 
       if (K.slotA && K.slotB) {
         K.bindTimer++;
-        if (K.bindTimer >= CAT_BIND_FRAMES) {
+        if (K.bindTimer >= CAT_BIND_FRAMES && Math.random() >= this.fractionAbove(EA_CAT)) {
+          K.bindTimer = 0;   // no ha superado la Ea rebajada: otro intento
+        } else if (K.bindTimer >= CAT_BIND_FRAMES) {
           let a = K.slotA, b = K.slotB;
           let cx = (a.pos.x + b.pos.x) / 2, cy = (a.pos.y + b.pos.y) / 2;
           let ox = cx - K.pos.x, oy = cy - K.pos.y, on = Math.hypot(ox, oy) || 1;
@@ -476,6 +489,24 @@ class World {
     }
     if (fMax === 0) return;
 
+    // Con catalizador, la franja violeta entre Ea(cat.) y Ea son los pares que
+    // solo pueden reaccionar por la vía catalizada.
+    let catOn = this.nK > 0;
+    if (catOn) {
+      beginShape();
+      noStroke();
+      fill(hc ? color(255,0,255,70) : color(167,139,250,70));
+      vertex(map(EA_CAT, 0, vMax, aX, aX + aW), aY + aH);
+      for (let k = 0; k <= N; k++) {
+        let v = (k / N) * vMax;
+        if (v < EA_CAT || v > ea) continue;
+        let f = (v / (sigma*sigma)) * Math.exp(-(v*v) / (2*sigma*sigma));
+        vertex(map(v, 0, vMax, aX, aX + aW), map(f, 0, fMax, aY + aH, aY));
+      }
+      vertex(constrain(map(ea, 0, vMax, aX, aX + aW), aX, aX + aW), aY + aH);
+      endShape(CLOSE);
+    }
+
     beginShape();
     noStroke();
     fill(hc ? color(255,255,0,80) : color(52,199,130,70));
@@ -517,6 +548,20 @@ class World {
     fill(hc ? color(255,255,0) : color(220,80,80));
     textAlign(CENTER, BOTTOM); textSize(7);
     text("Ea", eaX, aY - 1);
+
+    if (catOn) {
+      let ecX = map(EA_CAT, 0, vMax, aX, aX + aW);
+      stroke(hc ? color(255,0,255) : color(167,139,250));
+      strokeWeight(1.2);
+      drawingContext.save();
+      drawingContext.setLineDash([3, 3]);
+      line(ecX, aY, ecX, aY + aH);
+      drawingContext.restore();
+      noStroke();
+      fill(hc ? color(255,0,255) : color(167,139,250));
+      textAlign(CENTER, TOP); textSize(7);
+      text("Ea cat.", ecX, aY + aH + 1);   // debajo del eje, para no pisar «Ea»
+    }
   }
 
   drawStatsOverlay(theme) {
