@@ -5,6 +5,10 @@
 const CM_RADIUS   = 44;   // radio visual de las moléculas grandes
 const CM_SITE     = 30;   // distancia del sitio reactivo al centro
 const CM_EA_NORM  = 5.8;  // energía de activación normalizada (igual que World)
+// Velocidad de cada molécula al lanzar: v = K·√E. La relativa (2v) supera la Ea a
+// partir del nivel 4 (nivel 3: 5,2 < 5,8; nivel 4: 6,0), como dice la ayuda.
+// Antes era 2·(3,2·√E + 1,2) ≥ 8,8: la energía siempre era suficiente.
+const CM_SPEED_K  = 1.5;
 
 class CollisionMode {
   constructor() {
@@ -37,7 +41,7 @@ class CollisionMode {
   launch(energyIdx) {
     if (this.phase !== "ready") return;
     this.phase = "flying";
-    let speed = BASE_SIGMA * Math.sqrt(energyIdx) * 1.6 + 1.2;
+    let speed = CM_SPEED_K * Math.sqrt(energyIdx);
     this.flyA = { x: this.posA.x, y: this.posA.y, vx:  speed, vy: 0, angle: this.molA.angle };
     this.flyB = { x: this.posB.x, y: this.posB.y, vx: -speed, vy: 0, angle: this.molB.angle };
     this._energyIdx = energyIdx;
@@ -71,6 +75,12 @@ class CollisionMode {
         this.resultTimer = 0;
         this.flashTimer = 40;
         this.fragments = [];
+        // Antes de _spawnFragments(), que lo usa (si no, el primer choque no
+        // efectivo rompía el dibujo)
+        this._collisionPos  = {
+          x: (this.flyA.x + this.flyB.x) / 2,
+          y: (this.flyA.y + this.flyB.y) / 2
+        };
 
         if (this.resultEffective) {
           // Producto C en el centro
@@ -87,10 +97,6 @@ class CollisionMode {
         this.phase = "result";
         this._energyOk      = energyOk;
         this._orientationOk = orientationOk;
-        this._collisionPos  = {
-          x: (this.flyA.x + this.flyB.x) / 2,
-          y: (this.flyA.y + this.flyB.y) / 2
-        };
         // Detener las moléculas en el punto de impacto (separadas)
         this.flyA.vx = -1.8; this.flyB.vx = 1.8;
       }
