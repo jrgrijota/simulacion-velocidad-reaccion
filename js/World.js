@@ -459,21 +459,23 @@ class World {
   drawMBInset(theme) {
     let dark = theme !== "light";
     let hc   = theme === "high-contrast";
-    let bW = min(150, this.camW - 24), bH = 78;
+    // Tamaño legible en el proyector: es la explicación del efecto de la temperatura
+    let bW = constrain(this.camW * 0.36, 150, 270), bH = round(bW * 0.5);
+    bW = min(bW, this.camW - 24);
     let bX = this.camX + this.camW - bW - 12, bY = this.camY + 10;
 
     noStroke();
     fill(dark ? (hc ? color(20,20,20,230) : color(12, 15, 26, 210)) : color(175, 185, 200, 210));
     rect(bX, bY, bW, bH, 6);
 
-    let padL = 8, padR = 6, padT = 18, padB = 12;
+    let padL = 8, padR = 8, padT = 24, padB = 18;
     let aX = bX + padL, aY = bY + padT;
     let aW = bW - padL - padR, aH = bH - padT - padB;
 
     noStroke();
     fill(dark ? color(100, 120, 160) : color(70, 90, 120));
-    textAlign(LEFT, TOP); textSize(8);
-    text("Velocidad relativa de los choques (T = " + this.tIdx + ")", bX + 5, bY + 5);
+    textAlign(LEFT, TOP); textSize(bW > 200 ? 11 : 9);
+    text("Velocidad relativa de los choques (T = " + this.tIdx + ")", bX + 6, bY + 6);
 
     // La reacción compara con Ea la velocidad RELATIVA del par (ver step), así que
     // se dibuja su distribución: componentes con σ·√2, no la de una sola molécula.
@@ -546,8 +548,15 @@ class World {
 
     noStroke();
     fill(hc ? color(255,255,0) : color(220,80,80));
-    textAlign(CENTER, BOTTOM); textSize(7);
+    textAlign(CENTER, BOTTOM); textSize(11); textStyle(BOLD);
     text("Ea", eaX, aY - 1);
+    textStyle(NORMAL);
+
+    // Qué parte de los pares tiene energía suficiente (el área verde)
+    let pct = Math.round(this.fractionAbove(ea) * 100);
+    fill(hc ? color(255,255,0) : color(52,199,130));
+    textAlign(RIGHT, BOTTOM); textSize(bW > 200 ? 11 : 9);
+    text(pct + " % supera Ea", aX + aW, aY + aH - 3);
 
     if (catOn) {
       let ecX = map(EA_CAT, 0, vMax, aX, aX + aW);
@@ -559,8 +568,8 @@ class World {
       drawingContext.restore();
       noStroke();
       fill(hc ? color(255,0,255) : color(167,139,250));
-      textAlign(CENTER, TOP); textSize(7);
-      text("Ea cat.", ecX, aY + aH + 1);   // debajo del eje, para no pisar «Ea»
+      textAlign(CENTER, TOP); textSize(10);
+      text("Ea cat.", ecX, aY + aH + 2);   // debajo del eje, para no pisar «Ea»
     }
   }
 
