@@ -40,6 +40,10 @@ function setup() {
   configureComparePair();
   updateUIVisibility();
   rebuildWorlds();
+  // El tamaño medido en setup() puede no ser el definitivo (la página aún se está
+  // maquetando) y en móvil el alto cambia con la barra del navegador: se reajusta
+  // siempre que cambie el contenedor, no solo al redimensionar la ventana.
+  if (holder && window.ResizeObserver) new ResizeObserver(windowResized).observe(holder);
 }
 
 function windowResized() {

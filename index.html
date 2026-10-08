@@ -349,6 +349,16 @@
       position: relative;
     }
     #canvas-holder canvas { display: block; }
+
+    /* ── PANTALLAS ESTRECHAS (móvil) ──
+       La simulación arriba a todo el ancho y el panel debajo. El lienzo toma el
+       tamaño de #canvas-holder y computeLayout() reparte cámara y gráfica. */
+    @media (max-width: 760px) {
+      html, body { height: auto; overflow: auto; }
+      body { flex-direction: column; }
+      #canvas-holder { order: -1; flex: none; width: 100%; height: clamp(360px, 68svh, 640px); }
+      .sidebar { width: 100%; border-right: none; border-top: 1px solid var(--border-main); overflow: visible; }
+    }
   </style>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <script src="js/estadisticas.js" data-sim="sim-velocidad-reaccion"></script>
