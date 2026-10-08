@@ -289,20 +289,18 @@ function drawRateGraph() {
   }
 }
 
-// ─── Contadores DOM (agregados de todas las cámaras) ────────────────────────
+// ─── Contadores DOM ─────────────────────────────────────────────────────────
+// Con una cámara, sus valores; en comparación, «izquierda | derecha» (sumarlas
+// mezclaría dos experimentos distintos).
 function updateCounters() {
-  let nA = 0, nB = 0, nC = 0, total = 0, rate = 0;
-  for (let w of worlds) {
-    nA += w.countType('A'); nB += w.countType('B'); nC += w.countType('C');
-    total += w.totalReactions; rate += w.currentRate;
-  }
+  let porCamara = (f) => worlds.map(f).join(" | ");
   let setTxt = (id, v) => { let e = document.getElementById(id); if (e) e.innerText = v; };
-  setTxt("count-a", nA);
-  setTxt("count-b", nB);
-  setTxt("count-c", nC);
-  setTxt("count-total", total);
+  setTxt("count-a", porCamara(w => w.countType('A')));
+  setTxt("count-b", porCamara(w => w.countType('B')));
+  setTxt("count-c", porCamara(w => w.countType('C')));
+  setTxt("count-total", porCamara(w => w.totalReactions));
   let anyHist = worlds.some(w => w.rateHistory.length > 0);
-  setTxt("count-rate", anyHist ? rate + " /s" : "—");
+  setTxt("count-rate", anyHist ? porCamara(w => w.currentRate) + " /s" : "—");
 }
 
 // ─── Ajustes en vivo ────────────────────────────────────────────────────────
