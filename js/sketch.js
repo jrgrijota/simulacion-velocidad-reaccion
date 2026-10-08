@@ -220,7 +220,8 @@ function drawRateGraph() {
   noStroke();
   fill(dark ? color(80,95,130) : color(90,110,140));
   textAlign(LEFT, TOP); textStyle(NORMAL); textSize(9);
-  text("VELOCIDAD DE REACCIÓN (reacciones/s)", grX + padL, grY + 4);
+  // «s» = segundo de simulación (60 pasos), no de reloj: ver la ayuda
+  text("VELOCIDAD DE REACCIÓN (reacciones/s simulado)", grX + padL, grY + 4);
 
   let maxLen = 0, maxRate = 1;
   for (let w of worlds) {

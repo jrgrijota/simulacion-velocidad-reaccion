@@ -161,6 +161,8 @@ class World {
     if (this.molecules.some(m => m.dead))
       this.molecules = this.molecules.filter(m => !m.dead);
 
+    // Tasa = reacciones en los últimos 60 pasos (1 s de simulación, no de reloj:
+    // así no depende de lo rápido que dibuje el equipo)
     if (this.frameCount % 60 === 0) {
       let cutoff = this.frameCount - 60;
       this.reactionTimestamps = this.reactionTimestamps.filter(f => f > cutoff);
