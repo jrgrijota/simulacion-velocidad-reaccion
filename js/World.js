@@ -25,7 +25,7 @@ class World {
     this.nA = opts.nA;
     this.nB = opts.nB;
     this.nK = opts.nK;
-    this.title = opts.title || "CÁMARA DE REACCIÓN";
+    this.title = opts.title || i18n.t("CÁMARA DE REACCIÓN");
     this.accent = opts.accent || [120, 200, 160];
 
     // Límites (se asignan con setBounds)
@@ -425,7 +425,7 @@ class World {
     textStyle(NORMAL); textSize(capH);
     fill(dark ? color(150, 165, 195) : color(70, 90, 120));
     textAlign(RIGHT, BOTTOM);
-    text("conversión", rx, by - sz + 1);
+    text(i18n.t("conversión"), rx, by - sz + 1);
 
     // Porcentaje
     textStyle(BOLD); textSize(sz);
@@ -475,7 +475,7 @@ class World {
     noStroke();
     fill(dark ? color(100, 120, 160) : color(70, 90, 120));
     textAlign(LEFT, TOP); textSize(bW > 200 ? 11 : 9);
-    text("Velocidad relativa de los choques (T = " + this.tIdx + ")", bX + 6, bY + 6);
+    text(i18n.t("Velocidad relativa de los choques (T = {t})", { t: this.tIdx }), bX + 6, bY + 6);
 
     // La reacción compara con Ea la velocidad RELATIVA del par (ver step), así que
     // se dibuja su distribución: componentes con σ·√2, no la de una sola molécula.
@@ -556,7 +556,7 @@ class World {
     let pct = Math.round(this.fractionAbove(ea) * 100);
     fill(hc ? color(255,255,0) : color(52,199,130));
     textAlign(RIGHT, BOTTOM); textSize(bW > 200 ? 11 : 9);
-    text(pct + " % supera Ea", aX + aW, aY + aH - 3);
+    text(i18n.t("{pct} % supera Ea", { pct: pct }), aX + aW, aY + aH - 3);
 
     if (catOn) {
       let ecX = map(EA_CAT, 0, vMax, aX, aX + aW);
@@ -569,7 +569,7 @@ class World {
       noStroke();
       fill(hc ? color(255,0,255) : color(167,139,250));
       textAlign(CENTER, TOP); textSize(10);
-      text("Ea cat.", ecX, aY + aH + 2);   // debajo del eje, para no pisar «Ea»
+      text(i18n.t("Ea cat."), ecX, aY + aH + 2);   // debajo del eje, para no pisar «Ea»
     }
   }
 
@@ -610,7 +610,7 @@ class World {
     noStroke();
     fill(dark ? color(100,115,155) : color(70,90,120));
     textAlign(LEFT, TOP); textSize(9.5);
-    text("Térm. " + this.thermalReactions + " · Cat. " + this.catalyzedReactions,
+    text(i18n.t("Térm. {t} · Cat. {c}", { t: this.thermalReactions, c: this.catalyzedReactions }),
          this.camX + 10, this.camY + this.camH - 14);
   }
 }
