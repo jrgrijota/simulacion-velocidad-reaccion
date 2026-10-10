@@ -19,9 +19,9 @@ const GAP = 14;
 
 // Presets del par Izquierda/Derecha según la variable comparada
 const COMPARE_PRESETS = {
-  energy:   { label: "Temperatura",      min: 1, max: 10, left: 2, right: 8 },
-  count:    { label: "Moléculas (A=B)",  min: 4, max: 30, left: 8, right: 24 },
-  catalyst: { label: "Catalizadores",    min: 0, max: 6,  left: 0, right: 4 },
+  energy:   { label: i18n.t("Temperatura"),      min: 1, max: 10, left: 2, right: 8 },
+  count:    { label: i18n.t("Moléculas (A=B)"),  min: 4, max: 30, left: 8, right: 24 },
+  catalyst: { label: i18n.t("Catalizadores"),    min: 0, max: 6,  left: 0, right: 4 },
 };
 
 // ─── Helpers DOM ────────────────────────────────────────────────────────────
@@ -87,7 +87,7 @@ function readConfig() {
   let nK = intVal("ui-cat-slider");
 
   if (mode === "single") {
-    return [{ tIdx: temp, nA, nB, nK, title: "CÁMARA DE REACCIÓN", accent: ACCENT_SINGLE }];
+    return [{ tIdx: temp, nA, nB, nK, title: i18n.t("CÁMARA DE REACCIÓN"), accent: ACCENT_SINGLE }];
   }
 
   let L = intVal("ui-cmp-left");
@@ -99,8 +99,8 @@ function readConfig() {
     let title = "";
     if (compareVar === "energy")      { s.tIdx = v; title = "T = " + v; }
     else if (compareVar === "count")  { s.nA = v; s.nB = v; title = v + " A + " + v + " B"; }
-    else                              { s.nK = v; title = (v === 0) ? "Sin catalizador"
-                                                       : (v + " catalizador" + (v > 1 ? "es" : "")); }
+    else                              { s.nK = v; title = (v === 0) ? i18n.t("Sin catalizador")
+                                                       : i18n.t(v > 1 ? "{n} catalizadores" : "{n} catalizador", { n: v }); }
     s.title = (side === "L" ? "◀ " : "▶ ") + title;
     s.accent = (side === "L") ? ACCENT_LEFT : ACCENT_RIGHT;
     return s;
@@ -188,8 +188,8 @@ function drawCompletionOverlay() {
     textSize(constrain(w.camW * 0.04, 11, 17));
     fill(themeMode === "light" ? color(40, 50, 70) : color(205, 214, 232));
     let sub = w.isComplete()
-      ? "reactivo limitante agotado"
-      : w.totalReactions + " de " + w.initLimiting + " reacciones";
+      ? i18n.t("reactivo limitante agotado")
+      : i18n.t("{n} de {total} reacciones", { n: w.totalReactions, total: w.initLimiting });
     text(sub, w.camX + w.camW / 2, w.camY + w.camH / 2 + sz * 0.55);
   }
 }
@@ -197,7 +197,7 @@ function drawCompletionOverlay() {
 function setPaused(state) {
   paused = state;
   let btn = document.getElementById("ui-btn-playpause");
-  if (btn) btn.innerText = paused ? "▶ Reanudar" : "⏸ Pausar";
+  if (btn) btn.innerText = paused ? i18n.t("▶ Reanudar") : i18n.t("⏸ Pausar");
 }
 
 // ─── Gráfico de tasa (superpone las curvas de todas las cámaras) ────────────
@@ -221,7 +221,7 @@ function drawRateGraph() {
   fill(dark ? color(80,95,130) : color(90,110,140));
   textAlign(LEFT, TOP); textStyle(NORMAL); textSize(9);
   // «s» = segundo de simulación (60 pasos), no de reloj: ver la ayuda
-  text("VELOCIDAD DE REACCIÓN (reacciones/s simulado)", grX + padL, grY + 4);
+  text(i18n.t("VELOCIDAD DE REACCIÓN (reacciones/s simulado)"), grX + padL, grY + 4);
 
   let maxLen = 0, maxRate = 1;
   for (let w of worlds) {
@@ -244,7 +244,7 @@ function drawRateGraph() {
   text(maxRate, aX - 3, aY);
   text("0", aX - 3, aY + aH);
   textAlign(LEFT,  BOTTOM); text("–" + maxLen + "s", aX, aY + aH + 11);
-  textAlign(RIGHT, BOTTOM); text("ahora", aX + aW, aY + aH + 11);
+  textAlign(RIGHT, BOTTOM); text(i18n.t("ahora"), aX + aW, aY + aH + 11);
 
   // Curva de cada cámara
   for (let w of worlds) {
@@ -486,5 +486,5 @@ function syncTheme() {
 
 function tempLabel(idx) {
   const labels = ["","Muy baja","Baja","Moderada","Normal","Alta","Muy alta","Elevada","Intensa","Extrema","Máxima"];
-  return (labels[idx] || idx) + " (" + idx + ")";
+  return (labels[idx] ? i18n.t(labels[idx]) : idx) + " (" + idx + ")";
 }

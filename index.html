@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Simulación: Velocidad de Reacción</title>
+  <script src="js/i18n-en.js"></script>
+  <script src="js/i18n.js"></script>
   <script src="js/vendor/p5.min.js"></script>
   <script>
     (function () {
@@ -473,7 +475,7 @@
               <span class="field-readout"><span id="collision-energy-val">5</span></span>
             </div>
             <input type="range" id="ui-collision-energy" min="1" max="10" value="5" step="1">
-            <p class="field-hint">Controla la velocidad al lanzar. La energía de activación E<sub>a</sub> equivale aproximadamente al nivel 4.</p>
+            <p class="field-hint" data-i18n="hint-energia-choque">Controla la velocidad al lanzar. La energía de activación E<sub>a</sub> equivale aproximadamente al nivel 4.</p>
           </div>
           <div class="control-group" style="display:flex; gap:8px;">
             <button id="ui-btn-launch" class="btn-primary">▶ Lanzar</button>
@@ -504,7 +506,7 @@
 
           <div class="control-group">
             <div class="field-label">
-              <span><span class="cmp-var-name">Catalizadores</span> · ◀ Izquierda</span>
+              <span><span class="cmp-var-name">Catalizadores</span> · <span data-i18n="◀ Izquierda">◀ Izquierda</span></span>
               <span class="field-readout"><span id="cmpl-val">0</span></span>
             </div>
             <input type="range" id="ui-cmp-left" min="0" max="6" value="0" step="1">
@@ -512,7 +514,7 @@
 
           <div class="control-group">
             <div class="field-label">
-              <span><span class="cmp-var-name">Catalizadores</span> · ▶ Derecha</span>
+              <span><span class="cmp-var-name">Catalizadores</span> · <span data-i18n="▶ Derecha">▶ Derecha</span></span>
               <span class="field-readout"><span id="cmpr-val">4</span></span>
             </div>
             <input type="range" id="ui-cmp-right" min="0" max="6" value="4" step="1">
@@ -597,12 +599,12 @@
       </button>
       <div class="card-body">
         <div class="info-section">
-          <p>Las moléculas <b>A</b> y <b>B</b> son <b>poliatómicas</b>: tienen una orientación y un <b>sitio reactivo</b> (el extremo claro resaltado). Sus velocidades siguen la <b>distribución de Maxwell-Boltzmann</b> y aumentan con la temperatura.</p>
-          <p><b>Vía térmica.</b> Una colisión directa solo produce C si se cumplen <b>dos</b> condiciones a la vez: que la velocidad relativa supere la <b>energía de activación E<sub>a</sub></b> (energía suficiente) <b>y</b> que ambos sitios reactivos choquen de frente (<b>orientación correcta</b>). Por eso es poco frecuente.</p>
-          <p><b>Vía catalizada.</b> El <b>catalizador (K)</b> atrae a una A y a una B hacia sus dos cavidades. Cuando ambas quedan acopladas, ya están bien orientadas y les basta una <b>energía de activación menor</b> (la línea violeta del recuadro), así que reaccionan casi siempre. El catalizador se libera intacto para volver a actuar.</p>
-          <p>El recuadro muestra cómo se reparten las velocidades relativas de los choques; el área verde, a la derecha de E<sub>a</sub>, son los que tienen energía suficiente; el gráfico inferior, la <b>velocidad de reacción</b> (reacciones/s) a medida que avanza.</p>
+          <p data-i18n="info-1">Las moléculas <b>A</b> y <b>B</b> son <b>poliatómicas</b>: tienen una orientación y un <b>sitio reactivo</b> (el extremo claro resaltado). Sus velocidades siguen la <b>distribución de Maxwell-Boltzmann</b> y aumentan con la temperatura.</p>
+          <p data-i18n="info-2"><b>Vía térmica.</b> Una colisión directa solo produce C si se cumplen <b>dos</b> condiciones a la vez: que la velocidad relativa supere la <b>energía de activación E<sub>a</sub></b> (energía suficiente) <b>y</b> que ambos sitios reactivos choquen de frente (<b>orientación correcta</b>). Por eso es poco frecuente.</p>
+          <p data-i18n="info-3"><b>Vía catalizada.</b> El <b>catalizador (K)</b> atrae a una A y a una B hacia sus dos cavidades. Cuando ambas quedan acopladas, ya están bien orientadas y les basta una <b>energía de activación menor</b> (la línea violeta del recuadro), así que reaccionan casi siempre. El catalizador se libera intacto para volver a actuar.</p>
+          <p data-i18n="info-4">El recuadro muestra cómo se reparten las velocidades relativas de los choques; el área verde, a la derecha de E<sub>a</sub>, son los que tienen energía suficiente; el gráfico inferior, la <b>velocidad de reacción</b> (reacciones/s) a medida que avanza.</p>
           <p>Los segundos son de simulación: cada uno son 60 pasos. En un equipo lento la animación va más despacio, pero las cifras son las mismas.</p>
-          <p><b>Modo comparación.</b> Divide la pantalla en dos cámaras. Eliges <b>una</b> variable a comparar —energía, cantidad de moléculas o catalizador— y se aplica un valor distinto a cada cámara; las otras dos quedan <b>bloqueadas e iguales</b>. El gráfico inferior superpone las dos curvas (◀ izquierda / ▶ derecha) para comparar directamente la velocidad de reacción.</p>
+          <p data-i18n="info-6"><b>Modo comparación.</b> Divide la pantalla en dos cámaras. Eliges <b>una</b> variable a comparar —energía, cantidad de moléculas o catalizador— y se aplica un valor distinto a cada cámara; las otras dos quedan <b>bloqueadas e iguales</b>. El gráfico inferior superpone las dos curvas (◀ izquierda / ▶ derecha) para comparar directamente la velocidad de reacción.</p>
         </div>
       </div>
     </div>

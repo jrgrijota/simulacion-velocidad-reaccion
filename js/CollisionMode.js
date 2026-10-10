@@ -197,7 +197,7 @@ class CollisionMode {
     noStroke();
     fill(hc ? color(255,255,0) : color(140, 160, 210));
     textAlign(LEFT, TOP); textStyle(BOLD); textSize(10);
-    text("MODO CHOQUE", bx + 10, by + 7);
+    text(i18n.t("MODO CHOQUE"), bx + 10, by + 7);
     textStyle(NORMAL);
 
     let pA = this._restPos(bx, by, bw, bh, 'A');
@@ -252,7 +252,7 @@ class CollisionMode {
     noStroke();
     fill(dark ? color(80, 95, 130) : color(80, 100, 140));
     textAlign(CENTER, TOP); textStyle(ITALIC); textSize(11);
-    text("↻ Arrastra para rotar", bx + bw/2, by + bh - 46);
+    text(i18n.t("↻ Arrastra para rotar"), bx + bw/2, by + bh - 46);
     textStyle(NORMAL);
   }
 
@@ -403,7 +403,7 @@ class CollisionMode {
     let titleCol = hc ? color(255,255,0) : (eff ? color(52, 220, 130) : color(240, 90, 90));
     fill(titleCol);
     textAlign(CENTER, TOP); textStyle(BOLD); textSize(16);
-    text(eff ? "✓ CHOQUE EFECTIVO" : "✗ CHOQUE INEFECTIVO", px + panW/2, py + 10);
+    text(eff ? i18n.t("✓ CHOQUE EFECTIVO") : i18n.t("✗ CHOQUE INEFECTIVO"), px + panW/2, py + 10);
 
     // Condiciones
     let yy = py + 36;
@@ -415,21 +415,21 @@ class CollisionMode {
     let oCol = hc ? color(255,255,0) : (oOk ? color(52, 220, 130) : color(240, 90, 90));
 
     fill(mutedCol); textAlign(LEFT, TOP);
-    text("Energía suficiente:", px + 16, yy);
+    text(i18n.t("Energía suficiente:"), px + 16, yy);
     fill(eCol); textAlign(RIGHT, TOP);
-    text(eOk ? "Sí ✓" : "No ✗", px + panW - 16, yy);
+    text(eOk ? i18n.t("Sí ✓") : i18n.t("No ✗"), px + panW - 16, yy);
 
     yy += 20;
     fill(mutedCol); textAlign(LEFT, TOP);
-    text("Orientación correcta:", px + 16, yy);
+    text(i18n.t("Orientación correcta:"), px + 16, yy);
     fill(oCol); textAlign(RIGHT, TOP);
-    text(oOk ? "Sí ✓" : "No ✗", px + panW - 16, yy);
+    text(oOk ? i18n.t("Sí ✓") : i18n.t("No ✗"), px + panW - 16, yy);
 
     yy += 20;
     fill(dark ? color(100, 115, 155) : color(80, 100, 135));
     textAlign(CENTER, TOP); textStyle(ITALIC); textSize(10);
-    text(eff ? "A + B → C  (ambas condiciones cumplidas)"
-             : "No se forma C  (falta al menos una condición)", px + panW/2, yy);
+    text(eff ? i18n.t("A + B → C  (ambas condiciones cumplidas)")
+             : i18n.t("No se forma C  (falta al menos una condición)"), px + panW/2, yy);
     textStyle(NORMAL);
   }
 }
