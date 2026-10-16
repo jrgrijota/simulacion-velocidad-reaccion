@@ -118,5 +118,7 @@ window.I18N_EU = {
   'Sí ✓': 'Bai ✓',
   'No ✗': 'Ez ✗',
   'A + B → C  (ambas condiciones cumplidas)': 'A + B → C  (bi baldintzak betetzen dira)',
-  'No se forma C  (falta al menos una condición)': 'Ez da C sortzen  (gutxienez baldintza bat falta da)'
+  'No se forma C  (falta al menos una condición)': 'Ez da C sortzen  (gutxienez baldintza bat falta da)',
+  // Sello de la zona de simulación (js/sello.js)
+  'Más simulaciones en simulaciencia.es': 'Simulazio gehiago simulaciencia.es webgunean'
 };

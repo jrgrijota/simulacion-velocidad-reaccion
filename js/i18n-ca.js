@@ -118,5 +118,7 @@ window.I18N_CA = {
   'Sí ✓': 'Sí ✓',
   'No ✗': 'No ✗',
   'A + B → C  (ambas condiciones cumplidas)': 'A + B → C  (totes dues condicions complertes)',
-  'No se forma C  (falta al menos una condición)': 'No es forma C  (falta almenys una condició)'
+  'No se forma C  (falta al menos una condición)': 'No es forma C  (falta almenys una condició)',
+  // Sello de la zona de simulación (js/sello.js)
+  'Más simulaciones en simulaciencia.es': 'Més simulacions a simulaciencia.es'
 };
