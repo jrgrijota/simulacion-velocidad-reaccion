@@ -214,12 +214,14 @@
     /* ── BOTONES ── */
     .btn-primary {
       width: 100%; padding: 8px 0;
-      background: var(--accent); color: #fff;
+      background: var(--accent-strong); color: #fff;
       border: none; border-radius: 7px; cursor: pointer;
       font-size: var(--fs-input); font-weight: 600;
       transition: background 0.15s;
     }
-    .btn-primary:hover { background: var(--accent-strong); }
+    /* Fondo un tono más oscuro que el acento para que el texto blanco se lea bien (contraste 4,5:1) */
+    .btn-primary:hover { filter: brightness(0.88); }
+    [data-theme="high-contrast"] .btn-primary { color: #000; }
 
     .btn-secondary {
       width: 100%; padding: 7px 0;
@@ -285,6 +287,8 @@
     }
     .stat-item.accent-a .stat-value { color: #4f8ef7; }
     .stat-item.accent-b .stat-value { color: #f7823c; }
+    [data-theme="light"] .stat-item.accent-a .stat-value { color: #1446a8; }
+    [data-theme="light"] .stat-item.accent-b .stat-value { color: #8a3a0c; }
     .stat-item.accent-c .stat-value { color: #34c782; }
     .stat-item.accent-r .stat-value { color: var(--success); }
 
@@ -387,10 +391,10 @@
     <!-- Configuración (engranaje) -->
     <div class="toolbar-row">
       <div id="ui-dropdown-container">
-        <button id="ui-dropdown-trigger" title="Configuración de visualización">⚙</button>
+        <button id="ui-dropdown-trigger" title="Configuración de visualización" aria-label="Configuración de visualización">⚙</button>
         <div class="dropdown-card">
           <div class="dropdown-label">Apariencia</div>
-          <select id="ui-theme-select">
+          <select id="ui-theme-select" aria-label="Apariencia">
             <option value="dark">Oscuro</option>
             <option value="light">Claro</option>
             <option value="high-contrast">Alto Contraste</option>
@@ -407,7 +411,7 @@
       </button>
       <div class="card-body">
         <div class="control-group">
-          <select id="ui-mode-select">
+          <select id="ui-mode-select" aria-label="Modo">
             <option value="single">Modo reacción</option>
             <option value="compare">Modo comparación</option>
             <option value="collision">Modo choque</option>
@@ -429,38 +433,38 @@
 
         <!-- Temperatura -->
         <div class="control-group" id="group-temp">
-          <div class="field-label">
+          <label class="field-label" for="ui-temp-slider">
             Temperatura
             <span class="field-readout" id="temp-val">Normal (4)</span>
-          </div>
+          </label>
           <input type="range" id="ui-temp-slider" min="1" max="10" value="4" step="1">
           <p class="field-hint">Controla la energía cinética media de las moléculas.</p>
         </div>
 
         <!-- nA -->
         <div class="control-group" id="group-na">
-          <div class="field-label">
+          <label class="field-label" for="ui-na-slider">
             Moléculas A (reactivo)
             <span class="field-readout"><span id="na-val">16</span></span>
-          </div>
+          </label>
           <input type="range" id="ui-na-slider" min="4" max="30" value="16" step="1">
         </div>
 
         <!-- nB -->
         <div class="control-group" id="group-nb">
-          <div class="field-label">
+          <label class="field-label" for="ui-nb-slider">
             Moléculas B (reactivo)
             <span class="field-readout"><span id="nb-val">16</span></span>
-          </div>
+          </label>
           <input type="range" id="ui-nb-slider" min="4" max="30" value="16" step="1">
         </div>
 
         <!-- Catalizadores -->
         <div class="control-group" id="group-cat" style="margin-top:4px;">
-          <div class="field-label">
+          <label class="field-label" for="ui-cat-slider">
             Catalizadores
             <span class="field-readout"><span id="cat-val">0</span></span>
-          </div>
+          </label>
           <input type="range" id="ui-cat-slider" min="0" max="6" value="0" step="1">
           <p class="field-hint">Moléculas que sujetan A y B ya bien orientadas y les ofrecen un camino con menor energía de activación.</p>
         </div>
@@ -474,10 +478,10 @@
         <!-- Controles del modo choque (ocultos por defecto) -->
         <div id="group-collision-controls" style="display:none;">
           <div class="control-group" style="margin-top:6px;">
-            <div class="field-label">
+            <label class="field-label" for="ui-collision-energy">
               Energía del choque
               <span class="field-readout"><span id="collision-energy-val">5</span></span>
-            </div>
+            </label>
             <input type="range" id="ui-collision-energy" min="1" max="10" value="5" step="1">
             <p class="field-hint" data-i18n="hint-energia-choque">Controla la velocidad al lanzar. La energía de activación E<sub>a</sub> equivale aproximadamente al nivel 4.</p>
           </div>
@@ -499,7 +503,7 @@
       <div class="card-body">
         <div id="compare-extra">
           <div class="control-group">
-            <div class="field-label">Variable a comparar</div>
+            <label class="field-label" for="ui-compare-var">Variable a comparar</label>
             <select id="ui-compare-var">
               <option value="catalyst">Presencia de catalizador</option>
               <option value="energy">Energía (temperatura)</option>
@@ -509,18 +513,18 @@
           </div>
 
           <div class="control-group">
-            <div class="field-label">
+            <label class="field-label" for="ui-cmp-left">
               <span><span class="cmp-var-name">Catalizadores</span> · <span data-i18n="◀ Izquierda">◀ Izquierda</span></span>
               <span class="field-readout"><span id="cmpl-val">0</span></span>
-            </div>
+            </label>
             <input type="range" id="ui-cmp-left" min="0" max="6" value="0" step="1">
           </div>
 
           <div class="control-group">
-            <div class="field-label">
+            <label class="field-label" for="ui-cmp-right">
               <span><span class="cmp-var-name">Catalizadores</span> · <span data-i18n="▶ Derecha">▶ Derecha</span></span>
               <span class="field-readout"><span id="cmpr-val">4</span></span>
-            </div>
+            </label>
             <input type="range" id="ui-cmp-right" min="0" max="6" value="4" step="1">
           </div>
         </div>
