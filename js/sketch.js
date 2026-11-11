@@ -40,6 +40,20 @@ function setup() {
   configureComparePair();
   updateUIVisibility();
   rebuildWorlds();
+  // Ajustes de la dirección (fichas del alumnado): ver js/parametros.js.
+  const alias = (map, f) => (v) => f(map[v] || v);
+  aplicarParametrosUrl({
+    modo:         alias({ reaccion: "single", "reacción": "single", comparacion: "compare", "comparación": "compare", choque: "collision" },
+                        urlParam.select("ui-mode-select")),
+    comparar:     alias({ catalizador: "catalyst", temperatura: "energy", cantidad: "count" }, urlParam.select("ui-compare-var")),
+    temperatura:  urlParam.range("ui-temp-slider"),
+    a:            urlParam.range("ui-na-slider"),
+    b:            urlParam.range("ui-nb-slider"),
+    catalizador:  urlParam.range("ui-cat-slider"),
+    izquierda:    urlParam.range("ui-cmp-left"),
+    derecha:      urlParam.range("ui-cmp-right"),
+    energia:      urlParam.range("ui-collision-energy"),
+  });
   // El tamaño medido en setup() puede no ser el definitivo (la página aún se está
   // maquetando) y en móvil el alto cambia con la barra del navegador: se reajusta
   // siempre que cambie el contenedor, no solo al redimensionar la ventana.
