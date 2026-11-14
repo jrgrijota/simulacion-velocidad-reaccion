@@ -440,11 +440,7 @@ function setupEventListeners() {
   // Reset
   document.getElementById("ui-btn-reset").addEventListener("click", rebuildWorlds);
 
-  // Info colapsable
-  let infoCard = document.getElementById("ui-panel-info");
-  document.getElementById("ui-info-trigger").addEventListener("click", () => {
-    infoCard.classList.toggle("is-expanded");
-  });
+  // «¿Cómo funciona?» se abre con el manejador común de las tarjetas (index.html).
 
   // Tema
   let themeSelect = document.getElementById("ui-theme-select");
