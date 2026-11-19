@@ -184,6 +184,10 @@ class CollisionMode {
     let dark = theme !== "light";
     let hc   = theme === "high-contrast";
 
+    if (TH.fun) {
+      // Zona de choque como tarjeta; el título lo dice la mascota
+      tarjeta(bx, by, bw, bh, 18);
+    } else {
     // Fondo de la zona de choque
     noStroke();
     fill(dark ? (hc ? color(0,0,0) : color(17, 20, 32)) : color(195, 204, 216));
@@ -199,6 +203,7 @@ class CollisionMode {
     textAlign(LEFT, TOP); textStyle(BOLD); textSize(10);
     text(i18n.t("MODO CHOQUE"), bx + 10, by + 7);
     textStyle(NORMAL);
+    }
 
     let pA = this._restPos(bx, by, bw, bh, 'A');
     let pB = this._restPos(bx, by, bw, bh, 'B');
@@ -208,6 +213,7 @@ class CollisionMode {
     // Línea central punteada
     stroke(dark ? color(50, 60, 90) : color(160, 175, 200));
     strokeWeight(1);
+    if (TH.fun) { stroke(...TH.border); strokeWeight(2); }
     drawingContext.save();
     drawingContext.setLineDash([6, 6]);
     line(bx + bw/2, by + 20, bx + bw/2, by + bh - 20);
@@ -252,6 +258,16 @@ class CollisionMode {
     noStroke();
     fill(dark ? color(80, 95, 130) : color(80, 100, 140));
     textAlign(CENTER, TOP); textStyle(ITALIC); textSize(11);
+    if (TH.fun) {
+      // Indicación como píldora, legible en la pizarra
+      textStyle(BOLD); textSize(16);
+      let t = i18n.t("↻ Arrastra para rotar"), w = textWidth(t) + 30;
+      tarjeta(bx + bw/2 - w/2, by + bh - 58, w, 34, 17, TH.panel2);
+      fill(...TH.title); textAlign(CENTER, CENTER);
+      text(t, bx + bw/2, by + bh - 42);
+      textStyle(NORMAL);
+      return;
+    }
     text(i18n.t("↻ Arrastra para rotar"), bx + bw/2, by + bh - 46);
     textStyle(NORMAL);
   }
@@ -271,25 +287,32 @@ class CollisionMode {
     ellipse(x, y, (R + 10) * 2);
 
     // Enlace
-    stroke(red(base), green(base), blue(base), 200);
+    let tinta = TH.fun;
+    if (tinta) { stroke(...TH.ink); strokeWeight(17); line(rearX, rearY, siteX, siteY); }
+    stroke(red(base), green(base), blue(base), tinta ? 255 : 200);
     strokeWeight(12);
     line(rearX, rearY, siteX, siteY);
 
     // Átomo trasero (A: mismo azul; B: naranja oscuro)
     noStroke();
+    if (tinta) { stroke(...TH.ink); strokeWeight(3); }
     if (type === 'A') { fill(base); } else { fill(red(base)*0.65, green(base)*0.65, blue(base)*0.65); }
     ellipse(rearX, rearY, 28, 28);
+    noStroke();
     fill(255,255,255, dark ? 40 : 60);
     ellipse(rearX - 5, rearY - 5, 10, 10);
 
     // Cuerpo principal
+    if (tinta) { stroke(...TH.ink); strokeWeight(3.5); }
     fill(base);
     ellipse(x, y, R * 2, R * 2);
+    noStroke();
     fill(255, 255, 255, dark ? 50 : 75);
     ellipse(x - R*0.25, y - R*0.25, R * 0.55, R * 0.55);
 
     // Sitio reactivo (resaltado)
     stroke(hc ? color(255,255,0) : color(255, 200, 90)); strokeWeight(3);
+    if (tinta) stroke(...TH.ink);
     fill(hc ? color(255,255,0) : color(255, 245, 200));
     ellipse(siteX, siteY, 22, 22);
     noStroke(); fill(255, 255, 255, dark ? 80 : 120);
@@ -304,12 +327,12 @@ class CollisionMode {
 
     // Flecha de orientación (indicador del eje)
     if (this.phase === "ready") {
-      stroke(red(base), green(base), blue(base), 120); strokeWeight(2);
+      stroke(red(base), green(base), blue(base), tinta ? 220 : 120); strokeWeight(tinta ? 3 : 2);
       let ax = x + ca * (R + 16), ay = y + sa * (R + 16);
       line(x, y, ax, ay);
       // Punta de flecha
       let perp = 6;
-      fill(red(base), green(base), blue(base), 120); noStroke();
+      fill(red(base), green(base), blue(base), tinta ? 220 : 120); noStroke();
       triangle(ax, ay,
         ax - ca*8 - (-sa)*perp, ay - sa*8 - ca*perp,
         ax - ca*8 + (-sa)*perp, ay - sa*8 + ca*perp);
@@ -340,6 +363,11 @@ class CollisionMode {
     }
 
     // Enlaces
+    if (TH.fun) {
+      stroke(...TH.ink); strokeWeight(15 * fac);
+      line(a1.x, a1.y, b1.x, b1.y); line(b1.x, b1.y, a2.x, a2.y);
+      line(a2.x, a2.y, b2.x, b2.y); line(b2.x, b2.y, a1.x, a1.y);
+    }
     stroke(160, 200, 170, 200); strokeWeight(10 * fac);
     line(a1.x, a1.y, b1.x, b1.y);
     line(b1.x, b1.y, a2.x, a2.y);
@@ -348,16 +376,20 @@ class CollisionMode {
 
     let ds = 40 * fac;
     noStroke();
+    if (TH.fun) { stroke(...TH.ink); strokeWeight(3); }
     fill(79, 142, 247);
     ellipse(a1.x, a1.y, ds, ds);
     ellipse(a2.x, a2.y, ds, ds);
+    noStroke();
     fill(180, 210, 255, dark ? 100 : 140);
     ellipse(a1.x - 6, a1.y - 6, 13, 13);
     ellipse(a2.x - 6, a2.y - 6, 13, 13);
 
+    if (TH.fun) { stroke(...TH.ink); strokeWeight(3); }
     fill(247, 130, 60);
     ellipse(b1.x, b1.y, ds, ds);
     ellipse(b2.x, b2.y, ds, ds);
+    noStroke();
     fill(255, 210, 170, dark ? 100 : 140);
     ellipse(b1.x - 6, b1.y - 6, 13, 13);
     ellipse(b2.x - 6, b2.y - 6, 13, 13);
@@ -366,6 +398,37 @@ class CollisionMode {
     fill(255, 255, 255, (dark ? 240 : 255) * fac);
     textAlign(CENTER, CENTER); textStyle(BOLD); textSize(28 * fac);
     text('C', x, y + 1);
+    textStyle(NORMAL);
+  }
+
+  // Resultado en el estilo juego: tarjeta con las dos condiciones, en grande
+  _drawResultPanelJuego(bx, by, bw, bh) {
+    let eff = this.resultEffective;
+    let col = eff ? TH.ok : TH.bad;
+    let panW = min(bw - 24, 400), panH = 112;
+    let px = bx + bw/2 - panW/2;
+    let py = by + bh - panH - 16;
+    tarjeta(px, py, panW, panH, 18, TH.panel, col, 3);
+
+    textFont("Fredoka"); textStyle(BOLD); textSize(panW < 330 ? 19 : 22);
+    textAlign(CENTER, TOP);
+    let titulo = frase(eff ? i18n.t("✓ CHOQUE EFECTIVO") : i18n.t("✗ CHOQUE INEFECTIVO"));
+    cifra(titulo, px + panW/2, py + 10, col);
+
+    let filas = [
+      [i18n.t("Energía suficiente:"), this._energyOk],
+      [i18n.t("Orientación correcta:"), this._orientationOk],
+    ];
+    let yy = py + 50;
+    textSize(panW < 330 ? 15 : 17);
+    for (let [txt, ok] of filas) {
+      textStyle(NORMAL); fill(...TH.text); textAlign(LEFT, TOP);
+      text(txt, px + 18, yy);
+      textStyle(BOLD); fill(...(ok ? TH.ok : TH.bad)); textAlign(RIGHT, TOP);
+      text(ok ? i18n.t("Sí ✓") : i18n.t("No ✗"), px + panW - 18, yy);
+      yy += 26;
+    }
+    // «A + B → C» o «No se forma C» lo dice la mascota
     textStyle(NORMAL);
   }
 
@@ -382,6 +445,7 @@ class CollisionMode {
   _drawResultPanel(bx, by, bw, bh, theme) {
     let dark = theme !== "light";
     let hc = theme === "high-contrast";
+    if (TH.fun) { this._drawResultPanelJuego(bx, by, bw, bh); return; }
 
     let eff = this.resultEffective;
     let panW = min(bw * 0.55, 340), panH = 110;

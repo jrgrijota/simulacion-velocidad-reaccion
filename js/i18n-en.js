@@ -2,16 +2,16 @@
 // en el HTML o en las llamadas a i18n.t(); valor: texto en inglés británico.
 window.I18N_EN = {
   // Cabecera y título
-  'Simulación: Velocidad de Reacción': 'Simulation: Rate of Reaction',
-  'Velocidad de Reacción': 'Rate of Reaction',
-  'Teoría de Colisiones · A + B → C': 'Collision Theory · A + B → C',
+  'Simulación: Velocidad de reacción': 'Simulation: Rate of reaction',
+  'Velocidad de reacción': 'Rate of reaction',
+  'Teoría de colisiones · A + B → C': 'Collision theory · A + B → C',
 
   // Configuración de visualización
   'Configuración de visualización': 'Display settings',
   'Apariencia': 'Appearance',
   'Oscuro': 'Dark',
   'Claro': 'Light',
-  'Alto Contraste': 'High Contrast',
+  'Alto contraste': 'High contrast',
 
   // Modo
   'Modo': 'Mode',
@@ -120,5 +120,12 @@ window.I18N_EN = {
   'A + B → C  (ambas condiciones cumplidas)': 'A + B → C  (both conditions met)',
   'No se forma C  (falta al menos una condición)': 'No C forms  (at least one condition not met)',
   // Sello de la zona de simulación (js/sello.js)
-  'Más simulaciones en simulaciencia.es': 'More simulations at simulaciencia.es'
+  'Más simulaciones en simulaciencia.es': 'More simulations at simulaciencia.es',
+  // Lienzo: mensajes de la mascota (estilo juego)
+  "Solo reaccionan los choques con energía suficiente (más que Ea) y con los sitios reactivos de frente.":
+    "Only collisions with enough energy (more than Ea) and with the reactive sites meeting head-on react.",
+  "El catalizador sujeta A y B ya bien orientadas y les basta una energía de activación menor: reaccionan más a menudo.":
+    "The catalyst holds A and B already correctly oriented, and a lower activation energy is enough for them: they react more often.",
+  "Solo cambia esta variable; lo demás es igual en las dos cámaras. ¿Dónde reaccionan más deprisa?":
+    "Only this variable changes; everything else is the same in both chambers. Where do they react faster?"
 };

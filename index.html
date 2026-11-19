@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Simulación: Velocidad de Reacción</title>
+  <title>Simulación: Velocidad de reacción</title>
   <!-- Página pública de esta simulación: simulaciencia.es. Esta dirección (github.io) es la que carga la web dentro de un iframe; la canónica evita que los buscadores la indexen como página aparte. -->
   <meta name="description" content="Cómo afectan temperatura, concentración y catalizador a la rapidez de una reacción, con un modo choque que muestra por qué hacen falta energía y orientación.">
   <link rel="canonical" id="canonical" href="https://simulaciencia.es/simulaciones/velocidad-reaccion/">
@@ -370,12 +370,14 @@
       html, body { height: auto; overflow: auto; }
       body { flex-direction: column; }
       #canvas-holder { order: -1; flex: none; width: 100%; height: clamp(360px, 68svh, 640px); }
+      html:not([data-theme="high-contrast"]) #canvas-holder { height: clamp(420px, 78svh, 700px); }
       .sidebar { width: 100%; border-right: none; border-top: 1px solid var(--border-main); overflow: visible; }
     }
   </style>
+  <link rel="stylesheet" href="css/estilo-juego.css">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <script src="js/estadisticas.js" data-sim="sim-velocidad-reaccion"></script>
-    <script src="js/sello.js" data-contenedor="#canvas-holder" data-esquina="tc" data-esquina-movil="tl" data-arriba-movil="38" data-ancho-movil="760"></script>
+    <script src="js/sello.js" data-contenedor="#canvas-holder" data-esquina="bl"></script>
 </head>
 <body>
 
@@ -385,10 +387,22 @@
 
     <!-- Header -->
     <div class="sim-header">
-      <div class="sim-logo">⚗️</div>
+      <div class="sim-logo"><svg viewBox="0 0 46 46" fill="none" aria-hidden="true">
+        <!-- A y B chocando por sus sitios reactivos, con el destello -->
+        <path d="M23 6 l2.2 5.2 5.6 .4 -4.3 3.6 1.4 5.4 -4.9 -3 -4.9 3 1.4 -5.4 -4.3 -3.6 5.6 -.4z" fill="#ffd84a" stroke="#071a2b" stroke-width="1.6" stroke-linejoin="round"/>
+        <line x1="8" y1="34" x2="18" y2="28" stroke="#4f8ef7" stroke-width="4" stroke-linecap="round"/>
+        <circle cx="7" cy="35" r="4" fill="#4f8ef7" stroke="#071a2b" stroke-width="1.6"/>
+        <circle cx="13" cy="31" r="6.5" fill="#4f8ef7" stroke="#071a2b" stroke-width="1.8"/>
+        <circle cx="19.5" cy="27.5" r="3.4" fill="#fff5d2" stroke="#071a2b" stroke-width="1.5"/>
+        <line x1="38" y1="34" x2="28" y2="28" stroke="#f7823c" stroke-width="4" stroke-linecap="round"/>
+        <circle cx="39" cy="35" r="4" fill="#ad5b2a" stroke="#071a2b" stroke-width="1.6"/>
+        <circle cx="33" cy="31" r="6.5" fill="#f7823c" stroke="#071a2b" stroke-width="1.8"/>
+        <circle cx="26.5" cy="27.5" r="3.4" fill="#fff5d2" stroke="#071a2b" stroke-width="1.5"/>
+        <circle cx="11" cy="29" r="1.8" fill="#fff" opacity=".6"/><circle cx="31" cy="29" r="1.8" fill="#fff" opacity=".6"/>
+      </svg></div>
       <div>
-        <div class="sim-title">Velocidad de Reacción</div>
-        <div class="sim-subtitle">Teoría de Colisiones · A + B → C</div>
+        <h1 class="sim-title">Velocidad de reacción</h1>
+        <div class="sim-subtitle">Teoría de colisiones · A + B → C</div>
       </div>
     </div>
 
@@ -401,7 +415,7 @@
           <select id="ui-theme-select" aria-label="Apariencia">
             <option value="dark">Oscuro</option>
             <option value="light">Claro</option>
-            <option value="high-contrast">Alto Contraste</option>
+            <option value="high-contrast">Alto contraste</option>
           </select>
         </div>
       </div>
@@ -626,7 +640,9 @@
 
 <!-- ── CANVAS ──────────────────────────────────────────────────────────── -->
 <div id="canvas-holder"></div>
+<div id="anuncio" class="sr-only" aria-live="polite"></div>
 
+<script src="js/estilo-juego.js"></script>
 <script src="js/Molecule.js"></script>
 <script src="js/World.js"></script>
 <script src="js/CollisionMode.js"></script>
