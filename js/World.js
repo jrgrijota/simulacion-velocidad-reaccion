@@ -27,6 +27,7 @@ class World {
     this.nK = opts.nK;
     this.title = opts.title || i18n.t("CÁMARA DE REACCIÓN");
     this.accent = opts.accent || [120, 200, 160];
+    this.lado = opts.lado || "S";   // S: una cámara; L/R: izquierda/derecha
 
     // Límites (se asignan con setBounds)
     this.camX = 0; this.camY = 0; this.camW = 100; this.camH = 100;
@@ -393,6 +394,11 @@ class World {
       let rr = map(t, 0, 1, 14, 30);
       noStroke(); fill(255, 240, 80, a);
       ellipse(f.x, f.y, rr * 2);
+      if (TH.fun) {
+        stroke(...TH.ink, a); strokeWeight(1.5); fill(255, 216, 74, a);
+        estrella(f.x, f.y, rr * 0.6, rr * 0.25);
+        noStroke();
+      }
     }
 
     for (let m of this.molecules) m.display(theme);
@@ -402,6 +408,7 @@ class World {
 
   // Porcentaje de conversión, grande y continuo, en la esquina inferior derecha
   drawProgressBadge(theme) {
+    if (TH.fun) { this.drawProgressBadgeJuego(); return; }
     let dark = theme !== "light";
     let hc   = theme === "high-contrast";
     let ac = hc ? [255, 255, 0] : this.accent;
@@ -435,7 +442,71 @@ class World {
     textStyle(NORMAL);
   }
 
+  // ─── Estilo juego ──────────────────────────────────────────────────────────
+  altoBadgeJuego() {
+    let sz = constrain(min(this.camW, this.camH) * 0.17, 26, 60);
+    return sz + constrain(this.camW * 0.032, 12, 16) + 18;
+  }
+
+  drawProgressBadgeJuego() {
+    let ac = acentoCamara(this);
+    let label = this.progressPercent() + "%";
+    let sz = constrain(min(this.camW, this.camH) * 0.17, 26, 60);
+    textFont("Fredoka"); textStyle(BOLD); textSize(sz);
+    let w = max(textWidth(label), textWidth("100%") * 0.8) + 26;
+    let cap = constrain(this.camW * 0.032, 12, 16);
+    let h = sz + cap + 18;
+    let x = this.camX + this.camW - w - 12, y = this.camY + this.camH - h - 14;
+    tarjeta(x, y, w, h, 16, TH.panel2);
+    textStyle(NORMAL); textSize(cap); fill(...TH.muted); textAlign(CENTER, TOP);
+    text(frase(i18n.t("conversión")), x + w / 2, y + 7);
+    textStyle(BOLD); textSize(sz); textAlign(CENTER, BOTTOM);
+    cifra(label, x + w / 2, y + h - 2, ac);
+    textStyle(NORMAL);
+  }
+
+  drawChamberJuego() {
+    let ac = acentoCamara(this);
+    noStroke(); fill(...TH.ink); rect(this.camX, this.camY + 5, this.camW, this.camH, 18);
+    stroke(...ac); strokeWeight(3); fill(...TH.panel);
+    rect(this.camX, this.camY, this.camW, this.camH, 18);
+    noStroke();
+    let tam = this.camW < 260 ? 13 : 15;
+    pildora(this.camX + 12, this.camY + 12, frase(this.title), ac, tam);
+  }
+
+  drawStatsOverlayJuego() {
+    let nA = this.countType('A'), nB = this.countType('B');
+    let nC = this.countType('C'), nK = this.countType('K');
+    let items = [
+      { label: "A", count: nA, c: [79, 142, 247] },
+      { label: "B", count: nB, c: [247, 130, 60] },
+      { label: "C", count: nC, c: [52, 199, 130] },
+    ];
+    if (nK > 0) items.push({ label: "K", count: nK, c: [167, 139, 250] });
+    let peq = this.camW < 420;
+    let fila = peq ? 17 : 21, bW = peq ? 108 : 128, bH = items.length * fila + (peq ? 28 : 34);
+    let bX = this.camX + 12, bY = this.camY + this.camH - bH - 14;
+    // Cámara estrecha: encima del porcentaje, para que no se pisen
+    if (this.camW < 300) bY -= this.altoBadgeJuego() + 10;
+    tarjeta(bX, bY, bW, bH, 14, TH.panel2);
+    textFont("Fredoka"); textSize(peq ? 13 : 15); textStyle(BOLD);
+    for (let i = 0; i < items.length; i++) {
+      let it = items[i], y = bY + (peq ? 13 : 16) + i * fila;
+      stroke(...TH.ink); strokeWeight(1.8); fill(...it.c); ellipse(bX + 16, y, peq ? 10 : 12);
+      noStroke();
+      fill(...(it.count === 0 ? TH.muted : TH.title));
+      textAlign(LEFT, CENTER);
+      text(it.label + ": " + it.count, bX + 29, y);
+    }
+    textStyle(NORMAL); textSize(peq ? 11 : 12); fill(...TH.muted);
+    textAlign(LEFT, CENTER);
+    text(i18n.t("Térm. {t} · Cat. {c}", { t: this.thermalReactions, c: this.catalyzedReactions }),
+         bX + 10, bY + bH - (peq ? 11 : 13));
+  }
+
   drawChamber(theme) {
+    if (TH.fun) { this.drawChamberJuego(); return; }
     let dark = theme !== "light";
     let hc   = theme === "high-contrast";
     let ac = this.accent;
@@ -463,19 +534,44 @@ class World {
     let bW = constrain(this.camW * 0.36, 150, 270), bH = round(bW * 0.5);
     bW = min(bW, this.camW - 24);
     let bX = this.camX + this.camW - bW - 12, bY = this.camY + 10;
+    let fun = TH.fun;
+    if (fun) {
+      // Con una cámara estrecha, debajo del título para no pisarlo
+      bW = constrain(this.camW * 0.42, 160, 300);
+      bW = min(bW, this.camW - 24);
+      bH = round(bW * 0.56);
+      bX = this.camX + this.camW - bW - 12;
+      bY = this.camY + (this.camW < 420 ? 50 : 12);
+      tarjeta(bX, bY, bW, bH, 14, TH.panel2);
+    } else {
+      noStroke();
+      fill(dark ? (hc ? color(20,20,20,230) : color(12, 15, 26, 210)) : color(175, 185, 200, 210));
+      rect(bX, bY, bW, bH, 6);
+    }
 
-    noStroke();
-    fill(dark ? (hc ? color(20,20,20,230) : color(12, 15, 26, 210)) : color(175, 185, 200, 210));
-    rect(bX, bY, bW, bH, 6);
-
-    let padL = 8, padR = 8, padT = 24, padB = 18;
+    let padL = 8, padR = 8, padT = fun ? 28 : 24, padB = 18;
     let aX = bX + padL, aY = bY + padT;
     let aW = bW - padL - padR, aH = bH - padT - padB;
 
     noStroke();
     fill(dark ? color(100, 120, 160) : color(70, 90, 120));
     textAlign(LEFT, TOP); textSize(bW > 200 ? 11 : 9);
-    text(i18n.t("Velocidad relativa de los choques (T = {t})", { t: this.tIdx }), bX + 6, bY + 6);
+    let tituloMB = i18n.t("Velocidad relativa de los choques (T = {t})", { t: this.tIdx });
+    if (fun) tituloMB = tituloMB.replace(/(\S+) = /g, "$1\u00a0=\u00a0");   // «(T = 4)» no se parte
+    if (fun) {
+      fill(...TH.muted); textSize(bW > 220 ? 13 : 11);
+      // Si no cabe en una línea, dos líneas y la curva más abajo
+      // Cámara muy estrecha (móvil, comparación): sin título, toda la altura para la curva
+      if (this.camW < 300) { padT = 20; aY = bY + padT; aH = bH - padT - padB; }
+      else {
+        if (textWidth(tituloMB) > bW - 18) {
+          let extra = round(textSize() * 1.3) + 2;
+          padT += extra; aY += extra; aH -= extra;
+        }
+        text(tituloMB, bX + 10, bY + 8, bW - 18);
+      }
+    } else
+    text(tituloMB, bX + 6, bY + 6);
 
     // La reacción compara con Ea la velocidad RELATIVA del par (ver step), así que
     // se dibuja su distribución: componentes con σ·√2, no la de una sola molécula.
@@ -526,6 +622,7 @@ class World {
     noFill();
     stroke(dark ? (hc ? color(255,255,0) : color(120,160,255)) : color(60, 100, 200));
     strokeWeight(1.5);
+    if (fun) { stroke(...TH.curve); strokeWeight(3); strokeJoin(ROUND); }
     beginShape();
     for (let k = 0; k <= N; k++) {
       let v = (k / N) * vMax;
@@ -537,6 +634,7 @@ class World {
     let eaX = constrain(map(ea, 0, vMax, aX, aX + aW), aX, aX + aW);
     stroke(hc ? color(255,255,0) : color(220,80,80));
     strokeWeight(1.2);
+    if (fun) { stroke(...TH.ea); strokeWeight(2); }
     drawingContext.save();
     drawingContext.setLineDash([3, 3]);
     line(eaX, aY, eaX, aY + aH);
@@ -544,11 +642,13 @@ class World {
 
     stroke(dark ? color(60,70,100) : color(120,140,170));
     strokeWeight(0.8); noFill();
+    if (fun) { stroke(...TH.muted); strokeWeight(2); }
     line(aX, aY + aH, aX + aW, aY + aH);
 
     noStroke();
     fill(hc ? color(255,255,0) : color(220,80,80));
     textAlign(CENTER, BOTTOM); textSize(11); textStyle(BOLD);
+    if (fun) { fill(...TH.ea); textSize(13); }
     text("Ea", eaX, aY - 1);
     textStyle(NORMAL);
 
@@ -556,12 +656,19 @@ class World {
     let pct = Math.round(this.fractionAbove(ea) * 100);
     fill(hc ? color(255,255,0) : color(52,199,130));
     textAlign(RIGHT, BOTTOM); textSize(bW > 200 ? 11 : 9);
+    if (fun) {
+      // La cifra clave del recuadro, grande
+      textStyle(BOLD); textSize(bW > 220 ? 17 : 14);
+      cifra(i18n.t("{pct} % supera Ea", { pct: pct }), aX + aW, aY + aH - 6, TH.ok);
+      textStyle(NORMAL);
+    } else
     text(i18n.t("{pct} % supera Ea", { pct: pct }), aX + aW, aY + aH - 3);
 
     if (catOn) {
       let ecX = map(EA_CAT, 0, vMax, aX, aX + aW);
       stroke(hc ? color(255,0,255) : color(167,139,250));
       strokeWeight(1.2);
+      if (fun) { stroke(...TH.cat); strokeWeight(2); }
       drawingContext.save();
       drawingContext.setLineDash([3, 3]);
       line(ecX, aY, ecX, aY + aH);
@@ -569,11 +676,14 @@ class World {
       noStroke();
       fill(hc ? color(255,0,255) : color(167,139,250));
       textAlign(CENTER, TOP); textSize(10);
+      if (fun) { fill(...TH.cat); textSize(12); textStyle(BOLD); }
       text(i18n.t("Ea cat."), ecX, aY + aH + 2);   // debajo del eje, para no pisar «Ea»
+      textStyle(NORMAL);
     }
   }
 
   drawStatsOverlay(theme) {
+    if (TH.fun) { this.drawStatsOverlayJuego(); return; }
     let dark = theme !== "light";
     let hc   = theme === "high-contrast";
 

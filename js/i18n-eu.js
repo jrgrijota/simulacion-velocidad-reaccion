@@ -2,16 +2,16 @@
 // i18n.t() deietan agertzen den bezala; balioa: euskarazko testua.
 window.I18N_EU = {
   // Cabecera y título
-  'Simulación: Velocidad de Reacción': 'Simulazioa: Erreakzio-abiadura',
-  'Velocidad de Reacción': 'Erreakzio-abiadura',
-  'Teoría de Colisiones · A + B → C': 'Talken teoria · A + B → C',
+  'Simulación: Velocidad de reacción': 'Simulazioa: Erreakzio-abiadura',
+  'Velocidad de reacción': 'Erreakzio-abiadura',
+  'Teoría de colisiones · A + B → C': 'Talken teoria · A + B → C',
 
   // Configuración de visualización
   'Configuración de visualización': 'Bistaratze-doikuntzak',
   'Apariencia': 'Itxura',
   'Oscuro': 'Iluna',
   'Claro': 'Argia',
-  'Alto Contraste': 'Kontraste handia',
+  'Alto contraste': 'Kontraste handia',
 
   // Modo
   'Modo': 'Modua',
@@ -120,5 +120,12 @@ window.I18N_EU = {
   'A + B → C  (ambas condiciones cumplidas)': 'A + B → C  (bi baldintzak betetzen dira)',
   'No se forma C  (falta al menos una condición)': 'Ez da C sortzen  (gutxienez baldintza bat falta da)',
   // Sello de la zona de simulación (js/sello.js)
-  'Más simulaciones en simulaciencia.es': 'Simulazio gehiago simulaciencia.es webgunean'
+  'Más simulaciones en simulaciencia.es': 'Simulazio gehiago simulaciencia.es webgunean',
+  // Lienzo: mensajes de la mascota (estilo juego)
+  "Solo reaccionan los choques con energía suficiente (más que Ea) y con los sitios reactivos de frente.":
+    "Energia nahikoa (Ea baino gehiago) eta gune erreaktiboak aurrez aurre dituzten talkek bakarrik erreakzionatzen dute.",
+  "El catalizador sujeta A y B ya bien orientadas y les basta una energía de activación menor: reaccionan más a menudo.":
+    "Katalizatzaileak A eta B ondo orientatuta eusten ditu, eta aktibazio-energia txikiagoa nahikoa zaie: maizago erreakzionatzen dute.",
+  "Solo cambia esta variable; lo demás es igual en las dos cámaras. ¿Dónde reaccionan más deprisa?":
+    "Aldagai hau bakarrik aldatzen da; gainerakoa berdina da bi ganberetan. Non erreakzionatzen dute azkarrago?"
 };

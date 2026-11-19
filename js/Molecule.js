@@ -92,14 +92,17 @@ class Molecule {
       ellipse(this.pos.x, this.pos.y, (this.radius + 8) * 2);
     }
 
-    // Enlace
-    stroke(red(base), green(base), blue(base), 220);
+    // Enlace (con tinta en el estilo juego)
+    let tinta = TH.fun;
+    if (tinta) { stroke(...TH.ink); strokeWeight(8); line(bx, by, sx, sy); }
+    stroke(red(base), green(base), blue(base), tinta ? 255 : 220);
     strokeWeight(5);
     line(bx, by, sx, sy);
 
     // Átomo trasero (apéndice, marca la orientación)
     // A: mismo azul que el cuerpo; B: naranja oscuro para distinción
     noStroke();
+    if (tinta) { stroke(...TH.ink); strokeWeight(1.5); }
     if (this.type === 'A') {
       fill(base);
     } else {
@@ -110,6 +113,7 @@ class Molecule {
     // Átomo central (cuerpo)
     fill(base);
     ellipse(this.pos.x, this.pos.y, 15, 15);
+    noStroke();
     fill(255, 255, 255, dark ? 55 : 85);
     ellipse(this.pos.x - 2.5, this.pos.y - 2.5, 6, 6);
 
@@ -117,6 +121,7 @@ class Molecule {
     fill(hc ? color(255, 255, 0) : color(255, 245, 210));
     stroke(hc ? color(255, 255, 0) : color(255, 200, 90));
     strokeWeight(2);
+    if (tinta) { stroke(...TH.ink); strokeWeight(1.5); }
     ellipse(sx, sy, 9, 9);
 
     // Letra
@@ -148,6 +153,11 @@ class Molecule {
       ellipse(this.pos.x, this.pos.y, (this.radius + 9) * 2);
     }
 
+    if (TH.fun) {
+      stroke(...TH.ink); strokeWeight(6);
+      line(a1.x, a1.y, b1.x, b1.y); line(b1.x, b1.y, a2.x, a2.y);
+      line(a2.x, a2.y, b2.x, b2.y); line(b2.x, b2.y, a1.x, a1.y);
+    }
     stroke(160, 180, 160, 190); strokeWeight(3.5);
     line(a1.x, a1.y, b1.x, b1.y);
     line(b1.x, b1.y, a2.x, a2.y);
@@ -155,16 +165,20 @@ class Molecule {
     line(b2.x, b2.y, a1.x, a1.y);
 
     noStroke();
+    if (TH.fun) { stroke(...TH.ink); strokeWeight(1.5); }
     fill(79, 142, 247);
     ellipse(a1.x, a1.y, 12, 12);
     ellipse(a2.x, a2.y, 12, 12);
+    noStroke();
     fill(180, 210, 255, dark ? 100 : 140);
     ellipse(a1.x - 2, a1.y - 2, 4, 4);
     ellipse(a2.x - 2, a2.y - 2, 4, 4);
 
+    if (TH.fun) { stroke(...TH.ink); strokeWeight(1.5); }
     fill(247, 130, 60);
     ellipse(b1.x, b1.y, 12, 12);
     ellipse(b2.x, b2.y, 12, 12);
+    noStroke();
     fill(255, 210, 170, dark ? 100 : 140);
     ellipse(b1.x - 2, b1.y - 2, 4, 4);
     ellipse(b2.x - 2, b2.y - 2, 4, 4);
@@ -197,15 +211,22 @@ class Molecule {
     fill(red(v), green(v), blue(v), dark ? 235 : 255);
     stroke(red(v) * 0.7, green(v) * 0.7, blue(v) * 0.7);
     strokeWeight(2);
+    if (TH.fun) { stroke(...TH.ink); strokeWeight(2.5); }
     ellipse(this.pos.x, this.pos.y, this.radius * 2, this.radius * 2);
+    if (TH.fun) {   // brillo
+      noStroke(); fill(255, 255, 255, 110);
+      ellipse(this.pos.x - this.radius * 0.4, this.pos.y - this.radius * 0.45, this.radius * 0.6, this.radius * 0.38);
+    }
 
     // Cavidades de unión
     for (let role of ['A', 'B']) {
       let sp = this.slotPos(role);
       let filled = (role === 'A') ? this.slotA : this.slotB;
       noStroke();
+      if (TH.fun) { stroke(...TH.ink); strokeWeight(1.2); }
       fill(filled ? color(255, 240, 120) : color(255, 255, 255, dark ? 70 : 110));
       ellipse(sp.x, sp.y, 8, 8);
+      noStroke();
     }
 
     // Etiqueta

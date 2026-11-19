@@ -2,16 +2,16 @@
 // a l'HTML o a les crides a i18n.t(); valor: text en català.
 window.I18N_CA = {
   // Cabecera y título
-  'Simulación: Velocidad de Reacción': 'Simulació: Velocitat de Reacció',
-  'Velocidad de Reacción': 'Velocitat de Reacció',
-  'Teoría de Colisiones · A + B → C': 'Teoria de Col·lisions · A + B → C',
+  'Simulación: Velocidad de reacción': 'Simulació: Velocitat de reacció',
+  'Velocidad de reacción': 'Velocitat de reacció',
+  'Teoría de colisiones · A + B → C': 'Teoria de col·lisions · A + B → C',
 
   // Configuración de visualización
   'Configuración de visualización': 'Configuració de visualització',
   'Apariencia': 'Aparença',
   'Oscuro': 'Fosc',
   'Claro': 'Clar',
-  'Alto Contraste': 'Alt contrast',
+  'Alto contraste': 'Alt contrast',
 
   // Modo
   'Modo': 'Mode',
@@ -120,5 +120,12 @@ window.I18N_CA = {
   'A + B → C  (ambas condiciones cumplidas)': 'A + B → C  (totes dues condicions complertes)',
   'No se forma C  (falta al menos una condición)': 'No es forma C  (falta almenys una condició)',
   // Sello de la zona de simulación (js/sello.js)
-  'Más simulaciones en simulaciencia.es': 'Més simulacions a simulaciencia.es'
+  'Más simulaciones en simulaciencia.es': 'Més simulacions a simulaciencia.es',
+  // Lienzo: mensajes de la mascota (estilo juego)
+  "Solo reaccionan los choques con energía suficiente (más que Ea) y con los sitios reactivos de frente.":
+    "Només reaccionen els xocs amb prou energia (més que Ea) i amb els llocs reactius de cara.",
+  "El catalizador sujeta A y B ya bien orientadas y les basta una energía de activación menor: reaccionan más a menudo.":
+    "El catalitzador subjecta A i B ja ben orientades i els n'hi ha prou amb una energia d'activació menor: reaccionen més sovint.",
+  "Solo cambia esta variable; lo demás es igual en las dos cámaras. ¿Dónde reaccionan más deprisa?":
+    "Només canvia aquesta variable; la resta és igual a les dues cambres. On reaccionen més de pressa?"
 };

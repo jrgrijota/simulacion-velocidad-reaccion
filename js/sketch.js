@@ -30,6 +30,7 @@ function intVal(id) { return parseInt(val(id)); }
 
 // ─── Setup / resize ────────────────────────────────────────────────────────
 function setup() {
+  if (document.fonts) document.fonts.load("600 12px Fredoka");
   let holder = document.getElementById("canvas-holder");
   let w = holder ? holder.offsetWidth  : 1000;
   let h = holder ? holder.offsetHeight : 680;
@@ -69,6 +70,21 @@ function windowResized() {
 }
 
 function computeLayout() {
+  TH = TEMAS_LIENZO[themeMode] || TEMAS_LIENZO.dark;
+  if (TH.fun) {
+    // Estilo juego: franja de la mascota arriba y hueco abajo para el sello
+    let top = BOC_Y + altoBocadillo() + 14, abajo = 44, x = 14;
+    regionX = x; regionY = top; regionW = width - 2 * x;
+    if (mode === "collision") {
+      regionH = height - top - abajo;
+      grH = 0; grX = 0; grY = 0; grW = 0;
+      return;
+    }
+    grH = max(100, Math.floor(height * 0.2));
+    grX = x; grW = regionW; grY = height - abajo - grH;
+    regionH = grY - 16 - top;
+    return;
+  }
   if (mode === "collision") {
     regionX = PAD; regionY = PAD;
     regionW = width - 2*PAD;
@@ -117,6 +133,7 @@ function readConfig() {
                                                        : i18n.t(v > 1 ? "{n} catalizadores" : "{n} catalizador", { n: v }); }
     s.title = (side === "L" ? "◀ " : "▶ ") + title;
     s.accent = (side === "L") ? ACCENT_LEFT : ACCENT_RIGHT;
+    s.lado = side;
     return s;
   }
   return [mk("L", L), mk("R", R)];
@@ -140,14 +157,28 @@ function rebuildWorlds() {
 
 // ─── Bucle principal ────────────────────────────────────────────────────────
 function draw() {
-  background(themeMode === "light" ? [215, 222, 232] :
-             themeMode === "high-contrast" ? [0, 0, 0] : [11, 12, 16]);
+  let antes = TH;
+  TH = TEMAS_LIENZO[themeMode] || TEMAS_LIENZO.dark;
+  if (TH.fun !== antes.fun) { computeLayout(); layoutWorlds(); }
+  if (TH.fun) {
+    // Marco del tablero dibujado dentro del lienzo: escala con él (móvil)
+    clear();
+    stroke(...TH.border); strokeWeight(2); fill(...TH.bg);
+    rect(1, 1, width - 2, height - 2, 26);
+    noStroke();
+    textFont("Fredoka");
+  } else {
+    background(themeMode === "light" ? [215, 222, 232] :
+               themeMode === "high-contrast" ? [0, 0, 0] : [11, 12, 16]);
+    textFont("sans-serif");
+  }
 
   if (mode === "collision") {
     if (collisionMode) {
       collisionMode.step();
       collisionMode.draw(regionX, regionY, regionW, regionH, themeMode);
     }
+    if (TH.fun) drawBocadillo(mensajeMascota());
     return;
   }
 
@@ -165,7 +196,51 @@ function draw() {
   if (mode === "compare" && compareDone && paused) drawCompletionOverlay();
 
   drawRateGraph();
+  if (TH.fun) drawBocadillo(mensajeMascota());
   updateCounters();
+}
+
+// Lo que dice la mascota: qué pasa ahora en la simulación
+function mensajeMascota() {
+  if (mode === "collision") {
+    let c = collisionMode;
+    if (c && c.phase === "result") {
+      let ef = c.resultEffective;
+      return {
+        tag: frase(i18n.t(ef ? "✓ CHOQUE EFECTIVO" : "✗ CHOQUE INEFECTIVO")),
+        txt: i18n.t(ef ? "A + B → C  (ambas condiciones cumplidas)" : "No se forma C  (falta al menos una condición)").replace(/\s+/g, " "),
+        col: ef ? TH.ok : TH.bad,
+      };
+    }
+    return {
+      tag: frase(i18n.t("MODO CHOQUE")),
+      txt: i18n.t("Dos moléculas grandes. Rótalas arrastrando y lánzalas una contra la otra para ver si el choque es efectivo."),
+      col: TH.molA,
+    };
+  }
+  if (mode === "compare" && worlds.length === 2) {
+    if (compareDone) {
+      return {
+        tag: frase(i18n.t("reactivo limitante agotado")),
+        txt: worlds.map(w => (w.lado === "L" ? "◀ " : "▶ ") +
+          i18n.t("{n} de {total} reacciones", { n: w.totalReactions, total: w.initLimiting })).join("    "),
+        col: TH.left,
+      };
+    }
+    return {
+      tag: COMPARE_PRESETS[compareVar].label,
+      txt: i18n.t("Solo cambia esta variable; lo demás es igual en las dos cámaras. ¿Dónde reaccionan más deprisa?"),
+      col: TH.left,
+    };
+  }
+  let nK = worlds.length ? worlds[0].nK : 0;
+  return {
+    tag: nK === 0 ? i18n.t("Sin catalizador") : i18n.t(nK > 1 ? "{n} catalizadores" : "{n} catalizador", { n: nK }),
+    txt: nK > 0
+      ? i18n.t("El catalizador sujeta A y B ya bien orientadas y les basta una energía de activación menor: reaccionan más a menudo.")
+      : i18n.t("Solo reaccionan los choques con energía suficiente (más que Ea) y con los sitios reactivos de frente."),
+    col: TH.single,
+  };
 }
 
 function mousePressed() {
@@ -183,6 +258,24 @@ function mouseReleased() {
 // Muestra el porcentaje de conversión en grande en cada cámara
 function drawCompletionOverlay() {
   let hc = themeMode === "high-contrast";
+  if (TH.fun) {
+    for (let w of worlds) {
+      let pct = w.progressPercent();
+      noStroke(); fill(...TH.bg, 205);
+      rect(w.camX, w.camY, w.camW, w.camH, 18);
+      let sz = constrain(min(w.camW, w.camH) * 0.34, 46, 160);
+      textAlign(CENTER, CENTER); textStyle(BOLD); textSize(sz);
+      cifra(pct + "%", w.camX + w.camW / 2, w.camY + w.camH / 2 - sz * 0.12, acentoCamara(w));
+      textStyle(NORMAL);
+      textSize(constrain(w.camW * 0.045, 14, 22));
+      fill(...TH.text);
+      let sub = w.isComplete()
+        ? i18n.t("reactivo limitante agotado")
+        : i18n.t("{n} de {total} reacciones", { n: w.totalReactions, total: w.initLimiting });
+      text(sub, w.camX + w.camW / 2, w.camY + w.camH / 2 + sz * 0.58);
+    }
+    return;
+  }
   for (let w of worlds) {
     let pct = w.progressPercent();
 
@@ -216,6 +309,7 @@ function setPaused(state) {
 
 // ─── Gráfico de tasa (superpone las curvas de todas las cámaras) ────────────
 function drawRateGraph() {
+  if (TH.fun) { drawRateGraphJuego(); return; }
   let dark = themeMode !== "light";
   let hc   = themeMode === "high-contrast";
 
@@ -300,6 +394,85 @@ function drawRateGraph() {
       fill(dark ? color(200,210,230) : color(40,50,70));
       text(w.title, lx + 13, ly);
       ly += 14;
+    }
+  }
+}
+
+// Gráfica de la velocidad en el estilo juego: tarjeta, línea gruesa con tinta
+function drawRateGraphJuego() {
+  tarjeta(grX, grY, grW, grH, 18);
+  let padL = 40, padR = 16, padT = 32, padB = 22;
+  let aX = grX + padL, aY = grY + padT;
+  let aW = grW - padL - padR, aH = grH - padT - padB;
+
+  noStroke(); fill(...TH.muted); ellipse(grX + 18, grY + 17, 8);
+  fill(...TH.title); textFont("Fredoka"); textStyle(BOLD); textAlign(LEFT, CENTER);
+  textSize(estrecho() ? 13 : 15);
+  // «s» = segundo de simulación (60 pasos), no de reloj: ver la ayuda
+  text(frase(i18n.t("VELOCIDAD DE REACCIÓN (reacciones/s simulado)")), grX + 28, grY + 16);
+  textStyle(NORMAL);
+
+  let maxLen = 0, maxRate = 1;
+  for (let w of worlds) {
+    maxLen = max(maxLen, w.rateHistory.length);
+    if (w.rateHistory.length) maxRate = max(maxRate, max(...w.rateHistory));
+  }
+
+  // Ejes y guías
+  stroke(...TH.border); strokeWeight(1);
+  for (let g = 1; g <= 4; g++) {
+    let gy = map(g * maxRate / 4, 0, maxRate, aY + aH, aY);
+    line(aX, gy, aX + aW, gy);
+  }
+  stroke(...TH.muted); strokeWeight(2);
+  line(aX, aY + aH, aX + aW, aY + aH);
+  noStroke();
+  if (maxLen < 2) return;
+
+  fill(...TH.muted); textSize(12);
+  textAlign(RIGHT, CENTER);
+  text(maxRate, aX - 6, aY);
+  text("0", aX - 6, aY + aH);
+  textAlign(LEFT,  TOP); text("–" + maxLen + "s", aX, aY + aH + 4);
+  textAlign(RIGHT, TOP); text(i18n.t("ahora"), aX + aW, aY + aH + 4);
+
+  for (let w of worlds) {
+    let h = w.rateHistory;
+    if (h.length < 2) continue;
+    let ac = acentoCamara(w);
+    let px = i => map(i, 0, maxLen - 1, aX, aX + aW);
+    let py = v => map(v, 0, maxRate, aY + aH, aY);
+
+    noStroke(); fill(...ac, 45);
+    beginShape();
+    vertex(aX, aY + aH);
+    for (let i = 0; i < h.length; i++) vertex(px(i), py(h[i]));
+    vertex(px(h.length - 1), aY + aH);
+    endShape(CLOSE);
+
+    noFill(); strokeJoin(ROUND); strokeCap(ROUND);
+    for (let pasada of [[TH.ink, 7], [ac, 3.5]]) {
+      stroke(...pasada[0]); strokeWeight(pasada[1]);
+      beginShape();
+      for (let i = 0; i < h.length; i++) vertex(px(i), py(h[i]));
+      endShape();
+    }
+    stroke(...TH.ink); strokeWeight(2.5); fill(...ac);
+    ellipse(px(h.length - 1), py(w.currentRate), 13);
+    noStroke();
+  }
+
+  // Leyenda (solo en comparación)
+  if (worlds.length === 2) {
+    textSize(13); textAlign(LEFT, CENTER);
+    let lx = aX + 10, ly = aY + 8;
+    for (let w of worlds) {
+      let ac = acentoCamara(w);
+      stroke(...TH.ink); strokeWeight(2); fill(...ac);
+      ellipse(lx + 5, ly, 11);
+      noStroke(); fill(...TH.text);
+      text(frase(w.title), lx + 16, ly);
+      ly += 18;
     }
   }
 }
@@ -452,6 +625,7 @@ function setupEventListeners() {
     themeSelect.addEventListener("change", (e) => {
       themeMode = e.target.value;
       root.setAttribute("data-theme", e.target.value);
+      computeLayout(); layoutWorlds();
       try { localStorage.setItem("sim-ui-theme-vr", e.target.value); } catch (_) {}
     });
   }
