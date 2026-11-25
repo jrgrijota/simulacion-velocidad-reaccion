@@ -112,7 +112,7 @@ class Mundo {
                 k++;
             }
         }
-        const v = this.velAleatoria(tipo === 'K' ? 0.35 : 1);
+        const v = this.velAleatoria(tipo === 'K' ? 1 : 1);
         const m = new Molecula(px, py, v.vx, v.vy, tipo);
         if (tipo === 'K') m.giro = (Math.random() - 0.5) * 0.02;
         this.mol.push(m);
@@ -174,8 +174,11 @@ class Mundo {
             if (mejor) {
                 const sp = mejor.cavidad(m.tipo), dx = sp.x - m.x, dy = sp.y - m.y, d = Math.hypot(dx, dy) || 1;
                 const tira = CAT_PULL * (1 + (1 - mejorD / CAT_ATTRACT_R));
+                // La atracción solo gira la trayectoria: la rapidez (la temperatura) no cambia
+                const v0 = Math.hypot(m.vx, m.vy);
                 m.vx += dx / d * tira; m.vy += dy / d * tira;
-                m.vx *= 0.985; m.vy *= 0.985;
+                const v1 = Math.hypot(m.vx, m.vy) || 1;
+                m.vx *= v0 / v1; m.vy *= v0 / v1;
             }
         }
     }
