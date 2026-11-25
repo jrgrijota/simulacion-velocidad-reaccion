@@ -16,17 +16,18 @@ body.modo-choque .only-sim, body.modo-choque #mandos-comun { display: none !impo
 body.theme-marca .ecuacion b.ea { color: #1d4ed8; } body.theme-marca .ecuacion b.eb { color: #c2410c; } body.theme-marca .ecuacion b.ec { color: #047857; }
 body.theme-light:not(.theme-marca) .ecuacion b.ea { color: #1f5fbf; } body.theme-light:not(.theme-marca) .ecuacion b.eb { color: #c2410c; } body.theme-light:not(.theme-marca) .ecuacion b.ec { color: #0a7d58; }
 .barra-sus .sus-info { flex: 1; min-width: 0; }
+@media (max-width: 1180px) { .barra-sus .sus-info { flex: 1 1 100%; order: 3; } }
 
 /* ── Mandos del gas: nombre · barra · valor (alto 40 como en el boceto) ── */
 .mandos-fila { gap: calc(var(--u) * 2); }
 .mandos-fila .fila-deslizador { height: calc(var(--u) * 40); gap: calc(var(--u) * 12); }
-.mandos-fila .fila-deslizador label { display: flex; align-items: center; gap: calc(var(--u) * 8); width: calc(var(--u) * 150); min-width: 0; flex: none; color: var(--title); font: 600 calc(var(--u) * 16) var(--font-fun); white-space: nowrap; }
+body .mandos-fila .fila-deslizador label { display: flex; align-items: center; gap: calc(var(--u) * 8); width: calc(var(--u) * 150); min-width: 0; flex: none; color: var(--title); font: 600 calc(var(--u) * 16) var(--font-fun); white-space: nowrap; }
 .mandos-fila .fila-deslizador .valor { min-width: 0; width: calc(var(--u) * 40); font-size: calc(var(--u) * 16.5); }
 #val-nivel { width: calc(var(--u) * 100); }
 #mandos-comun.compacto .fila-deslizador { height: calc(var(--u) * 36); }
-#mandos-comun.compacto .fila-deslizador label { width: calc(var(--u) * 130); }
+body #mandos-comun.compacto .fila-deslizador label { width: calc(var(--u) * 130); }
 .punto-sl { display: inline-block; flex: none; width: calc(var(--u) * 14); height: calc(var(--u) * 14); border-radius: 50%; background: var(--c); border: calc(var(--u) * 2) solid #071a2b; }
-#mandos-izq .fila-deslizador label, #mandos-der .fila-deslizador label { width: calc(var(--u) * 150); }
+body #mandos-izq .fila-deslizador label, body #mandos-der .fila-deslizador label { width: calc(var(--u) * 150); }
 #mandos-izq .valor, #mandos-der .valor { width: calc(var(--u) * 90); }
 #mandos-izq, #mandos-der { width: calc(100% * 608 / 1330); }
 
@@ -36,7 +37,7 @@ body.theme-light:not(.theme-marca) .ecuacion b.ea { color: #1f5fbf; } body.theme
 .boton-lanzar { border: 3px solid var(--accent); color: var(--accent); }
 #mandos-choque .nota-mando { margin: calc(var(--u) * 14) 0 0; font-size: calc(var(--u) * 14); line-height: 1.45; }
 #mandos-choque { gap: calc(var(--u) * 6); }
-#mandos-choque .fila-deslizador label { width: calc(var(--u) * 170); flex: none; color: var(--title); font: 600 calc(var(--u) * 16) var(--font-fun); }
+body #mandos-choque .fila-deslizador label { width: calc(var(--u) * 170); flex: none; color: var(--title); font: 600 calc(var(--u) * 16) var(--font-fun); }
 #mandos-choque .fila-deslizador .valor { width: calc(var(--u) * 40); min-width: 0; }
 
 /* ── Álbum: seis sellos ── */
@@ -54,6 +55,6 @@ body.theme-light:not(.theme-marca) .ecuacion b.ea { color: #1f5fbf; } body.theme
     .barra-sus .sus-info { order: 4; flex-basis: 100%; }
     .album-tabla .mat-fila { grid-template-columns: repeat(2, 1fr); }
     #mandos-izq, #mandos-der { width: calc(100% * 342 / 370); }
-    #mandos-izq .fila-deslizador label, #mandos-der .fila-deslizador label { width: calc(var(--u) * 112); }
+    body #mandos-izq .fila-deslizador label, body #mandos-der .fila-deslizador label { width: calc(var(--u) * 112); }
     #mandos-izq .valor, #mandos-der .valor { width: calc(var(--u) * 80); }
 }
