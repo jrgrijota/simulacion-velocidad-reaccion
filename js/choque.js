@@ -57,10 +57,10 @@ class Choque {
             const a = i / 8 * Math.PI * 2, v = 1.5 + Math.random() * 2;
             this.chispas.push({ x: this.cx, y: this.cy, vx: Math.cos(a) * v, vy: Math.sin(a) * v, vida: 35 + Math.floor(Math.random() * 20), t: Math.random() < .5 ? 'A' : 'B' });
         }
-        const kind = this.eficaz ? 'eficaz' : (!this.energiaOk && !this.orientOk ? 'ambas' : !this.energiaOk ? 'energia' : 'orient');
+        const kind = this.eficaz ? 'eficaz' : (!this.energiaOk ? 'energia' : 'orient');
         const E = this.nivel;
-        const tit = { eficaz: i18n.t('Eficaz'), energia: i18n.t('Le falta energía'), orient: i18n.t('Mal orientadas'), ambas: i18n.t('Las dos cosas') }[kind];
-        const sub = { eficaz: i18n.t('energía y orientación'), energia: i18n.t('energía {e}, menos que Eₐ', { e: E }), orient: i18n.t('sitios que no se tocan'), ambas: i18n.t('poca energía y de lado') }[kind];
+        const tit = { eficaz: i18n.t('Eficaz'), energia: i18n.t('Poca energía'), orient: i18n.t('Mal orientadas') }[kind];
+        const sub = { eficaz: i18n.t('energía y orientación'), energia: i18n.t('energía {e}, menos que Eₐ', { e: E }), orient: i18n.t('sitios que no se tocan') }[kind];
         this.ultimo = { kind, ok: this.eficaz, titulo: tit, sub, nivel: E, energiaOk: this.energiaOk, orientOk: this.orientOk, angA: this.angA, angB: this.angB };
         this.historial.push(this.ultimo);
         if (this.historial.length > 40) this.historial.shift();

@@ -505,8 +505,8 @@ function curvaDe(mundo) {
     if (mundo.tFin != null) { pts[pts.length - 1][0] = Math.min(pts[pts.length - 1][0], mundo.tFin); pts.push([mundo.tFin, 0]); }
     return pts;
 }
-const ESCALA_T = [30, 60, 120, 240, 600, 1200, 2400, 6000, 12000];
-const ESCALA_Y = [1, 2, 4, 8, 16, 32, 64];
+const ESCALA_T = [10, 20, 30, 60, 120, 240, 600, 1200, 2400, 6000];
+const ESCALA_Y = [1, 2, 4, 8, 16, 32, 64, 128];
 const sobre = (lista, v) => lista.find(x => x >= v) || lista[lista.length - 1];
 
 // Leyenda del gas en dos líneas, fuera del puesto (Comparación en escritorio, bajo la etiqueta izquierda)

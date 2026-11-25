@@ -21,7 +21,7 @@ const PRESETS = {
 };
 const S = {
     modo: 'reaccion', cmp: 'catalyst', pausado: false,
-    mundos: [], choque: new Choque(), tmax: 30, ymax: 1, cmpListo: false, ganador: -1, tSello: 0, finRegistrado: false,
+    mundos: [], choque: new Choque(), tmax: 10, ymax: 1, cmpListo: false, ganador: -1, tSello: 0, finRegistrado: false,
 };
 const elId = (id) => document.getElementById(id);
 
@@ -134,7 +134,7 @@ function construir() {
     if (S.modo === 'reaccion') S.mundos = [new Mundo(leerConfig())];
     else if (S.modo === 'comparar') S.mundos = [new Mundo(configLado(0)), new Mundo(configLado(1))];
     else S.mundos = [];
-    S.tmax = 30; S.ymax = 1; S.cmpListo = false; S.ganador = -1; S.finRegistrado = false; S.tSello = 0;
+    S.tmax = 10; S.ymax = 1; S.cmpListo = false; S.ganador = -1; S.finRegistrado = false; S.tSello = 0;
     pausar(false);
 }
 function pausar(v) { S.pausado = v; elId('btn-pausa').textContent = v ? i18n.t('▶ Reanudar') : i18n.t('❚❚ Pausar'); }
@@ -265,7 +265,7 @@ function avanzar() {
         c.paso();
         if (antes === 'vuelo' && c.fase === 'resultado') {
             S.tSello = millis(); retoChoque(c.ultimo.kind);
-            if (c.ultimo.kind !== 'ambas') retoSello(c.ultimo.kind);
+            retoSello(c.ultimo.kind);
         }
         return;
     }
@@ -283,7 +283,7 @@ function avanzar() {
         if (w.tFin != null && !S.finRegistrado) {
             S.finRegistrado = true; S.tSello = millis();
             retoSello('completa'); if (w.nK > 0) retoSello('cat'); if (w.nA !== w.nB) { retoSello('sobra'); retoHecho('sobra'); }
-            if (w.tFin < 30) { retoHecho('rapida'); if (w.nivel <= 2 && w.nK > 0) retoHecho('fria'); }
+            if (w.tFin < 10) { retoHecho('rapida'); if (w.nivel <= 2 && w.nK > 0) retoHecho('fria'); }
         }
     } else if (S.modo === 'comparar' && !S.cmpListo && S.mundos.some(w => w.tFin != null)) {
         S.cmpListo = true; S.tSello = millis();

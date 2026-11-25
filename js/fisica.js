@@ -22,7 +22,7 @@ const CAT_CAPTURE_DIST = 18 * ESC_MOL;
 const CAT_BIND_FRAMES = 28;
 // Reloj: el gas está más concentrado que en la cámara ancha anterior y se chocan
 // más a menudo; se ajustó una sola vez para que los tiempos se parezcan a los de antes.
-const TICKS_S = 22;              // pasos de simulación por segundo simulado (calibrado una vez)
+const TICKS_S = 60;              // pasos por segundo: igual que PASOS_REALES, así el cronómetro marca segundos reales
 
 function gaussianRandom() {
     let u, v;
