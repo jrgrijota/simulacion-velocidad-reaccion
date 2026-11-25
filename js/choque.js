@@ -145,3 +145,70 @@ function dibujarPanelChoque(x, y, w, h, c, nivelActual, m) {
     const mx = x + w - 66;
     molAB(mx, d2 + 16, u ? u.angA : 0, 'A', 1.15); molAB(mx + 34, d2 + 16, u ? u.angB : Math.PI, 'B', 1.15);
 }
+
+// ═════════ Diagrama de energía del choque (modo Choque) ═════════
+// Perfil de la reacción: reactivos (A + B) a energía 0, cima a Eₐ, producto C más abajo.
+// La pareja A + B es una bola que sube la ladera con la energía del choque:
+// si llega a la cima (y están de frente) baja al lado de C; si no, vuelve.
+const CH_NIVEL_EA_K = Math.pow(EA_CAT / (2 * CH_VELOCIDAD), 2);   // la cima con catalizador (≈ 0,9)
+const PERFIL_C = -2.2;                                              // energía del producto C
+function alturaPerfil(s, ea) {                  // s: avance del choque (0–1)
+    if (s <= .2) return 0;
+    if (s <= .5) return ea * (1 - Math.cos(Math.PI * (s - .2) / .3)) / 2;
+    if (s <= .8) return PERFIL_C + (ea - PERFIL_C) * (1 + Math.cos(Math.PI * (s - .5) / .3)) / 2;
+    return PERFIL_C;
+}
+function puntoRetorno(E) { return E >= CH_NIVEL_EA ? .5 : .2 + .3 * Math.acos(1 - 2 * E / CH_NIVEL_EA) / Math.PI; }
+function avancePerfil(c, E) {
+    const s0 = .07;
+    if (c.fase === 'vuelo') {
+        const p = Math.max(0, Math.min(1, (c.A.x + CH_REPOSO) / (CH_REPOSO - CH_CONTACTO / 2)));
+        return s0 + (puntoRetorno(E) - s0) * p;
+    }
+    if (c.fase === 'resultado' && c.ultimo) {
+        const f = Math.min(1, c.t / 50), sr = puntoRetorno(E);
+        return c.eficaz ? .5 + (.93 - .5) * f : sr - (sr - s0) * f;
+    }
+    return s0;
+}
+function dibujarPerfil(x, y, w, h, c, nivelActual, m) {
+    const ink = tinta(), u = c.fase === 'resultado' ? c.ultimo : null;
+    const E = c.fase === 'listo' ? nivelActual : c.nivel;
+    T(x, y + 20, i18n.t('Energía durante el choque'), { fs: m ? 16 : 17.5, w: 600, c: THEME.text });
+    const gx = x + 26, gx1 = x + w - 8, gy = y + 86, gb = y + h - 30, eMin = PERFIL_C - .9, eMax = 10.6;
+    const X = s => gx + s * (gx1 - gx), Y = e => gb - (e - eMin) / (eMax - eMin) * (gb - gy);
+    // ejes
+    forma(`M${gx} ${gb} V${gy - 6} M${gx - 5} ${gy + 2} L${gx} ${gy - 6} L${gx + 5} ${gy + 2}`, { s: THEME.textDim, sw: 2, lc: 'round', lj: 'round' });
+    forma(`M${gx} ${gb} H${gx1} M${gx1 - 8} ${gb - 5} L${gx1} ${gb} L${gx1 - 8} ${gb + 5}`, { s: THEME.textDim, sw: 2, lc: 'round', lj: 'round' });
+    TS(gx - 8, gy - 12, i18n.t('energía'), { fs: 14, c: THEME.textDim, a: 'start' });
+    TS(gx1, gb + 22, i18n.t('avance del choque'), { fs: 14, c: THEME.textDim, a: 'end' });
+    // perfil con catalizador (referencia) y perfil normal
+    const camino = ea => { let d = ''; for (let i = 0; i <= 80; i++) { const s = i / 80; d += (i ? ' L' : 'M') + X(s) + ' ' + Y(alturaPerfil(s, ea)); } return d; };
+    forma(camino(CH_NIVEL_EA_K), { s: CF.K, sw: 2.4, dash: [6, 5], op: .9 });
+    forma(camino(CH_NIVEL_EA), { s: '#e9f2ff', sw: 3.5, lj: 'round' });
+    TS(X(.36), Y(0) + 24, i18n.t('con catalizador'), { fs: 13.5, a: 'middle', c: CF.K });
+    // Eₐ: flecha doble de los reactivos a la cima
+    const xe = X(.7);
+    forma(`M${X(.2)} ${Y(0)} H${xe + 6}`, { s: THEME.textDim, sw: 1.2, dash: [3, 4] });
+    forma(`M${X(.5)} ${Y(CH_NIVEL_EA)} H${xe + 6}`, { s: THEME.textDim, sw: 1.2, dash: [3, 4] });
+    forma(`M${xe} ${Y(0) - 2} V${Y(CH_NIVEL_EA) + 2} M${xe - 4} ${Y(0) - 8} L${xe} ${Y(0) - 2} L${xe + 4} ${Y(0) - 8} M${xe - 4} ${Y(CH_NIVEL_EA) + 8} L${xe} ${Y(CH_NIVEL_EA) + 2} L${xe + 4} ${Y(CH_NIVEL_EA) + 8}`, { s: '#ff6b7d', sw: 2.2, lc: 'round', lj: 'round' });
+    const yEa = (Y(0) + Y(CH_NIVEL_EA)) / 2;
+    forma(R(xe + 8, yEa - 12, 36, 24, 12), { f: '#c23b4a', s: ink, sw: 1.6 });
+    T(xe + 26, yEa + 5, 'Eₐ', { fs: 14, w: 700, a: 'middle', c: '#fff' });
+    TS(X(.1), Y(0) + 24, 'A + B', { fs: 15, w: 700, a: 'middle', c: THEME.text });
+    TS(X(.84), Y(PERFIL_C) - 12, 'C', { fs: 15, w: 700, a: 'middle', c: THEME.text });
+    // energía que trae el choque
+    const ok = E >= CH_NIVEL_EA, colE = ok ? CF.ok : CF.no;
+    forma(`M${X(.03)} ${Y(E)} H${gx1 - 4}`, { s: colE, sw: 2, dash: [7, 5], op: .9 });
+    const etE = i18n.t('energía del choque: {e}', { e: E }), anE = ancho(etE, { fs: 14, w: 600, sys: true });
+    forma(R(X(.03) - 4, Y(E) - 24, anE + 8, 20, 6), { f: THEME.cardBg, op: .92 });
+    TS(X(.03), Y(E) - 8, etE, { fs: 14, w: 600, c: colE });
+    // la pareja A + B (o C ya formada) sobre el perfil
+    const s = avancePerfil(c, E), bx = X(s), by = Y(alturaPerfil(s, CH_NIVEL_EA)) - 10;
+    if (c.fase === 'resultado' && c.eficaz && s > .55) molC(bx, by - 4, .5, 1.05);
+    else { CC(bx - 5, by, 8, { f: 'g:molA', s: ink, sw: 1.8 }); CC(bx + 5, by, 8, { f: 'g:molB', s: ink, sw: 1.8 }); }
+    if (u) {
+        const txt = { eficaz: i18n.t('supera la cima: se forma C'), energia: i18n.t('no llega a la cima: vuelve'), orient: i18n.t('llega, pero mal orientadas: vuelve') }[u.kind];
+        TS(x, y + 46, txt, { fs: 14.5, w: 700, c: u.ok ? CF.ok : CF.no });
+    }
+}

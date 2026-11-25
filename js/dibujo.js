@@ -385,41 +385,22 @@ function dibujarModelo(cx, cy, r, mundo, texto, zoom, fsR, extra) {
 }
 
 // ═════════ PANEL DE ESTADO ═════════
-// Curva de velocidades relativas de los choques, con Eₐ (y Eₐ con K si hay catalizador)
-function dibujarDistribucion(x, y, w, h, nivel, conCat) {
-    const ink = tinta();
-    RR(x, y, w, h, 12, { f: THEME.paper, s: ink, sw: 2.5 });
-    const gx = x + 14, gw = w - 28, top = y + 34, gb = y + h - 24, gh = gb - top - 4;
-    const sg = BASE_SIGMA * Math.sqrt(nivel) * Math.SQRT2, vmax = sg * 4.5;
-    const f = v => (v / (sg * sg)) * Math.exp(-(v * v) / (2 * sg * sg));
-    let fMax = 0; for (let i = 0; i <= 120; i++) fMax = Math.max(fMax, f(i / 120 * vmax));
-    const X = v => gx + v / vmax * gw, Y = v => gb - f(v) / fMax * gh;
-    for (let i = 1; i < 6; i++) linea(`M${gx + i * gw / 6} ${top} V${gb}`, THEME.paperGrid, 1);
-    let d = `M${gx} ${gb}`; for (let i = 0; i <= 60; i++) { const v = i / 60 * vmax; d += ` L${X(v)} ${Y(v)}`; }
-    const ea = EA, eac = EA_CAT;
-    let area = `M${X(ea)} ${gb}`; for (let i = 0; i <= 40; i++) { const v = ea + i / 40 * (vmax - ea); area += ` L${X(v)} ${Y(v)}`; } area += ` L${X(vmax)} ${gb} Z`;
-    if (conCat) { let a2 = `M${X(eac)} ${gb}`; for (let i = 0; i <= 30; i++) { const v = eac + i / 30 * (ea - eac); a2 += ` L${X(v)} ${Y(v)}`; } a2 += ` L${X(ea)} ${gb} Z`; forma(a2, { f: CF.K, op: .5 }); }
-    forma(area, { f: '#34c782', op: .6 });
-    forma(d, { s: '#1f5fae', sw: 3.5, lj: 'round' });
-    linea(`M${gx} ${gb} H${x + w - 10}`, THEME.paperInk, 2);
-    // Píldoras de Eₐ: «Eₐ con K» acaba a la derecha de su línea; «Eₐ» empieza a su izquierda y nunca se montan
-    const et = (xx, txt, col, tc, px0) => {
-        forma(`M${xx} ${top + 2} V${gb}`, { s: col, sw: 2.4, dash: [5, 4] });
-        const tw = ancho(txt, { fs: 13, w: 700 }) + 16;
-        forma(R(px0, y + 7, tw, 22, 11), { f: col, s: ink, sw: 1.6 });
-        T(px0 + tw / 2, y + 23, txt, { fs: 13, w: 700, a: 'middle', c: tc });
-        return px0 + tw;
-    };
-    let finK = -Infinity;
-    if (conCat) { const twK = ancho(i18n.t('Eₐ con K'), { fs: 13, w: 700 }) + 16; finK = et(X(eac), i18n.t('Eₐ con K'), '#6d50c9', '#fff', Math.max(x + 6, X(eac) + 12 - twK)); }
-    const twE = ancho('Eₐ', { fs: 13, w: 700 }) + 16;
-    et(X(ea), 'Eₐ', '#c23b4a', '#fff', conCat ? Math.max(finK + 6, X(ea) - 12) : X(ea) - twE / 2);
-    const pct = Math.round(Math.exp(-(ea * ea) / (2 * sg * sg)) * 100);
-    const lab = i18n.t('{pct} % supera Eₐ', { pct }), lw = ancho(lab, { fs: 14, w: 700 }) + 18;
-    forma(R(x + w - 12 - lw, gb - 34, lw, 24, 12), { f: '#167a4c', s: ink, sw: 1.6 });
-    T(x + w - 12 - lw / 2, gb - 17, lab, { fs: 14, w: 700, a: 'middle', c: '#fff' });
-    TS(gx, y + h - 7, i18n.t('lentas'), { fs: 14, c: THEME.paperInk });
-    TS(x + w - 12, y + h - 7, i18n.t('rápidas'), { fs: 14, a: 'end', c: THEME.paperInk });
+// Contador real: de los últimos choques A + B, cuántos llevan más energía que Eₐ
+function dibujarContadorChoques(x, y, w, h, ult, conCat, m) {
+    const ink = tinta(), n = ult.length, si = ult.filter(Boolean).length;
+    const fsN = m ? 30 : 34, txtN = i18n.t('{a} de {b}', { a: si, b: CHOQUES_VISTOS });
+    T(x, y + 34, txtN, { fs: fsN, w: 700, c: n ? '#34e3a8' : THEME.textDim });
+    const sub = n < CHOQUES_VISTOS ? i18n.t('contando choques…') : i18n.t('superan Eₐ');
+    TS(x + ancho(txtN, { fs: fsN, w: 700 }) + 12, y + 30, sub, { fs: m ? 14.5 : 15.5, c: THEME.textDim });
+    const paso = w / CHOQUES_VISTOS, r = Math.min(8, paso * .38), cy = y + 64;
+    for (let i = 0; i < CHOQUES_VISTOS; i++) {
+        const cx = x + paso * (i + .5), v = ult[i];
+        if (v === undefined) CC(cx, cy, r, { s: THEME.border, sw: 1.5, dash: [2, 3] });
+        else CC(cx, cy, r, v ? { f: '#34c782', s: ink, sw: 1.5 } : { f: THEME.hundido, s: THEME.textDim, sw: 1.5 });
+    }
+    const nota = conCat ? i18n.t('Con catalizador les basta menos energía: también reaccionan choques que no llegan a Eₐ.')
+                        : i18n.t('Verde: el choque lleva más energía que Eₐ. Sube la temperatura y verás más.');
+    partir(nota, w, { fs: m ? 14.5 : 15, sys: true }).slice(0, 2).forEach((l, i) => TS(x, y + 98 + i * 20, l, { fs: m ? 14.5 : 15, c: THEME.textDim }));
 }
 // e = { tag, col, msg, nivel, cat, n:[A,B,C,K], pie }
 function panelEstado(x, y, w, h, e, m) {
@@ -431,8 +412,8 @@ function panelEstado(x, y, w, h, e, m) {
     lineas.forEach((l, i) => T(px, y + 86 + i * lh, l, { fs, c: THEME.text }));
     let dy = y + 86 + (Math.max(lineas.length, 4) - 1) * lh + 24;
     linea(`M${px} ${dy} H${px + iw}`, THEME.border, 1.5);
-    TS(px, dy + 26, i18n.t('Velocidad de las moléculas al chocar'), { fs: 15.5, c: THEME.textDim });
-    const dh = m ? 132 : 140; dibujarDistribucion(px, dy + 38, iw, dh, e.nivel, e.cat);
+    TS(px, dy + 26, i18n.t('Últimos {n} choques entre A y B', { n: CHOQUES_VISTOS }), { fs: 15.5, c: THEME.textDim });
+    const dh = 124; dibujarContadorChoques(px, dy + 38, iw, dh, e.ult, e.cat, m);
     dy += 38 + dh + 18;
     linea(`M${px} ${dy} H${px + iw}`, THEME.border, 1.5);
     const sp = iw / 4;
@@ -440,8 +421,10 @@ function panelEstado(x, y, w, h, e, m) {
         const ix = px + i * sp + 16, iy = dy + 34;
         if (t === 'C') molC(ix, iy, .5, 1.1); else if (t === 'K') molK(ix, iy, -1.6, 1); else molAB(ix, iy, -.5, t, 1.1);
         T(ix + 25, iy + 8, String(n), { fs: 22, w: 600, c: THEME.text });
+        const nom = { A: 'reactivo A', B: 'reactivo B', C: 'producto C', K: 'catalizador' }[t];
+        TS(ix - 14, iy + 34, i18n.t(nom), { fs: m ? 13.5 : 14.5, c: THEME.textDim });
     });
-    TS(px, dy + 78, e.pie, { fs: 17, c: THEME.textDim });
+    TS(px, dy + 100, e.pie, { fs: 17, c: THEME.textDim });
 }
 
 // ═════════ TIRA: VELOCIDAD DE REACCIÓN EN PAPEL (toda la reacción) ═════════
@@ -452,8 +435,8 @@ function dibujarGrafica(x, y, w, h, curvas, tmax, ymax, m, titulo, filaLeyenda) 
     forma(R(x, y, w, h, 16), { f: THEME.paper, s: ink, sw: 3 });
     const gx = x + (m ? 40 : 64), gx1 = x + w - (m ? 18 : 30), gy = y + (m ? 46 : 40) + (filaLeyenda ? 30 : 0), gb = y + h - (m ? 30 : 26);
     T(x + (m ? 16 : 20), y + 26, titulo || i18n.t('Velocidad de reacción · reacciones por segundo'), { fs: m ? 14.5 : 16, w: 600, c: THEME.paperInk });
-    const paso = tmax / 6;
-    for (let i = 0; i <= 6; i++) {
+    const div = tmax % 6 === 0 ? 6 : 5, paso = tmax / div;   // marcas en segundos enteros
+    for (let i = 0; i <= div; i++) {
         const t = paso * i, xx = gx + t / tmax * (gx1 - gx);
         linea(`M${xx} ${gy} V${gb}`, THEME.paperGrid, 1);
         TS(xx, gb + 18, `${Math.round(t)} s`, { fs: 14, a: 'middle', c: THEME.paperInk });

@@ -15,6 +15,7 @@ const SLOT_DIST  = 28;           // distancia de la cavidad al centro del catali
 const BASE_SIGMA = 2.0;          // px/paso @ nivel 1
 const EA         = 5.8;          // energía de activación (vía térmica)
 const EA_CAT     = 2.9;          // energía de activación (vía catalizada)
+const CHOQUES_VISTOS = 20;      // el panel enseña los últimos 20 choques A + B
 const SITE_CONTACT = 11 * ESC_MOL;
 const CAT_ATTRACT_R = 115 * ESC_MOL;
 const CAT_PULL   = 0.11;
@@ -77,6 +78,7 @@ class Mundo {
         this.tFin = null;               // segundos simulados al terminar
         this.serie = [];                // reacciones en cada segundo simulado
         this.enSegundo = 0;
+        this.ultimos = [];              // últimos choques A + B: true si superan Eₐ (contador del panel)
         this.poblar();
     }
     poblar() {
@@ -122,6 +124,7 @@ class Mundo {
         if (this.nivel > 0 && n !== this.nivel) {
             const f = Math.sqrt(n / this.nivel);
             this.mol.forEach(m => { if (m.tipo !== 'K' && !m.en) { m.vx *= f; m.vy *= f; } });
+            this.ultimos = [];          // el contador vuelve a empezar con la nueva temperatura
         }
         this.nivel = n;
     }
@@ -229,9 +232,10 @@ class Mundo {
                 if (d2 >= minD * minD || d2 <= 0) continue;
                 const d = Math.sqrt(d2), nx = dx / d, ny = dy / d, ov = (minD - d) * 0.5;
                 a.x -= nx * ov; a.y -= ny * ov; b.x += nx * ov; b.y += ny * ov;
-                const dvx = a.vx - b.vx, dvy = a.vy - b.vy;
+                const dvx = a.vx - b.vx, dvy = a.vy - b.vy, dot = dvx * nx + dvy * ny;
                 if ((a.tipo === 'A' && b.tipo === 'B') || (a.tipo === 'B' && b.tipo === 'A')) {
                     const rel = Math.hypot(dvx, dvy), sa = a.sitio(), sb = b.sitio();
+                    if (dot > 0) { this.ultimos.push(rel >= EA); if (this.ultimos.length > CHOQUES_VISTOS) this.ultimos.shift(); }
                     if (rel >= EA && Math.hypot(sa.x - sb.x, sa.y - sb.y) <= SITE_CONTACT) {
                         const cx = (a.x + b.x) / 2, cy = (a.y + b.y) / 2;
                         nuevos.push({ x: cx, y: cy, vx: (a.vx + b.vx) / 2, vy: (a.vy + b.vy) / 2 });
@@ -240,7 +244,6 @@ class Mundo {
                         break;
                     }
                 }
-                const dot = dvx * nx + dvy * ny;
                 if (dot > 0) { a.vx -= dot * nx; a.vy -= dot * ny; b.vx += dot * nx; b.vy += dot * ny; }
                 a.giro += (Math.random() - 0.5) * 0.03; b.giro += (Math.random() - 0.5) * 0.03;
             }
