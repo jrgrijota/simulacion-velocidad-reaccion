@@ -25,7 +25,7 @@ class Choque {
     }
     // Al empezar, cada molécula mira hacia un lado al azar, pero nunca de frente:
     // el primer choque sin girarlas sale «mal orientadas» y obliga a pensar en la orientación.
-    formaActual() { try { return S.formaChoque; } catch (e) { return 'media'; } }   // S aún no existe al crear el primer Choque
+    formaActual() { try { return S.forma; } catch (e) { return 'media'; } }   // S aún no existe al crear el primer Choque
     orientarAlAzar() {
         const d = CH_CONTACTO / 2;
         for (let k = 0; k < 50; k++) {
@@ -57,8 +57,8 @@ class Choque {
     }
     evaluar() {
         const rel = Math.abs(this.A.vx - this.B.vx);
-        const dsit = distSitios(this.A.x, this.A.y, this.A.ang, this.B.x, this.B.y, this.B.ang, CH_SITIO, FORMAS[S.formaChoque].sitios);
-        this.energiaOk = rel >= EA; this.orientOk = S.formaChoque === 'sencilla' || dsit <= CH_ORIENT * FORMAS[S.formaChoque].contacto / SITE_CONTACT;
+        const dsit = distSitios(this.A.x, this.A.y, this.A.ang, this.B.x, this.B.y, this.B.ang, CH_SITIO, FORMAS[S.forma].sitios);
+        this.energiaOk = rel >= EA; this.orientOk = S.forma === 'sencilla' || dsit <= CH_ORIENT * FORMAS[S.forma].contacto / SITE_CONTACT;
         this.eficaz = this.energiaOk && this.orientOk;
         this.cx = (this.A.x + this.B.x) / 2; this.cy = (this.A.y + this.B.y) / 2;
         this.angA = this.A.ang; this.angB = this.B.ang;
@@ -98,7 +98,7 @@ class Choque {
         }
         if (c.fase === 'listo') {
             [c.A, c.B].forEach(m => forma(E(m.x, m.y, 74, 74), { s: THEME.accent, sw: 2, dash: [6, 7], op: c.arrastre === m ? .8 : .35 }));
-            if (!c.girado && S.formaChoque !== 'sencilla') {                 // pista hasta el primer giro: flecha curva y «arrastra para girar»
+            if (!c.girado && S.forma !== 'sencilla') {                 // pista hasta el primer giro: flecha curva y «arrastra para girar»
                 const op = .55 + .45 * Math.sin(millis() / 330);
                 [c.A, c.B].forEach((m, i) => {   // arco por el lado de dentro, para que no lo corte el círculo
                     const r = 84, sg = i ? -1 : 1, a0 = i ? -Math.PI * .4 : -Math.PI * .6, a1 = i ? -Math.PI * .9 : -Math.PI * .1;
@@ -164,7 +164,7 @@ function dibujarPanelChoque(x, y, w, h, c, nivelActual, m) {
     const d2 = dy + 124;
     marca(px + 14, d2 + 14, ok2);
     T(px + 38, d2 + 10, i18n.t('Sitios reactivos de frente'), { fs: 17.5, w: 600, c: THEME.text });
-    TS(px + 38, d2 + 32, S.formaChoque === 'sencilla' ? i18n.t('esféricas: cualquier lado sirve') : u ? (u.orientOk ? i18n.t('los extremos claros se tocan') : i18n.t('los extremos claros no se tocan')) : i18n.t('los extremos claros deben tocarse'), { fs: 15, c: THEME.textDim });
+    TS(px + 38, d2 + 32, S.forma === 'sencilla' ? i18n.t('esféricas: cualquier lado sirve') : u ? (u.orientOk ? i18n.t('los extremos claros se tocan') : i18n.t('los extremos claros no se tocan')) : i18n.t('los extremos claros deben tocarse'), { fs: 15, c: THEME.textDim });
     const mx = x + w - 66;
     molAB(mx, d2 + 16, u ? u.angA : 0, 'A', 1.15); molAB(mx + 34, d2 + 16, u ? u.angB : Math.PI, 'B', 1.15);
 }

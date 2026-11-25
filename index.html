@@ -113,7 +113,7 @@
                 <div id="mandos-izq" class="mandos-lienzo mandos-fila only-comparar"><div class="fila-deslizador"><label for="sl-izq" class="nom-cmp">Catalizadores</label><input type="range" id="sl-izq" min="0" max="6" value="0" step="1"><span class="valor" id="val-izq">0</span></div></div>
                 <div id="mandos-der" class="mandos-lienzo mandos-fila only-comparar"><div class="fila-deslizador"><label for="sl-der" class="nom-cmp">Catalizadores</label><input type="range" id="sl-der" min="0" max="6" value="4" step="1"><span class="valor" id="val-der">4</span></div></div>
                 <!-- Choque -->
-                <div id="forma-choque" class="carril forma-choque only-choque" role="radiogroup" aria-label="Forma de las moléculas">
+                <div id="forma-choque" class="carril forma-choque sin-comparar" role="radiogroup" aria-label="Forma de las moléculas">
                     <button type="button" class="carril-btn" data-forma="sencilla" role="radio" aria-checked="false">Esféricas</button>
                     <button type="button" class="carril-btn" data-forma="media" role="radio" aria-checked="true">Simples</button>
                     <button type="button" class="carril-btn" data-forma="compleja" role="radio" aria-checked="false">Complejas</button>
@@ -140,7 +140,7 @@
             <li data-i18n="vr-cond"><strong>Dos condiciones a la vez:</strong> que el choque tenga energía mayor que la <strong>energía de activación Eₐ</strong> y que los <strong>sitios reactivos</strong> (el extremo claro de A y de B) se toquen de frente.</li>
             <li data-i18n="vr-temp"><strong>Temperatura:</strong> más temperatura, moléculas más rápidas y más choques con energía suficiente: en el panel bajan los choques con poca energía.</li>
             <li data-i18n="vr-conc"><strong>Concentración:</strong> con más moléculas en el mismo balón (más concentración) hay más choques por segundo.</li>
-            <li data-i18n="vr-forma"><strong>Forma de las moléculas</strong> (en Comparación y en Choque): cuantos más lados reactivos ofrece la molécula, más fácil es que choque bien orientada. Las esféricas reaccionan por cualquier lado; las simples, por cualquiera de sus dos extremos; en las complejas hay un solo sitio reactivo, escondido entre otros átomos.</li>
+            <li data-i18n="vr-forma"><strong>Forma de las moléculas</strong> (en los tres modos): cuantos más lados reactivos ofrece la molécula, más fácil es que choque bien orientada. Las esféricas reaccionan por cualquier lado; las simples, por cualquiera de sus dos extremos; en las complejas hay un solo sitio reactivo, escondido entre otros átomos.</li>
             <li data-i18n="vr-cat"><strong>Catalizador (K):</strong> sujeta una A y una B ya bien orientadas y les ofrece un camino con <strong>menos energía de activación</strong>. Sale intacto y puede volver a actuar.</li>
             <li data-i18n="vr-gas"><strong>El color del balón:</strong> A y B son gases invisibles; C es un gas de color. El balón se tiñe según la cantidad de C que hay, no según la temperatura.</li>
         </ul>

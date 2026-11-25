@@ -7,6 +7,7 @@
 
 /* Lo que solo se ve en cada modo */
 body:not(.modo-comparar) .only-comparar { display: none !important; }
+body.modo-comparar .sin-comparar { display: none !important; }
 body:not(.modo-choque) .only-choque { display: none !important; }
 body.modo-choque .only-sim, body.modo-choque #mandos-comun { display: none !important; }
 
@@ -112,6 +113,7 @@ body.modo-choque #escena .acciones-sim { display: none; }
 #escena .cmpvar.en-lienzo .carril-btn { height: calc(var(--u) * 36); padding: 0 calc(var(--u) * 20); font-size: calc(var(--u) * 16.5); }
 body:not(.modo-comparar) #escena .cmpvar { display: none; }
 /* Choque: forma de las moléculas, arriba a la izquierda de la zona de trabajo */
+#escena .forma-choque.centrado { transform: translateX(-50%); }
 #escena .forma-choque { position: absolute; height: calc(var(--u) * 42); padding: calc(var(--u) * 3); gap: calc(var(--u) * 2); }
 #escena .forma-choque .carril-btn { height: calc(var(--u) * 34); padding: 0 calc(var(--u) * 16); font-size: calc(var(--u) * 15.5); }
 @media (max-width: 1180px) { .ecuacion { display: none; } }

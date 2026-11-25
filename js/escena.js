@@ -23,7 +23,7 @@ const PRESETS = {
     shape:    { nom: 'Forma',              min: 1, max: 3,  izq: 1, der: 3 },
 };
 const S = {
-    modo: 'reaccion', cmp: 'catalyst', pausado: false, formaChoque: 'media',
+    modo: 'reaccion', cmp: 'catalyst', pausado: false, forma: 'media',
     mundos: [], choque: new Choque(), tmax: 10, ymax: 1, cmpListo: false, ganador: -1, tSello: 0, finRegistrado: false,
 };
 const elId = (id) => document.getElementById(id);
@@ -33,7 +33,8 @@ function disponerReaccion(m) {
     if (!m) return {
         w: 1330, h: 696, tarjetas: [{ x: 0, y: 0, w: 1330, h: 556 }],
         puestos: [{ x: 0, y: 0, esc: 1, sinZoom: false, sinLeyenda: false }],
-        modelos: [{ cx: 664, cy: 250, r: 216, txt: 'Modelo: así imaginamos las moléculas', zoom: [ZOOM_P[0], ZOOM_P[1], 13], fs: 16 }],
+        modelos: [{ cx: 664, cy: 266, r: 200, txt: 'Modelo: así imaginamos las moléculas', zoom: [ZOOM_P[0], ZOOM_P[1], 13], fs: 16 }],
+        forma: { x: 664, y: 12, centro: true },
         acciones: { x: 664 - 150, y: 500, w: 300 },
         panel: { x: 910, y: 20, w: 400, h: 516, m: false }, graf: { x: 0, y: 568, w: 1330, h: 128, m: false },
         sello: { x: 1167, y: 628, m: false }, mandos: { x: 22, y: 372, w: 384 },
@@ -41,8 +42,9 @@ function disponerReaccion(m) {
     return {
         w: 370, h: 1640, tarjetas: [{ x: 0, y: 0, w: 370, h: 500 }, { x: 0, y: 1018, w: 370, h: 446 }],
         puestos: [{ x: 4, y: 10, esc: .86, sinZoom: true, sinLeyenda: false }],
-        modelos: [{ cx: 185, cy: 1202, r: 166, txt: 'Modelo de moléculas', zoom: null, fs: 14.5 }],
-        acciones: { x: 24, y: 1402, w: 322 },
+        modelos: [{ cx: 185, cy: 1232, r: 154, txt: 'Modelo de moléculas', zoom: null, fs: 14.5 }],
+        forma: { x: 185, y: 1030, centro: true },
+        acciones: { x: 24, y: 1408, w: 322 },
         panel: { x: 0, y: 516, w: 370, h: 486, m: true }, graf: { x: 0, y: 1480, w: 370, h: 160, m: true, tit: 'Reactivo transformado (%)' },
         sello: { x: 185, y: 1460, m: true }, mandos: { x: 14, y: 324, w: 342 },
     };
@@ -100,7 +102,8 @@ function colocarMandos() {
     if (!LAY) return;
     const c = elId('mandos-comun'), compara = S.modo === 'comparar';
     c.classList.toggle('compacto', !!LAY.mandos.compacto);
-    if (S.modo === 'choque') { colocarSobreLienzo(elId('forma-choque'), LAY.forma, CV_W, CV_H); colocarSobreLienzo(elId('mandos-choque'), LAY.mandos, CV_W, CV_H); elId('mandos-choque').classList.toggle('en-fila', !!LAY.mandos.fila); }
+    if (LAY.forma) { colocarSobreLienzo(elId('forma-choque'), LAY.forma, CV_W, CV_H); elId('forma-choque').classList.toggle('centrado', !!LAY.forma.centro); }
+    if (S.modo === 'choque') { colocarSobreLienzo(elId('mandos-choque'), LAY.mandos, CV_W, CV_H); elId('mandos-choque').classList.toggle('en-fila', !!LAY.mandos.fila); }
     else colocarSobreLienzo(c, LAY.mandos, CV_W, CV_H);
     if (compara) {
         colocarSobreLienzo(elId('mandos-izq'), LAY.lados[0].mando, CV_W, CV_H);
@@ -135,7 +138,7 @@ function configLado(i) {
     return c;
 }
 function construir() {
-    if (S.modo === 'reaccion') S.mundos = [new Mundo(leerConfig())];
+    if (S.modo === 'reaccion') S.mundos = [new Mundo({ ...leerConfig(), forma: S.forma })];
     else if (S.modo === 'comparar') S.mundos = [new Mundo(configLado(0)), new Mundo(configLado(1))];
     else S.mundos = [];
     S.tmax = 10; S.ymax = 1; S.cmpListo = false; S.ganador = -1; S.finRegistrado = false; S.tSello = 0;
@@ -212,6 +215,7 @@ function ajustarEjes(mundos) {
 }
 function dibujarReaccion() {
     const w = S.mundos[0], p = LAY.puestos[0], mo = LAY.modelos[0];
+    FORMA_DIBUJO = w.forma;                         // también los iconos del recuento
     LAY.tarjetas.forEach(t => tarj(t));
     dibujarPuesto(p.x, p.y, p.esc, datosPuesto(w, p));
     dibujarModelo(mo.cx, mo.cy, mo.r, w, i18n.t(mo.txt), mo.zoom, mo.fs);
@@ -228,6 +232,7 @@ function dibujarReaccion() {
         T(g.x + g.w - 20 - pw / 2, g.y + 26, pt, { fs: 14, w: 700, a: 'middle', c: '#fff' });
     }
     if (w.tFin != null) selloVR(i18n.t('¡REACCIÓN COMPLETA!'), i18n.t('en {t} s · {c}', { t: coma(w.tFin), c: w.nK > 0 ? plural(w.nK, 'con {n} catalizador', 'con {n} catalizadores') : i18n.t('sin catalizador') }), LAY.sello.x, LAY.sello.y, S.tSello, LAY.sello.m);
+    FORMA_DIBUJO = 'media';
 }
 function dibujarComparar() {
     LAY.tarjetas.forEach(t => tarj(t));
@@ -261,7 +266,7 @@ function dibujarComparar() {
 }
 function dibujarChoque() {
     const c = S.choque, mo = LAY.modelo, k = mo.r / R_MODELO;
-    FORMA_DIBUJO = S.formaChoque;
+    FORMA_DIBUJO = S.forma;
     LAY.tarjetas.forEach(t => tarj(t));
     const extra = { dibujarFondo: () => {
         c.dibujarFondo();
@@ -391,7 +396,7 @@ function iniciarEventos(cv) {
     document.querySelectorAll('[data-modo]').forEach(b => b.addEventListener('click', () => cambiarModo(b.dataset.modo)));
     document.querySelectorAll('[data-cmp]').forEach(b => b.addEventListener('click', () => cambiarComparacion(b.dataset.cmp)));
     document.querySelectorAll('[data-forma]').forEach(b => b.addEventListener('click', () => {
-        S.formaChoque = b.dataset.forma; S.choque.colocar();
+        S.forma = b.dataset.forma; S.choque.colocar(); if (S.modo === 'reaccion') construir();
         document.querySelectorAll('[data-forma]').forEach(o => { const on = o === b; o.classList.toggle('active', on); o.setAttribute('aria-checked', String(on)); });
     }));
     elId('btn-pausa').addEventListener('click', () => pausar(!S.pausado));
