@@ -114,13 +114,13 @@ function molAB(x, y, a, t, s = 1) {
     if (s >= .85 && s < 2.2) T(x + .3 * s, y + 3.6 * s, t, { fs: 9.5 * s, w: 700, a: 'middle', c: '#fff', sys: true });
 }
 function molC(x, y, a, s = 1) {
-    const ink = tinta(), ca = Math.cos(a), sa = Math.sin(a), px = -sa, py = ca, D = (s >= 2 ? 9.6 : 7.2) * s;
+    const ink = tinta(), ca = Math.cos(a), sa = Math.sin(a), px = -sa, py = ca, D = 9.6 * s;
     const a1 = [x + ca * D, y + sa * D], a2 = [x - ca * D, y - sa * D], b1 = [x + px * D, y + py * D], b2 = [x - px * D, y - py * D];
     const rombo = `M${a1.join(' ')} L${b1.join(' ')} L${a2.join(' ')} L${b2.join(' ')} Z`;
     forma(rombo, { s: ink, sw: 6.5 * s, lj: 'round' });
     forma(rombo, { f: CF.Cv, fo: .35, s: '#9fe3bf', sw: 3 * s, lj: 'round' });
-    // mismos átomos que A y B: uno azul, uno naranja y los dos pequeños blancos (se conserva la masa)
-    [[a1, 'g:molA', 5.6], [b1, 'g:molS', 3.6], [a2, 'g:molB', 5.6], [b2, 'g:molS', 3.6]].forEach(([p, f, r]) => {
+    // mismos átomos y tamaños que en A y B (grande 8, pequeño 4,8): uno azul, uno naranja y los dos pequeños blancos (se conserva la masa)
+    [[a1, 'g:molA', 8], [b1, 'g:molS', 4.8], [a2, 'g:molB', 8], [b2, 'g:molS', 4.8]].forEach(([p, f, r]) => {
         CC(p[0], p[1], r * s, { f, s: ink, sw: 1.7 * s });
         CC(p[0] - r * .32 * s, p[1] - r * .36 * s, r * .28 * s, { f: '#fff', op: .6 });
     });
