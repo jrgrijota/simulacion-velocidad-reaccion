@@ -131,7 +131,7 @@ function dibujarPanelChoque(x, y, w, h, c, nivelActual, m) {
     marca(px + 14, dy + 34, ok1);
     T(px + 38, dy + 30, i18n.t('Energía suficiente'), { fs: 16.5, w: 600, c: THEME.text });
     TS(px + 38, dy + 50, i18n.t('energía del choque {e} · Eₐ ≈ {ea}', { e: E1, ea: Math.round(CH_NIVEL_EA) }), { fs: 13, c: THEME.textDim });
-    const bx = px + 38, bw = iw - 38 - (m ? 0 : 24), by = dy + 62;
+    const bx = px + 38, bw = iw - 38, by = dy + 62;
     forma(R(bx, by, bw, 14, 7), { f: THEME.hundido, s: THEME.border, sw: 1.5 });
     forma(R(bx, by, Math.max(14, bw * E1 / 10), 14, 7), { f: ok1 === false ? CF.no : ok1 ? CF.ok : '#9ec9ff', s: ink, sw: 1.5 });
     const ex = bx + bw * CH_NIVEL_EA / 10;

@@ -18,27 +18,30 @@ body.theme-light:not(.theme-marca) .ecuacion b.ea { color: #1f5fbf; } body.theme
 .barra-sus .sus-info { flex: 1; min-width: 0; }
 @media (max-width: 1180px) { .barra-sus .sus-info { flex: 1 1 100%; order: 3; } }
 
-/* ── Mandos del gas: nombre · barra · valor (alto 40 como en el boceto) ── */
-.mandos-fila { gap: calc(var(--u) * 2); }
-.mandos-fila .fila-deslizador { height: calc(var(--u) * 40); gap: calc(var(--u) * 12); }
-body .mandos-fila .fila-deslizador label { display: flex; align-items: center; gap: calc(var(--u) * 8); width: calc(var(--u) * 150); min-width: 0; flex: none; color: var(--title); font: 600 calc(var(--u) * 16) var(--font-fun); white-space: nowrap; }
-.mandos-fila .fila-deslizador .valor { min-width: 0; width: calc(var(--u) * 40); font-size: calc(var(--u) * 16.5); }
-#val-nivel { width: calc(var(--u) * 100); }
+/* ── Mandos: rejilla de tres columnas (nombre · barra · valor) ──
+   Mismas columnas en todas las filas de un bloque: las barras empiezan y terminan
+   en la misma vertical y los valores quedan alineados a la derecha. */
+.mandos-fila { --col-nom: calc(var(--u) * 126); --col-val: calc(var(--u) * 84); gap: calc(var(--u) * 2); }
+.mandos-fila .fila-deslizador { display: grid; grid-template-columns: var(--col-nom) minmax(0, 1fr) var(--col-val); align-items: center; column-gap: calc(var(--u) * 14); height: calc(var(--u) * 40); }
+body .mandos-fila .fila-deslizador label { display: flex; align-items: center; gap: calc(var(--u) * 8); width: auto; min-width: 0; color: var(--title); font: 600 calc(var(--u) * 16) var(--font-fun); white-space: nowrap; }
+.mandos-fila .fila-deslizador input[type="range"] { width: 100%; min-width: 0; }
+.mandos-fila .fila-deslizador .valor { width: auto; min-width: 0; text-align: right; font: 700 calc(var(--u) * 16.5) var(--font-fun); white-space: nowrap; }
+#mandos-comun.compacto { --col-nom: calc(var(--u) * 126); --col-val: calc(var(--u) * 88); }
 #mandos-comun.compacto .fila-deslizador { height: calc(var(--u) * 36); }
-body #mandos-comun.compacto .fila-deslizador label { width: calc(var(--u) * 130); }
+#mandos-izq, #mandos-der { --col-nom: calc(var(--u) * 126); --col-val: calc(var(--u) * 40); width: calc(100% * 616 / 1330); }
 .punto-sl { display: inline-block; flex: none; width: calc(var(--u) * 14); height: calc(var(--u) * 14); border-radius: 50%; background: var(--c); border: calc(var(--u) * 2) solid #071a2b; }
-body #mandos-izq .fila-deslizador label, body #mandos-der .fila-deslizador label { width: calc(var(--u) * 150); }
-#mandos-izq .valor, #mandos-der .valor { width: calc(var(--u) * 90); }
-#mandos-izq, #mandos-der { width: calc(100% * 608 / 1330); }
 
-/* ── Choque: botones y nota ── */
-.botones-choque { display: flex; gap: calc(var(--u) * 16); margin-top: calc(var(--u) * 8); }
-.botones-choque .boton-suelto { height: calc(var(--u) * 40); font-size: calc(var(--u) * 16); padding: 0 calc(var(--u) * 16); justify-content: center; flex: 1; white-space: nowrap; }
+/* ── Choque: energía (nombre y valor arriba, barra, extremos), botones y nota ── */
+#mandos-choque { display: flex; flex-direction: column; }
+#mandos-choque .fila-slider { align-items: center; }
+body #mandos-choque .fila-slider label { font: 600 calc(var(--u) * 16) var(--font-fun); color: var(--title); }
+#mandos-choque .valor-slider { min-width: calc(var(--u) * 28); text-align: right; }
+#mandos-choque input[type="range"] { width: 100%; margin: calc(var(--u) * 6) 0 calc(var(--u) * 2); }
+#mandos-choque .slider-bounds { margin-bottom: calc(var(--u) * 8); font-size: calc(var(--u) * 12.5); }
+.botones-choque { display: grid; grid-template-columns: 1fr 1fr; gap: calc(var(--u) * 14); }
+.botones-choque .boton-suelto { height: calc(var(--u) * 38); font-size: calc(var(--u) * 16); padding: 0 calc(var(--u) * 12); justify-content: center; white-space: nowrap; }
 .boton-lanzar { border: 3px solid var(--accent); color: var(--accent); }
-#mandos-choque .nota-mando { margin: calc(var(--u) * 14) 0 0; font-size: calc(var(--u) * 14); line-height: 1.45; }
-#mandos-choque { gap: calc(var(--u) * 6); }
-body #mandos-choque .fila-deslizador label { width: calc(var(--u) * 170); flex: none; color: var(--title); font: 600 calc(var(--u) * 16) var(--font-fun); }
-#mandos-choque .fila-deslizador .valor { width: calc(var(--u) * 40); min-width: 0; }
+#mandos-choque .nota-mando { margin: calc(var(--u) * 8) 0 0; font-size: calc(var(--u) * 13); line-height: 1.4; }
 
 /* ── Álbum: seis sellos ── */
 .album-mini.album-vr { grid-template-columns: repeat(6, 1fr); gap: 6px; }
@@ -54,7 +57,6 @@ body #mandos-choque .fila-deslizador label { width: calc(var(--u) * 170); flex: 
     .ecuacion { font-size: 1.15rem; }
     .barra-sus .sus-info { order: 4; flex-basis: 100%; }
     .album-tabla .mat-fila { grid-template-columns: repeat(2, 1fr); }
-    #mandos-izq, #mandos-der { width: calc(100% * 342 / 370); }
-    body #mandos-izq .fila-deslizador label, body #mandos-der .fila-deslizador label { width: calc(var(--u) * 112); }
-    #mandos-izq .valor, #mandos-der .valor { width: calc(var(--u) * 80); }
+    #mandos-izq, #mandos-der { width: calc(100% * 342 / 370); --col-nom: calc(var(--u) * 112); --col-val: calc(var(--u) * 28); }
+}
 }

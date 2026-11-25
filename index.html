@@ -102,7 +102,7 @@
                 <div id="canvas-container"></div>
                 <!-- Los cuatro mandos del gas (en Comparar quedan los que no se comparan) -->
                 <div id="mandos-comun" class="mandos-lienzo mandos-fila">
-                    <div class="fila-deslizador" id="fila-nivel"><label for="sl-nivel">Temperatura</label><input type="range" id="sl-nivel" min="1" max="10" value="4" step="1"><span class="valor" id="val-nivel">Normal (4)</span></div>
+                    <div class="fila-deslizador" id="fila-nivel"><label for="sl-nivel"><i class="punto-sl" style="--c:#ff7a59"></i>Temperatura</label><input type="range" id="sl-nivel" min="1" max="10" value="4" step="1"><span class="valor" id="val-nivel">Normal (4)</span></div>
                     <div class="fila-deslizador" id="fila-cat"><label for="sl-cat"><i class="punto-sl" style="--c:#a78bfa"></i>Catalizadores</label><input type="range" id="sl-cat" min="0" max="6" value="0" step="1"><span class="valor" id="val-cat">0</span></div>
                     <div class="fila-deslizador" id="fila-na"><label for="sl-na"><i class="punto-sl" style="--c:#4f8ef7"></i>Moléculas A</label><input type="range" id="sl-na" min="4" max="30" value="16" step="1"><span class="valor" id="val-na">16</span></div>
                     <div class="fila-deslizador" id="fila-nb"><label for="sl-nb"><i class="punto-sl" style="--c:#f7823c"></i>Moléculas B</label><input type="range" id="sl-nb" min="4" max="30" value="16" step="1"><span class="valor" id="val-nb">16</span></div>
@@ -112,12 +112,14 @@
                 <div id="mandos-der" class="mandos-lienzo mandos-fila only-comparar"><div class="fila-deslizador"><label for="sl-der" class="nom-cmp">Catalizadores</label><input type="range" id="sl-der" min="0" max="6" value="4" step="1"><span class="valor" id="val-der">4</span></div></div>
                 <!-- Choque -->
                 <div id="mandos-choque" class="mandos-lienzo only-choque">
-                    <div class="fila-deslizador"><label for="sl-energia">Energía del choque</label><input type="range" id="sl-energia" min="1" max="10" value="5" step="1"><span class="valor" id="val-energia">5</span></div>
+                    <div class="fila-slider"><label for="sl-energia">Energía del choque</label><span class="valor-slider" id="val-energia">5</span></div>
+                    <input type="range" id="sl-energia" min="1" max="10" value="5" step="1">
+                    <div class="slider-bounds"><span>Suave</span><span>Fuerte</span></div>
                     <div class="botones-choque">
                         <button type="button" id="btn-lanzar" class="boton-suelto boton-lanzar">▶ Lanzar</button>
                         <button type="button" id="btn-colocar" class="boton-suelto">↺ <span class="solo-ancho">Colocar otra vez</span><span class="solo-movil">Colocar</span></button>
                     </div>
-                    <p class="nota-mando">Arrastra una molécula para girarla.<br>Eₐ equivale más o menos al nivel 4.</p>
+                    <p class="nota-mando">Arrastra una molécula para girarla.</p>
                 </div>
             </div>
             <div id="anuncio" class="sr-only" aria-live="polite"></div>

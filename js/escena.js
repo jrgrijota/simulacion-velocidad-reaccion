@@ -48,7 +48,7 @@ function disponerComparar(m) {
             const ox = i * 665, esc = .84;
             return { tag: { x: ox + 24, y: 18 }, puesto: { x: ox - 8, y: 96, esc, sinZoom: false, sinLeyenda: i === 1 },
                 modelo: { cx: ox + 477, cy: 222, r: 180, txt: 'Modelo de moléculas', fs: 14.5, zoom: [ox - 8 + ZOOM_P[0] * esc, 96 + ZOOM_P[1] * esc, 10] },
-                barra: { x: ox + 322, y: 428, w: 300 }, texto: { x: ox + 477, y: 460 }, mando: { x: ox + 28, y: 484, w: 608 } };
+                barra: { x: ox + 322, y: 428, w: 300 }, texto: { x: ox + 477, y: 460 }, mando: { x: ox + 24, y: 484, w: 616 } };
         });
         return { w: 1330, h: 696, tarjetas: [{ x: 0, y: 0, w: 1330, h: 540 }], lados, divisor: { x: 665, y1: 24, y2: 516 },
             graf: { x: 0, y: 552, w: 900, h: 144, m: false }, igual: { x: 916, y: 552, w: 414, h: 144 }, sello: { x: 743, y: 634, m: true },
@@ -60,22 +60,22 @@ function disponerComparar(m) {
             modelo: { cx: 185, cy: y0 + 476, r: 130, txt: 'Modelo de moléculas', fs: 13.5, zoom: null },
             barra: { x: 40, y: y0 + 292, w: 290 }, texto: { x: 185, y: y0 + 326 }, mando: { x: 14, y: y0 + 622, w: 342 } };
     });
-    return { w: 370, h: 1810, tarjetas: [{ x: 0, y: 0, w: 370, h: 676 }, { x: 0, y: 692, w: 370, h: 676 }], lados,
+    return { w: 370, h: 1776, tarjetas: [{ x: 0, y: 0, w: 370, h: 676 }, { x: 0, y: 692, w: 370, h: 676 }], lados,
         graf: { x: 0, y: 1384, w: 370, h: 200, m: true, tit: 'Velocidad de reacción (reacciones/s)', filaLeyenda: true },
-        igual: { x: 0, y: 1600, w: 370, h: 200 }, sello: { x: 185, y: 1360, m: true }, mandos: { x: 14, y: 1636, w: 342, compacto: true } };
+        igual: { x: 0, y: 1600, w: 370, h: 176 }, sello: { x: 185, y: 1360, m: true }, mandos: { x: 14, y: 1636, w: 342, compacto: true } };
 }
 function disponerChoque(m) {
     if (!m) return {
         w: 1330, h: 696, tarjetas: [{ x: 0, y: 0, w: 880, h: 556 }],
         modelo: { cx: 420, cy: 268, r: 222, txt: 'Modelo: así imaginamos dos moléculas que chocan', fs: 16 },
         panel: { x: 896, y: 0, w: 434, h: 330, m: false }, controles: { x: 896, y: 346, w: 434, h: 210 },
-        tira: { x: 0, y: 568, w: 1330, h: 128, m: false }, sello: { x: 758, y: 46, m: true }, mandos: { x: 920, y: 368, w: 386 },
+        tira: { x: 0, y: 568, w: 1330, h: 128, m: false }, sello: { x: 758, y: 46, m: true }, mandos: { x: 920, y: 360, w: 386 },
     };
     return {
-        w: 370, h: 1360, tarjetas: [{ x: 0, y: 0, w: 370, h: 420 }],
+        w: 370, h: 1386, tarjetas: [{ x: 0, y: 0, w: 370, h: 420 }],
         modelo: { cx: 185, cy: 206, r: 166, txt: 'Dos moléculas que chocan', fs: 14.5 },
-        panel: { x: 0, y: 436, w: 370, h: 352, m: true }, controles: { x: 0, y: 804, w: 370, h: 200 },
-        tira: { x: 0, y: 1020, w: 370, h: 340, m: true }, sello: { x: 185, y: 30, m: true }, mandos: { x: 14, y: 820, w: 342 },
+        panel: { x: 0, y: 436, w: 370, h: 352, m: true }, controles: { x: 0, y: 804, w: 370, h: 226 },
+        tira: { x: 0, y: 1046, w: 370, h: 340, m: true }, sello: { x: 185, y: 30, m: true }, mandos: { x: 14, y: 820, w: 342 },
     };
 }
 function calcularEscena() {          // devuelve true si cambia el tamaño del lienzo
