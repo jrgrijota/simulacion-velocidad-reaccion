@@ -169,7 +169,7 @@ function etiquetaLado(i) {
 const plural = (n, uno, varios) => i18n.t(n === 1 ? uno : varios, { n });
 function estadoPanel(w) {
     const nK = w.nK, n = [w.contar('A'), w.contar('B'), w.contar('C'), w.contar('K')];
-    let e = { nivel: w.nivel, cat: nK > 0, n, ult: w.ultimos, enEspera: S.pausado && w.pasos === 0 };
+    let e = { nivel: w.nivel, cat: nK > 0, n, cont: w.cont, nKreac: w.catalizadas, enEspera: S.pausado && w.pasos === 0 };
     if (w.tFin != null) {
         const t = coma(w.tFin, 1);
         let msg = i18n.t('Ya no quedan parejas de A y B: se han gastado los reactivos.') + ' ' +

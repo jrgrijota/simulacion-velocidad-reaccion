@@ -15,7 +15,6 @@ const SLOT_DIST  = 28;           // distancia de la cavidad al centro del catali
 const BASE_SIGMA = 2.0;          // px/paso @ nivel 1
 const EA         = 5.8;          // energía de activación (vía térmica)
 const EA_CAT     = 2.9;          // energía de activación (vía catalizada)
-const CHOQUES_VISTOS = 20;      // el panel enseña los últimos 20 choques A + B
 const SITE_CONTACT = 11 * ESC_MOL;
 const CAT_ATTRACT_R = 115 * ESC_MOL;
 const CAT_PULL   = 0.11;
@@ -78,7 +77,7 @@ class Mundo {
         this.tFin = null;               // segundos simulados al terminar
         this.serie = [];                // reacciones en cada segundo simulado
         this.enSegundo = 0;
-        this.ultimos = [];              // últimos choques A + B: true si superan Eₐ (contador del panel)
+        this.cont = { eficaz: 0, energia: 0, orient: 0 };   // choques A + B desde Empezar (como en Choque: si falla todo, cuenta como poca energía)
         this.prog = [[0, 0]];           // [segundos, % de reactivo transformado] tras cada reacción (gráfica)
         this.marcas = [];               // instantes de las reacciones (velocidad actual, media de 3 s)
         this.tMitad = null;             // segundos al llegar al 50 % (carrera de Comparación)
@@ -133,7 +132,7 @@ class Mundo {
         if (this.nivel > 0 && n !== this.nivel) {
             const f = Math.sqrt(n / this.nivel);
             this.mol.forEach(m => { if (m.tipo !== 'K' && !m.en) { m.vx *= f; m.vy *= f; } });
-            this.ultimos = [];          // el contador vuelve a empezar con la nueva temperatura
+            this.cont = { eficaz: 0, energia: 0, orient: 0 };   // vuelve a contar con la nueva temperatura
         }
         this.nivel = n;
     }
@@ -247,7 +246,7 @@ class Mundo {
                 const dvx = a.vx - b.vx, dvy = a.vy - b.vy, dot = dvx * nx + dvy * ny;
                 if ((a.tipo === 'A' && b.tipo === 'B') || (a.tipo === 'B' && b.tipo === 'A')) {
                     const rel = Math.hypot(dvx, dvy), sa = a.sitio(), sb = b.sitio();
-                    if (dot > 0) { this.ultimos.push(rel >= EA); if (this.ultimos.length > CHOQUES_VISTOS) this.ultimos.shift(); }
+                    if (dot > 0) this.cont[rel < EA ? 'energia' : Math.hypot(sa.x - sb.x, sa.y - sb.y) <= SITE_CONTACT ? 'eficaz' : 'orient']++;
                     if (rel >= EA && Math.hypot(sa.x - sb.x, sa.y - sb.y) <= SITE_CONTACT) {
                         const cx = (a.x + b.x) / 2, cy = (a.y + b.y) / 2;
                         nuevos.push({ x: cx, y: cy, vx: (a.vx + b.vx) / 2, vy: (a.vy + b.vy) / 2 });

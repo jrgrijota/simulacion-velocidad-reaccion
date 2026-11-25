@@ -387,28 +387,36 @@ function dibujarModelo(cx, cy, r, mundo, texto, zoom, fsR, extra) {
 // ═════════ PANEL DE ESTADO ═════════
 // Contador real: de los últimos choques A + B, cuántos llevan más energía que Eₐ
 const ROJO_NO = '#e5484d';            // carmesí: no se confunde con el naranja de B
-function dibujarContadorChoques(x, y, w, h, ult, conCat, m, enEspera) {
-    const ink = tinta(), n = ult.length, si = ult.filter(Boolean).length;
+const AMBAR_OR = '#f5b041';
+// Tres contadores, los mismos resultados que en Choque, acumulados desde Empezar; barra de proporciones
+// y, con catalizador, las reacciones que ocurren en él (así eficaces + catalizador = reacciones totales)
+function dibujarContadorChoques(x, y, w, h, cont, conCat, nK, m, enEspera) {
+    const ink = tinta(), tot = cont.eficaz + cont.energia + cont.orient;
+    const cats = [['eficaz', '#34c782', i18n.t('eficaces')], ['energia', ROJO_NO, i18n.t('poca energía')], ['orient', AMBAR_OR, i18n.t('mal orientados')]];
     if (enEspera) {
-        T(x, y + 32, i18n.t('Pulsa Empezar para contar choques'), { fs: m ? 17 : 18.5, w: 600, c: THEME.textDim });
-        const paso = w / CHOQUES_VISTOS, r = Math.min(8, paso * .38);
-        for (let i = 0; i < CHOQUES_VISTOS; i++) CC(x + paso * (i + .5), y + 64, r, { s: THEME.border, sw: 1.5, dash: [2, 3] });
-        return;
+        T(x, y + 30, i18n.t('Pulsa Empezar para contar choques'), { fs: m ? 17 : 18.5, w: 600, c: THEME.textDim });
+    } else {
+        const cw = w / 3;
+        cats.forEach(([k, col, nom], i) => {
+            const cx = x + i * cw, iy = y + 20;
+            if (k === 'eficaz') { CC(cx + 11, iy, 11, { f: col, s: ink, sw: 1.6 }); T(cx + 11, iy + 5, '✓', { fs: 14, w: 700, a: 'middle', c: '#071a2b', sys: true }); }
+            else if (k === 'energia') { CC(cx + 11, iy, 10, { s: col, sw: 2.4 }); forma(`M${cx + 4} ${iy + 7} L${cx + 18} ${iy - 7}`, { s: col, sw: 2.4, lc: 'round' }); }
+            else { forma(`M${cx + 3} ${iy + 3} A8 8 0 1 1 ${cx + 13} ${iy + 9}`, { s: col, sw: 2.6, lc: 'round' }); forma(`M${cx + 13} ${iy + 3} L${cx + 15} ${iy + 11} L${cx + 7} ${iy + 12}`, { s: col, sw: 2.4, lc: 'round', lj: 'round' }); }
+            T(cx + 30, iy + 10, String(cont[k]), { fs: m ? 24 : 27, w: 700, c: k === 'eficaz' ? '#34e3a8' : THEME.text });
+            TS(cx, iy + 34, nom, { fs: m ? 13.5 : 14.5, c: THEME.textDim });
+        });
     }
-    const fsN = m ? 30 : 34, txtN = i18n.t('{a} de {b}', { a: si, b: CHOQUES_VISTOS });
-    T(x, y + 34, txtN, { fs: fsN, w: 700, c: n ? '#34e3a8' : THEME.textDim });
-    const sub = n < CHOQUES_VISTOS ? i18n.t('contando choques…') : i18n.t('superan Eₐ');
-    TS(x + ancho(txtN, { fs: fsN, w: 700 }) + 12, y + 30, sub, { fs: m ? 14.5 : 15.5, c: THEME.textDim });
-    const paso = w / CHOQUES_VISTOS, r = Math.min(8, paso * .38), cy = y + 64;
-    for (let i = 0; i < CHOQUES_VISTOS; i++) {
-        const cx = x + paso * (i + .5), v = ult[i];
-        if (v === undefined) CC(cx, cy, r, { s: THEME.border, sw: 1.5, dash: [2, 3] });
-        else if (v) { CC(cx, cy, r, { f: '#34c782', s: ink, sw: 1.5 }); T(cx, cy + r * .45, '✓', { fs: r * 1.3, w: 700, a: 'middle', c: '#071a2b', sys: true }); }
-        else { CC(cx, cy, r - 1, { s: ROJO_NO, sw: 2.2 }); const q = (r - 1) * .7; forma(`M${cx - q} ${cy + q} L${cx + q} ${cy - q}`, { s: ROJO_NO, sw: 2.2, lc: 'round' }); }
+    const by = y + 66, bh = 14;
+    forma(R(x, by, w, bh, 7), { f: THEME.hundido, s: THEME.border, sw: 1.5 });
+    if (tot > 0) {
+        const ctx = drawingContext; ctx.save(); ctx.beginPath(); ctx.roundRect(x, by, w, bh, 7); ctx.clip();
+        let bx = x;
+        cats.forEach(([k, col]) => { const bw = w * cont[k] / tot; if (bw > 0) { forma(R(bx, by, bw, bh, 0), { f: col }); bx += bw; } });
+        ctx.restore(); forma(R(x, by, w, bh, 7), { s: ink, sw: 1.5 });
     }
-    const nota = conCat ? i18n.t('Verde: supera Eₐ; rojo: no. Con catalizador, A y B sujetas en él reaccionan sin llegar a Eₐ.')
-                        : i18n.t('Verde: supera Eₐ; rojo: no. De los verdes, solo reaccionan los que chocan de frente.');
-    partir(nota, w, { fs: m ? 14.5 : 15, sys: true }).slice(0, 3).forEach((l, i) => TS(x, y + 98 + i * 20, l, { fs: m ? 14.5 : 15, c: THEME.textDim }));
+    const pie = conCat ? i18n.t('Reacciones en el catalizador: {n}', { n: nK })
+                       : tot ? i18n.t('{t} choques: solo el {p} % son eficaces', { t: tot, p: coma(cont.eficaz / tot * 100, cont.eficaz / tot < .1 ? 1 : 0) }) : '';
+    if (pie) TS(x, y + 106, pie, { fs: m ? 14.5 : 15.5, w: conCat ? 700 : 400, c: conCat ? CF.K : THEME.textDim });
 }
 // e = { tag, col, msg, nivel, cat, n:[A,B,C,K], pie }
 function panelEstado(x, y, w, h, e, m) {
@@ -420,8 +428,8 @@ function panelEstado(x, y, w, h, e, m) {
     lineas.forEach((l, i) => T(px, y + 86 + i * lh, l, { fs, c: THEME.text }));
     let dy = y + 86 + (Math.max(lineas.length, 4) - 1) * lh + 24;
     linea(`M${px} ${dy} H${px + iw}`, THEME.border, 1.5);
-    TS(px, dy + 26, i18n.t('Últimos {n} choques entre A y B', { n: CHOQUES_VISTOS }), { fs: 15.5, c: THEME.textDim });
-    const dh = 124; dibujarContadorChoques(px, dy + 38, iw, dh, e.ult, e.cat, m, e.enEspera);
+    TS(px, dy + 26, i18n.t('Choques entre A y B'), { fs: 15.5, c: THEME.textDim });
+    const dh = 124; dibujarContadorChoques(px, dy + 38, iw, dh, e.cont, e.cat, e.nKreac, m, e.enEspera);
     dy += 38 + dh + 18;
     linea(`M${px} ${dy} H${px + iw}`, THEME.border, 1.5);
     const sp = iw / 4;
