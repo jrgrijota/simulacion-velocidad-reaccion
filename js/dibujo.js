@@ -307,8 +307,9 @@ function dibujarModelo(cx, cy, r, mundo, texto, zoom, fsR, extra) {
     const ctx = drawingContext, ink = tinta(), k = r / R_MODELO;
     if (zoom) {
         const [zx, zy, zr] = zoom, a = r * .42;
-        forma(`M${zx} ${zy - zr} L${cx - r * .9} ${cy - a} L${cx - r * .9} ${cy + a} L${zx} ${zy + zr} Z`, { f: CF.cian, op: .06 });
-        forma(`M${zx} ${zy - zr} L${cx - r * .9} ${cy - a} M${zx} ${zy + zr} L${cx - r * .9} ${cy + a}`, { s: CF.cian, sw: 1.4, op: .4, dash: [4, 5] });
+        const ex = zx < cx ? cx - r * .9 : cx + r * .9;          // el cono sale hacia el lado donde está el balón
+        forma(`M${zx} ${zy - zr} L${ex} ${cy - a} L${ex} ${cy + a} L${zx} ${zy + zr} Z`, { f: CF.cian, op: .06 });
+        forma(`M${zx} ${zy - zr} L${ex} ${cy - a} M${zx} ${zy + zr} L${ex} ${cy + a}`, { s: CF.cian, sw: 1.4, op: .4, dash: [4, 5] });
     }
     CC(cx + 4, cy + 5, r + 5, { f: ink, op: .55 });
     CC(cx, cy, r, { f: THEME.modelBg });

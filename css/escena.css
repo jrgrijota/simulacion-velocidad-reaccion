@@ -94,3 +94,16 @@ body.modo-reaccion .barra-sus { display: none; }
 #escena .acciones-sim.en-lienzo { position: absolute; display: flex; gap: calc(var(--u) * 14); }
 #escena .acciones-sim.en-lienzo .boton-suelto { flex: 1; justify-content: center; height: calc(var(--u) * 40); font-size: calc(var(--u) * 16); padding: 0 calc(var(--u) * 16); white-space: nowrap; }
 body.modo-choque #escena .acciones-sim { display: none; }
+
+/* Comparación (escritorio): la franja de contexto desaparece; selector y botones van dentro de la escena */
+@media (min-width: 761px) { body.modo-comparar .barra-sus { display: none; } }
+#escena .cmpvar.en-lienzo { position: absolute; transform: translateX(-50%); height: calc(var(--u) * 44); padding: calc(var(--u) * 3); gap: calc(var(--u) * 2); }
+#escena .cmpvar.en-lienzo .carril-btn { height: calc(var(--u) * 36); padding: 0 calc(var(--u) * 20); font-size: calc(var(--u) * 16.5); }
+body:not(.modo-comparar) #escena .cmpvar { display: none; }
+@media (max-width: 1180px) { .ecuacion { display: none; } }
+/* El título no cabe junto a los modos por debajo de ~1080 px: los modos bajan a su propia fila */
+@media (max-width: 1080px) {
+    .barra-sup { grid-template-columns: 1fr auto; }
+    .barra-sup .modos { grid-column: 1 / -1; grid-row: 2; justify-self: stretch; }
+    .barra-sup .modos .carril-btn { flex: 1; justify-content: center; }
+}

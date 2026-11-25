@@ -46,13 +46,17 @@ function disponerReaccion(m) {
 }
 function disponerComparar(m) {
     if (!m) {
+        // Frente a frente: [círculo · puesto] | [puesto · círculo]; en el centro, arriba, la pregunta con el selector
+        const esc = .74, PY = 122;
         const lados = [0, 1].map(i => {
-            const ox = i * 665, esc = .84;
-            return { tag: { x: ox + 24, y: 18 }, puesto: { x: ox - 8, y: 112, esc, sinZoom: false, sinLeyenda: true },
-                modelo: { cx: ox + 477, cy: 222, r: 180, txt: 'Modelo de moléculas', fs: 14.5, zoom: [ox - 8 + ZOOM_P[0] * esc, 112 + ZOOM_P[1] * esc, 10] },
-                barra: { x: ox + 322, y: 428, w: 300 }, texto: { x: ox + 477, y: 460 }, mando: { x: ox + 24, y: 484, w: 616 } };
+            const cx = i ? 1330 - 192 : 192, px = i ? 673 : 354;
+            const zx = px + (i ? PU.FX + 44 : PU.FX - 44) * esc, zy = PY + (PU.FY + 10) * esc;
+            return { tag: { x: i ? 1306 : 24, y: 18, der: !!i }, puesto: { x: px, y: PY, esc, sinZoom: false, sinLeyenda: true },
+                modelo: { cx, cy: 236, r: 174, txt: 'Modelo de moléculas', fs: 14.5, zoom: [zx, zy, 9] },
+                barra: { x: cx - 150, y: 442, w: 300 }, texto: { x: cx, y: 474 }, mando: { x: i ? 836 : 24, y: 492, w: 470 } };
         });
-        return { w: 1330, h: 696, tarjetas: [{ x: 0, y: 0, w: 1330, h: 540 }], lados, divisor: { x: 665, y1: 24, y2: 516 },
+        return { w: 1330, h: 696, tarjetas: [{ x: 0, y: 0, w: 1330, h: 540 }], lados, divisor: { x: 665, y1: 112, y2: 480 },
+            pregunta: { x: 665, y: 46 }, selector: { x: 665, y: 60 }, acciones: { x: 665 - 150, y: 492, w: 300 },
             graf: { x: 0, y: 552, w: 900, h: 144, m: false }, igual: { x: 916, y: 552, w: 414, h: 144 }, sello: { x: 743, y: 634, m: true },
             mandos: { x: 938, y: 588, w: 372, compacto: true } };
     }
@@ -97,6 +101,15 @@ function colocarMandos() {
     if (compara) {
         colocarSobreLienzo(elId('mandos-izq'), LAY.lados[0].mando, CV_W, CV_H);
         colocarSobreLienzo(elId('mandos-der'), LAY.lados[1].mando, CV_W, CV_H);
+    }
+    // Selector de la variable: en Comparación de escritorio, dentro de la escena bajo la pregunta
+    const sel = document.querySelector('.cmpvar'), barraSel = document.querySelector('.barra-sus');
+    if (LAY.selector) {
+        if (sel.parentElement !== elId('escena')) elId('escena').appendChild(sel);
+        sel.classList.add('en-lienzo'); colocarSobreLienzo(sel, LAY.selector, CV_W, CV_H);
+    } else if (sel.parentElement !== barraSel) {
+        barraSel.insertBefore(sel, barraSel.querySelector('.acciones-sim') || null); sel.classList.remove('en-lienzo');
+        sel.style.left = sel.style.top = '';
     }
     // Pausar y Reiniciar: en Reacción bajo el círculo del modelo (sin franja propia en la cabecera); en Comparación, en la cabecera
     const acc = document.querySelector('.acciones-sim'), barra = document.querySelector('.barra-sus');
@@ -188,12 +201,13 @@ function dibujarReaccion() {
 function dibujarComparar() {
     LAY.tarjetas.forEach(t => tarj(t));
     if (LAY.divisor) forma(`M${LAY.divisor.x} ${LAY.divisor.y1} V${LAY.divisor.y2}`, { s: THEME.border, sw: 2, dash: [8, 8] });
+    if (LAY.pregunta) T(LAY.pregunta.x, LAY.pregunta.y, i18n.t('¿Cuál termina antes?'), { fs: 26, w: 700, a: 'middle', c: THEME.text });
     S.mundos.forEach((w, i) => {
         const L = LAY.lados[i], tag = etiquetaLado(i);
         const tw = ancho(tag, { fs: 16, w: 600 }) + 34;
-        forma(R(L.tag.x, L.tag.y, tw, 32, 16), { f: THEME.pillBg, s: i ? COL_DER : COL_IZQ, sw: 2.5 });
-        T(L.tag.x + tw / 2, L.tag.y + 22, tag, { fs: 16, w: 600, a: 'middle', c: THEME.text });
-        if (i === 0 && !ESC_MOVIL) leyendaGasColumna(L.tag.x + 2, L.tag.y + 46);
+        const tx = L.tag.der ? L.tag.x - tw : L.tag.x;
+        forma(R(tx, L.tag.y, tw, 32, 16), { f: THEME.pillBg, s: i ? COL_DER : COL_IZQ, sw: 2.5 });
+        T(tx + tw / 2, L.tag.y + 22, tag, { fs: 16, w: 600, a: 'middle', c: THEME.text });
         dibujarPuesto(L.puesto.x, L.puesto.y, L.puesto.esc, datosPuesto(w, L.puesto));
         dibujarModelo(L.modelo.cx, L.modelo.cy, L.modelo.r, w, i18n.t(L.modelo.txt), L.modelo.zoom, L.modelo.fs);
         const b = L.barra;
