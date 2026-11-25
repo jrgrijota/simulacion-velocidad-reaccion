@@ -45,10 +45,10 @@ function disponerReaccion(m) {
 function disponerComparar(m) {
     if (!m) {
         const lados = [0, 1].map(i => {
-            const ox = i * 665, esc = .74;
-            return { tag: { x: ox + 24, y: 18 }, puesto: { x: ox + 4, y: 100, esc, sinZoom: false, sinLeyenda: i === 1 },
-                modelo: { cx: ox + 466, cy: 222, r: 180, txt: 'Modelo de moléculas', fs: 14.5, zoom: [ox + 4 + ZOOM_P[0] * esc, 100 + ZOOM_P[1] * esc, 10] },
-                barra: { x: ox + 316, y: 428, w: 300 }, texto: { x: ox + 466, y: 460 }, mando: { x: ox + 28, y: 484, w: 608 } };
+            const ox = i * 665, esc = .84;
+            return { tag: { x: ox + 24, y: 18 }, puesto: { x: ox - 8, y: 96, esc, sinZoom: false, sinLeyenda: i === 1 },
+                modelo: { cx: ox + 477, cy: 222, r: 180, txt: 'Modelo de moléculas', fs: 14.5, zoom: [ox - 8 + ZOOM_P[0] * esc, 96 + ZOOM_P[1] * esc, 10] },
+                barra: { x: ox + 322, y: 428, w: 300 }, texto: { x: ox + 477, y: 460 }, mando: { x: ox + 28, y: 484, w: 608 } };
         });
         return { w: 1330, h: 696, tarjetas: [{ x: 0, y: 0, w: 1330, h: 540 }], lados, divisor: { x: 665, y1: 24, y2: 516 },
             graf: { x: 0, y: 552, w: 900, h: 144, m: false }, igual: { x: 916, y: 552, w: 414, h: 144 }, sello: { x: 743, y: 634, m: true },
