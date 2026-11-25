@@ -108,7 +108,7 @@ class Choque {
 function mensajeChoque(c) {
     const u = c.ultimo;
     if (!u) return { tag: i18n.t('LISTO PARA LANZAR'), col: '#9ec9ff', msg: i18n.t('Elige la energía y pulsa Lanzar. Aquí verás si reaccionan y por qué.') };
-    if (u.kind === 'eficaz') return { tag: i18n.t('CHOQUE EFICAZ'), col: CF.cam, msg: i18n.t('Se cumplen las dos condiciones a la vez: energía suficiente y sitios reactivos de frente. A y B forman C.') };
+    if (u.kind === 'eficaz') return { tag: i18n.t('CHOQUE EFICAZ'), col: CF.cam, msg: i18n.t('Se cumplen las dos condiciones a la vez, así que A y B se unen y forman C.') };
     if (u.kind === 'energia') return { tag: i18n.t('LE FALTA ENERGÍA'), col: CF.no, msg: i18n.t('Los sitios reactivos se tocan, pero el choque no llega a Eₐ: las moléculas rebotan sin reaccionar.') };
     if (u.kind === 'orient') return { tag: i18n.t('MAL ORIENTADAS'), col: CF.no, msg: i18n.t('Hay energía de sobra, pero los sitios reactivos no se tocan de frente: las moléculas rebotan sin reaccionar.') };
     return { tag: i18n.t('NO REACCIONAN'), col: CF.no, msg: i18n.t('Falta energía y, además, los sitios reactivos no están de frente: las moléculas rebotan.') };

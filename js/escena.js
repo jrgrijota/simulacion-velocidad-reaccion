@@ -58,7 +58,7 @@ function disponerComparar(m) {
     }
     const lados = [0, 1].map(i => {
         const y0 = i * 692;
-        return { tag: { x: 14, y: y0 + 14 }, puesto: { x: 55, y: y0 + 52, esc: .62, sinZoom: true, sinLeyenda: i === 1 },
+        return { tag: { x: 14, y: y0 + 14 }, puesto: { x: 55, y: y0 + 52, esc: .62, sinZoom: true, sinLeyenda: true },
             modelo: { cx: 185, cy: y0 + 476, r: 130, txt: 'Modelo de moléculas', fs: 13.5, zoom: null },
             barra: { x: 40, y: y0 + 292, w: 290 }, texto: { x: 185, y: y0 + 326 }, mando: { x: 14, y: y0 + 622, w: 342 } };
     });
@@ -144,7 +144,7 @@ function estadoPanel(w) {
                     : i18n.t('Sin catalizador ha tardado {t} s.', { t }));
         if (w.nA !== w.nB) msg += ' ' + i18n.t('Sobra {x}: el limitante era {y}.', { x: w.nA > w.nB ? 'A' : 'B', y: w.nA > w.nB ? 'B' : 'A' });
         Object.assign(e, { tag: i18n.t('REACCIÓN COMPLETA'), col: CF.cam, msg,
-            pie: i18n.t('{n} reacciones: {t} por choque directo · {k} con K', { n: w.total, t: w.termicas, k: w.catalizadas }) });
+            pie: i18n.t('{n} reacciones · {t} directas · {k} con K', { n: w.total, t: w.termicas, k: w.catalizadas }) });
     } else if (nK > 0) {
         Object.assign(e, { tag: plural(nK, '{n} CATALIZADOR', '{n} CATALIZADORES'), col: CF.K,
             msg: i18n.t('El catalizador sujeta A y B ya bien orientadas y les basta una energía de activación menor: reaccionan más a menudo.') });

@@ -125,7 +125,7 @@ function molC(x, y, a, s = 1) {
         CC(p[0] - r * .32 * s, p[1] - r * .36 * s, r * .28 * s, { f: '#fff', op: .6 });
     });
     if (s >= 1 && s < 2) T(x, y + 3.4 * s, 'C', { fs: 9 * s, w: 700, a: 'middle', c: '#eafff3', sys: true });
-    else if (s >= 2) T(x, y + D + 5.6 * s + 22, 'C', { fs: 20, w: 700, a: 'middle', c: '#7fe3ae' });
+    else if (s >= 2) T(x, y + D + 8 * s + 40, 'C', { fs: 20, w: 700, a: 'middle', c: '#7fe3ae' });
 }
 function molK(x, y, a, s = 1, llenaA = false, llenaB = false) {
     const ink = tinta(), r = 13 * s;
@@ -360,16 +360,18 @@ function dibujarDistribucion(x, y, w, h, nivel, conCat) {
     forma(area, { f: '#34c782', op: .6 });
     forma(d, { s: '#1f5fae', sw: 3.5, lj: 'round' });
     linea(`M${gx} ${gb} H${x + w - 10}`, THEME.paperInk, 2);
-    const et = (xx, txt, col, tc, alDerecha) => {
+    // Píldoras de Eₐ: «Eₐ con K» acaba a la derecha de su línea; «Eₐ» empieza a su izquierda y nunca se montan
+    const et = (xx, txt, col, tc, px0) => {
         forma(`M${xx} ${top + 2} V${gb}`, { s: col, sw: 2.4, dash: [5, 4] });
         const tw = ancho(txt, { fs: 13, w: 700 }) + 16;
-        let px0 = alDerecha == null ? xx - tw / 2 : Math.min(xx + 10, alDerecha) - tw;     // «Eₐ con K» acaba antes que «Eₐ»
-        px0 = Math.max(x + 6, px0);
         forma(R(px0, y + 7, tw, 22, 11), { f: col, s: ink, sw: 1.6 });
         T(px0 + tw / 2, y + 23, txt, { fs: 13, w: 700, a: 'middle', c: tc });
+        return px0 + tw;
     };
-    et(X(ea), 'Eₐ', '#c23b4a', '#fff');
-    if (conCat) et(X(eac), i18n.t('Eₐ con K'), '#6d50c9', '#fff', X(ea) - 22);
+    let finK = -Infinity;
+    if (conCat) { const twK = ancho(i18n.t('Eₐ con K'), { fs: 13, w: 700 }) + 16; finK = et(X(eac), i18n.t('Eₐ con K'), '#6d50c9', '#fff', Math.max(x + 6, X(eac) + 12 - twK)); }
+    const twE = ancho('Eₐ', { fs: 13, w: 700 }) + 16;
+    et(X(ea), 'Eₐ', '#c23b4a', '#fff', conCat ? Math.max(finK + 6, X(ea) - 12) : X(ea) - twE / 2);
     const pct = Math.round(Math.exp(-(ea * ea) / (2 * sg * sg)) * 100);
     const lab = i18n.t('{pct} % supera Eₐ', { pct }), lw = ancho(lab, { fs: 14, w: 700 }) + 18;
     forma(R(x + w - 12 - lw, gb - 34, lw, 24, 12), { f: '#167a4c', s: ink, sw: 1.6 });
