@@ -17,10 +17,22 @@ class Choque {
     constructor() { this.reiniciar(true); }
     reiniciar(todo) {
         this.fase = 'listo';                 // 'listo' | 'vuelo' | 'resultado'
-        this.A = { x: -CH_REPOSO, y: 0, ang: 0, vx: 0 };
-        this.B = { x: CH_REPOSO, y: 0, ang: Math.PI, vx: 0 };
+        const aA = this.A ? this.A.ang : 0, aB = this.B ? this.B.ang : Math.PI;   // sin «todo», se conserva el giro
+        this.A = { x: -CH_REPOSO, y: 0, ang: aA, vx: 0 };
+        this.B = { x: CH_REPOSO, y: 0, ang: aB, vx: 0 };
         this.arrastre = null; this.t = 0; this.chispas = [];
-        if (todo) { this.ultimo = null; this.historial = []; }
+        if (todo) { this.ultimo = null; this.historial = []; this.orientarAlAzar(); }
+    }
+    // Al empezar, cada molécula mira hacia un lado al azar, pero nunca de frente:
+    // el primer choque sin girarlas sale «mal orientadas» y obliga a pensar en la orientación.
+    orientarAlAzar() {
+        const d = CH_CONTACTO / 2;
+        for (let k = 0; k < 50; k++) {
+            const a = Math.random() * Math.PI * 2, b = Math.random() * Math.PI * 2;
+            const sa = { x: -d + Math.cos(a) * CH_SITIO, y: Math.sin(a) * CH_SITIO }, sb = { x: d + Math.cos(b) * CH_SITIO, y: Math.sin(b) * CH_SITIO };
+            if (Math.hypot(sa.x - sb.x, sa.y - sb.y) > CH_ORIENT * 1.6) { this.A.ang = a; this.B.ang = b; return; }
+        }
+        this.A.ang = Math.PI / 2; this.B.ang = -Math.PI / 2;
     }
     colocar() { if (this.fase !== 'vuelo') { const a = this.A.ang, b = this.B.ang; this.reiniciar(false); this.A.ang = a; this.B.ang = b; } }
     lanzar(nivel) {
