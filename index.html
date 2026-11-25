@@ -41,6 +41,7 @@
             <button type="button" class="carril-btn" data-modo="choque" role="tab" aria-selected="false">Choque</button>
         </div>
         <div class="botones-sup">
+            <span class="ecuacion" aria-label="A más B da C"><b class="ea">A</b> <span>+</span> <b class="eb">B</b> <span>→</span> <b class="ec">C</b></span>
             <button id="btn-ayuda" type="button" class="boton-suelto boton-redondo" aria-expanded="false" aria-controls="panel-ayuda" title="¿Cómo funciona?" aria-label="¿Cómo funciona?">?</button>
             <button id="btn-retos" type="button" class="boton-suelto boton-retos" aria-expanded="false" aria-controls="panel-retos"><span aria-hidden="true">★</span> <span class="btn-retos-txt">Retos</span></button>
             <button id="theme-btn" class="theme-btn" title="Ajustes" aria-label="Ajustes" aria-expanded="false">
@@ -82,18 +83,18 @@
         </div>
     </header>
 
-    <!-- ── FILA DE CONTEXTO: etiqueta · carril de opciones · frase guía · botón de acción ── -->
+    <!-- ── FILA DE CONTEXTO: frase guía (izquierda) · variable que se compara (centrada bajo los modos) · pausa y reinicio (derecha) ── -->
     <div class="barra-sus">
-        <span class="ecuacion" aria-label="A más B da C"><b class="ea">A</b> <span>+</span> <b class="eb">B</b> <span>→</span> <b class="ec">C</b></span>
-        <span class="barra-sus-label only-comparar" id="lbl-cmp">Comparación</span>
-        <div class="carril cmpvar only-comparar" role="radiogroup" aria-labelledby="lbl-cmp">
+        <p id="frase" class="sus-info"></p>
+        <div class="carril cmpvar only-comparar" role="radiogroup" aria-label="Variable que se compara">
             <button type="button" class="carril-btn" data-cmp="catalyst" role="radio" aria-checked="true">Catalizador</button>
             <button type="button" class="carril-btn" data-cmp="energy" role="radio" aria-checked="false">Temperatura</button>
             <button type="button" class="carril-btn" data-cmp="count" role="radio" aria-checked="false">Cantidad</button>
         </div>
-        <p id="frase" class="sus-info"></p>
-        <button id="btn-pausa" type="button" class="boton-suelto only-sim">❚❚ Pausar</button>
-        <button id="btn-reiniciar" type="button" class="boton-suelto only-sim">↺ Reiniciar</button>
+        <div class="acciones-sim only-sim">
+            <button id="btn-pausa" type="button" class="boton-suelto">❚❚ Pausar</button>
+            <button id="btn-reiniciar" type="button" class="boton-suelto">↺ Reiniciar</button>
+        </div>
     </div>
 
     <div class="app-container">
@@ -119,7 +120,6 @@
                         <button type="button" id="btn-lanzar" class="boton-suelto boton-lanzar">▶ Lanzar</button>
                         <button type="button" id="btn-colocar" class="boton-suelto">↺ <span class="solo-ancho">Colocar otra vez</span><span class="solo-movil">Colocar</span></button>
                     </div>
-                    <p class="nota-mando">Arrastra una molécula para girarla.</p>
                 </div>
             </div>
             <div id="anuncio" class="sr-only" aria-live="polite"></div>

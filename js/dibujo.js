@@ -263,9 +263,9 @@ function puestoBase(o) {
     if (!sinLeyenda) {
         const lx = 16, ly = 22;
         RR(lx, ly, 14, 14, 3.5, { f: '#fff', fo: .12, s: THEME.textDim, sw: 1.4 });
-        TS(lx + 22, ly + 12, i18n.t('A y B: gases invisibles'), { fs: 13, c: THEME.textDim });
+        TS(lx + 22, ly + 12, i18n.t('A y B: gases invisibles'), { fs: 14.5, c: THEME.textDim });
         RR(lx, ly + 24, 14, 14, 3.5, { f: CF.gasC, fo: .75, s: ink, sw: 1.4 });
-        TS(lx + 22, ly + 36, i18n.t('C: gas de color (sí se ve)'), { fs: 13, c: THEME.textDim });
+        TS(lx + 22, ly + 36, i18n.t('C: gas de color (sí se ve)'), { fs: 14.5, c: THEME.textDim });
     }
 }
 // Lo que cambia en cada fotograma: el nombre del nivel y los dígitos del cronómetro
@@ -282,7 +282,8 @@ function dibujarPuesto(x, y, esc, o) {
     const dpr = pixelDensity(), conv = Math.round(Math.min(1, o.conv) * 40);
     const fuente = document.fonts && document.fonts.check('600 16px Fredoka') ? 1 : 0;
     const key = [temaActual(), o.nivel, conv, o.terminada ? 1 : 0, o.sinZoom ? 1 : 0, o.sinLeyenda ? 1 : 0, dpr, fuente].join('|');
-    const clave = [o.sinZoom ? 'z' : 'n', o.sinLeyenda ? 'l' : 'n'].join('');
+    // Un lienzo de caché por puesto (en Comparación hay dos con estados distintos: si compartieran caché se redibujarían en cada fotograma)
+    const clave = [o.sinZoom ? 'z' : 'n', o.sinLeyenda ? 'l' : 'n', Math.round(x), Math.round(y)].join('|');
     let c = _cachePuesto[clave];
     if (!c) c = _cachePuesto[clave] = { cv: document.createElement('canvas'), key: '' };
     if (c.key !== key) {
@@ -373,8 +374,8 @@ function dibujarDistribucion(x, y, w, h, nivel, conCat) {
     const lab = i18n.t('{pct} % supera Eₐ', { pct }), lw = ancho(lab, { fs: 14, w: 700 }) + 18;
     forma(R(x + w - 12 - lw, gb - 34, lw, 24, 12), { f: '#167a4c', s: ink, sw: 1.6 });
     T(x + w - 12 - lw / 2, gb - 17, lab, { fs: 14, w: 700, a: 'middle', c: '#fff' });
-    TS(gx, y + h - 7, i18n.t('lentas'), { fs: 12.5, c: THEME.paperInk });
-    TS(x + w - 12, y + h - 7, i18n.t('rápidas'), { fs: 12.5, a: 'end', c: THEME.paperInk });
+    TS(gx, y + h - 7, i18n.t('lentas'), { fs: 14, c: THEME.paperInk });
+    TS(x + w - 12, y + h - 7, i18n.t('rápidas'), { fs: 14, a: 'end', c: THEME.paperInk });
 }
 // e = { tag, col, msg, nivel, cat, n:[A,B,C,K], pie }
 function panelEstado(x, y, w, h, e, m) {
@@ -386,7 +387,7 @@ function panelEstado(x, y, w, h, e, m) {
     lineas.forEach((l, i) => T(px, y + 86 + i * lh, l, { fs, c: THEME.text }));
     let dy = y + 86 + (Math.max(lineas.length, 4) - 1) * lh + 24;
     linea(`M${px} ${dy} H${px + iw}`, THEME.border, 1.5);
-    TS(px, dy + 26, i18n.t('Velocidad de las moléculas al chocar'), { fs: 14, c: THEME.textDim });
+    TS(px, dy + 26, i18n.t('Velocidad de las moléculas al chocar'), { fs: 15.5, c: THEME.textDim });
     const dh = m ? 132 : 140; dibujarDistribucion(px, dy + 38, iw, dh, e.nivel, e.cat);
     dy += 38 + dh + 18;
     linea(`M${px} ${dy} H${px + iw}`, THEME.border, 1.5);
@@ -396,7 +397,7 @@ function panelEstado(x, y, w, h, e, m) {
         if (t === 'C') molC(ix, iy, .5, 1.1); else if (t === 'K') molK(ix, iy, -1.6, 1); else molAB(ix, iy, -.5, t, 1.1);
         T(ix + 25, iy + 8, String(n), { fs: 22, w: 600, c: THEME.text });
     });
-    TS(px, dy + 76, e.pie, { fs: 13.5, c: THEME.textDim });
+    TS(px, dy + 78, e.pie, { fs: 17, c: THEME.textDim });
 }
 
 // ═════════ TIRA: VELOCIDAD DE REACCIÓN EN PAPEL (toda la reacción) ═════════
@@ -411,12 +412,12 @@ function dibujarGrafica(x, y, w, h, curvas, tmax, ymax, m, titulo, filaLeyenda) 
     for (let i = 0; i <= 6; i++) {
         const t = paso * i, xx = gx + t / tmax * (gx1 - gx);
         linea(`M${xx} ${gy} V${gb}`, THEME.paperGrid, 1);
-        TS(xx, gb + 18, `${Math.round(t)} s`, { fs: 12.5, a: 'middle', c: THEME.paperInk });
+        TS(xx, gb + 18, `${Math.round(t)} s`, { fs: 14, a: 'middle', c: THEME.paperInk });
     }
     for (let j = 0; j <= 2; j++) {
         const yy = gb - j * (gb - gy) / 2;
         linea(`M${gx} ${yy} H${gx1}`, THEME.paperGrid, 1);
-        TS(gx - 8, yy + 4, coma(j * ymax / 2, ymax < 2 ? 1 : 0).replace(',0', ''), { fs: 12.5, a: 'end', c: THEME.paperInk });
+        TS(gx - 8, yy + 4, coma(j * ymax / 2, ymax < 2 ? 1 : 0).replace(',0', ''), { fs: 14, a: 'end', c: THEME.paperInk });
     }
     forma(`M${gx} ${gy - 4} V${gb} H${gx1}`, { s: THEME.paperInk, sw: 2 });
     curvas.forEach(cv => {
@@ -464,13 +465,22 @@ const ESCALA_T = [30, 60, 120, 240, 600, 1200, 2400, 6000, 12000];
 const ESCALA_Y = [1, 2, 4, 8, 16, 32, 64];
 const sobre = (lista, v) => lista.find(x => x >= v) || lista[lista.length - 1];
 
+// Leyenda del gas en dos líneas, fuera del puesto (Comparación en escritorio, bajo la etiqueta izquierda)
+function leyendaGasColumna(x, y) {
+    const ink = tinta();
+    RR(x, y, 14, 14, 3.5, { f: '#fff', fo: .12, s: THEME.textDim, sw: 1.4 });
+    TS(x + 22, y + 12, i18n.t('A y B: gases invisibles'), { fs: 14.5, c: THEME.textDim });
+    RR(x, y + 24, 14, 14, 3.5, { f: CF.gasC, fo: .75, s: ink, sw: 1.4 });
+    TS(x + 22, y + 36, i18n.t('C: gas de color (sí se ve)'), { fs: 14.5, c: THEME.textDim });
+}
+
 // ═════════ MODO CHOQUE ═════════
 function dibujarTiraChoques(x, y, w, h, hist, m) {
     const ink = tinta();
     tarj({ x, y, w, h }, THEME.pillBg, 16);
-    T(x + 24, y + 32, i18n.t('Tus choques'), { fs: 16, w: 600, c: THEME.text });
+    T(x + 24, y + 32, i18n.t('Tus choques'), { fs: 17.5, w: 600, c: THEME.text });
     const ef = hist.filter(c => c.ok).length;
-    TS(x + 140, y + 32, hist.length ? (hist.length === 1 ? i18n.t('1 lanzamiento') : i18n.t('{n} lanzamientos', { n: hist.length })) + ' · ' + (ef === 1 ? i18n.t('1 eficaz') : i18n.t('{e} eficaces', { e: ef })) : i18n.t('Todavía no has lanzado'), { fs: 14, c: THEME.textDim });
+    TS(x + 24 + ancho(i18n.t('Tus choques'), { fs: 17.5, w: 600 }) + 16, y + 32, hist.length ? (hist.length === 1 ? i18n.t('1 lanzamiento') : i18n.t('{n} lanzamientos', { n: hist.length })) + ' · ' + (ef === 1 ? i18n.t('1 eficaz') : i18n.t('{e} eficaces', { e: ef })) : i18n.t('Todavía no has lanzado'), { fs: 15.5, c: THEME.textDim });
     const items = hist.slice(-4);
     for (let i = 0; i < 4; i++) {
         const c = items[i - (4 - items.length)];                // los vacíos primero; el último, a la derecha (o abajo)
@@ -486,6 +496,6 @@ function celdaChoque(x, y, w, h, c, ultimo) {
     CC(x + 30, y + h / 2, 15, { f: col, s: ink, sw: 2.5 });
     T(x + 30, y + h / 2 + 6, c.ok ? '✓' : '✗', { fs: 16, w: 700, a: 'middle', c: '#071a2b', sys: true });
     T(x + 56, y + h / 2 - 3, c.titulo, { fs: 16, w: 600, c: THEME.text });
-    TS(x + 56, y + h / 2 + 17, c.sub, { fs: 13, c: THEME.textDim });
-    if (ultimo) TS(x + w - 12, y + h / 2 - 3, i18n.t('último'), { fs: 12.5, a: 'end', c: THEME.change });
+    TS(x + 56, y + h / 2 + 17, c.sub, { fs: 14.5, c: THEME.textDim });
+    if (ultimo) TS(x + w - 12, y + h / 2 - 3, i18n.t('último'), { fs: 14, a: 'end', c: THEME.change });
 }

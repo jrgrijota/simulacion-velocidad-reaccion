@@ -107,7 +107,7 @@ class Choque {
 // ═════════ Panel con las dos condiciones (modo Choque) ═════════
 function mensajeChoque(c) {
     const u = c.ultimo;
-    if (!u) return { tag: i18n.t('LISTO PARA LANZAR'), col: '#9ec9ff', msg: i18n.t('Gira las moléculas, elige la energía y lánzalas. Aquí verás por qué reaccionan o no.') };
+    if (!u) return { tag: i18n.t('LISTO PARA LANZAR'), col: '#9ec9ff', msg: i18n.t('Elige la energía y pulsa Lanzar. Aquí verás si reaccionan y por qué.') };
     if (u.kind === 'eficaz') return { tag: i18n.t('CHOQUE EFICAZ'), col: CF.cam, msg: i18n.t('Se cumplen las dos condiciones a la vez: energía suficiente y sitios reactivos de frente. A y B forman C.') };
     if (u.kind === 'energia') return { tag: i18n.t('LE FALTA ENERGÍA'), col: CF.no, msg: i18n.t('Los sitios reactivos se tocan, pero el choque no llega a Eₐ: las moléculas rebotan sin reaccionar.') };
     if (u.kind === 'orient') return { tag: i18n.t('MAL ORIENTADAS'), col: CF.no, msg: i18n.t('Hay energía de sobra, pero los sitios reactivos no se tocan de frente: las moléculas rebotan sin reaccionar.') };
@@ -129,19 +129,19 @@ function dibujarPanelChoque(x, y, w, h, c, nivelActual, m) {
         T(cx, cy + 6, ok == null ? '?' : ok ? '✓' : '✗', { fs: 16, w: 700, a: 'middle', c: ok == null ? THEME.textDim : '#071a2b', sys: true });
     };
     marca(px + 14, dy + 34, ok1);
-    T(px + 38, dy + 30, i18n.t('Energía suficiente'), { fs: 16.5, w: 600, c: THEME.text });
-    TS(px + 38, dy + 50, i18n.t('energía del choque {e} · Eₐ ≈ {ea}', { e: E1, ea: Math.round(CH_NIVEL_EA) }), { fs: 13, c: THEME.textDim });
-    const bx = px + 38, bw = iw - 38, by = dy + 62;
+    T(px + 38, dy + 30, i18n.t('Energía suficiente'), { fs: 17.5, w: 600, c: THEME.text });
+    TS(px + 38, dy + 52, i18n.t('energía del choque {e} · Eₐ ≈ {ea}', { e: E1, ea: Math.round(CH_NIVEL_EA) }), { fs: 15, c: THEME.textDim });
+    const bx = px + 38, bw = iw - 38, by = dy + 64;
     forma(R(bx, by, bw, 14, 7), { f: THEME.hundido, s: THEME.border, sw: 1.5 });
     forma(R(bx, by, Math.max(14, bw * E1 / 10), 14, 7), { f: ok1 === false ? CF.no : ok1 ? CF.ok : '#9ec9ff', s: ink, sw: 1.5 });
     const ex = bx + bw * CH_NIVEL_EA / 10;
     forma(`M${ex} ${by - 6} V${by + 20}`, { s: '#ff6b7d', sw: 2.5, dash: [4, 3] });
-    T(ex, by + 36, 'Eₐ', { fs: 13.5, w: 700, a: 'middle', c: '#ff9aa4' });
+    T(ex, by + 37, 'Eₐ', { fs: 15, w: 700, a: 'middle', c: '#ff9aa4' });
     // condición 2: orientación
     const d2 = dy + 124;
     marca(px + 14, d2 + 14, ok2);
-    T(px + 38, d2 + 10, i18n.t('Sitios reactivos de frente'), { fs: 16.5, w: 600, c: THEME.text });
-    TS(px + 38, d2 + 30, u ? (u.orientOk ? i18n.t('los extremos claros se tocan') : i18n.t('los extremos claros no se tocan')) : i18n.t('los extremos claros deben tocarse'), { fs: 13, c: THEME.textDim });
+    T(px + 38, d2 + 10, i18n.t('Sitios reactivos de frente'), { fs: 17.5, w: 600, c: THEME.text });
+    TS(px + 38, d2 + 32, u ? (u.orientOk ? i18n.t('los extremos claros se tocan') : i18n.t('los extremos claros no se tocan')) : i18n.t('los extremos claros deben tocarse'), { fs: 15, c: THEME.textDim });
     const mx = x + w - 66;
     molAB(mx, d2 + 16, u ? u.angA : 0, 'A', 1.15); molAB(mx + 34, d2 + 16, u ? u.angB : Math.PI, 'B', 1.15);
 }

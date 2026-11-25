@@ -46,8 +46,8 @@ function disponerComparar(m) {
     if (!m) {
         const lados = [0, 1].map(i => {
             const ox = i * 665, esc = .84;
-            return { tag: { x: ox + 24, y: 18 }, puesto: { x: ox - 8, y: 96, esc, sinZoom: false, sinLeyenda: i === 1 },
-                modelo: { cx: ox + 477, cy: 222, r: 180, txt: 'Modelo de moléculas', fs: 14.5, zoom: [ox - 8 + ZOOM_P[0] * esc, 96 + ZOOM_P[1] * esc, 10] },
+            return { tag: { x: ox + 24, y: 18 }, puesto: { x: ox - 8, y: 112, esc, sinZoom: false, sinLeyenda: true },
+                modelo: { cx: ox + 477, cy: 222, r: 180, txt: 'Modelo de moléculas', fs: 14.5, zoom: [ox - 8 + ZOOM_P[0] * esc, 112 + ZOOM_P[1] * esc, 10] },
                 barra: { x: ox + 322, y: 428, w: 300 }, texto: { x: ox + 477, y: 460 }, mando: { x: ox + 24, y: 484, w: 616 } };
         });
         return { w: 1330, h: 696, tarjetas: [{ x: 0, y: 0, w: 1330, h: 540 }], lados, divisor: { x: 665, y1: 24, y2: 516 },
@@ -181,20 +181,21 @@ function dibujarComparar() {
         const tw = ancho(tag, { fs: 16, w: 600 }) + 34;
         forma(R(L.tag.x, L.tag.y, tw, 32, 16), { f: THEME.pillBg, s: i ? COL_DER : COL_IZQ, sw: 2.5 });
         T(L.tag.x + tw / 2, L.tag.y + 22, tag, { fs: 16, w: 600, a: 'middle', c: THEME.text });
+        if (i === 0 && !ESC_MOVIL) leyendaGasColumna(L.tag.x + 2, L.tag.y + 46);
         dibujarPuesto(L.puesto.x, L.puesto.y, L.puesto.esc, datosPuesto(w, L.puesto));
         dibujarModelo(L.modelo.cx, L.modelo.cy, L.modelo.r, w, i18n.t(L.modelo.txt), L.modelo.zoom, L.modelo.fs);
         const b = L.barra;
         forma(R(b.x, b.y, b.w, 12, 6), { f: THEME.hundido, s: THEME.border, sw: 1.5 });
         if (w.conversion() > 0) forma(R(b.x, b.y, Math.max(12, b.w * w.conversion()), 12, 6), { f: '#34c782', s: tinta(), sw: 1.5 });
-        T(L.texto.x, L.texto.y, i18n.t('{n} de {total} reacciones · {p} %', { n: w.total, total: w.limitante, p: w.porcentaje() }), { fs: 15.5, w: 600, a: 'middle', c: THEME.text });
+        T(L.texto.x, L.texto.y, i18n.t('{n} de {total} reacciones · {p} %', { n: w.total, total: w.limitante, p: w.porcentaje() }), { fs: 18, w: 700, a: 'middle', c: THEME.text });
     });
     ajustarEjes(S.mundos);
     const g = LAY.graf, ig = LAY.igual;
     dibujarGrafica(g.x, g.y, g.w, g.h, S.mundos.map((w, i) => curvaGrafica(w, i ? COL_DER : COL_IZQ,
-        { lab: etiquetaLado(i).replace(/^[◀▶] /, (i ? '▶ ' : '◀ ')).toLowerCase(), fin: w.tFin != null ? coma(w.tFin) + ' s' : null })),
+        { lab: etiquetaLado(i).replace(/^[◀▶] /, (i ? '▶ ' : '◀ ')).replace(/^([◀▶] )([A-ZÁÉÍÓÚ])(?=[a-záéíóúñ])/, (m, p, l) => p + l.toLowerCase()), fin: w.tFin != null ? coma(w.tFin) + ' s' : null })),
         S.tmax, S.ymax, g.m, g.tit && i18n.t(g.tit), g.filaLeyenda);
     tarj(ig, THEME.pillBg, 16);
-    T(ig.x + 22, ig.y + 28, i18n.t('Igual en los dos'), { fs: 15, w: 600, c: THEME.textDim });
+    T(ig.x + 22, ig.y + 28, i18n.t('Igual en los dos'), { fs: 16.5, w: 600, c: THEME.textDim });
     if (S.cmpListo && S.ganador >= 0) {
         const w = S.mundos[S.ganador], L = etiquetaLado(S.ganador).replace(/^[◀▶] /, '');
         selloVR(i18n.t('¡TERMINA ANTES!'), `${L}: ${coma(w.tFin)} s`, LAY.sello.x, LAY.sello.y, S.tSello, LAY.sello.m);
@@ -206,7 +207,7 @@ function dibujarChoque() {
     const extra = { dibujarFondo: () => {
         c.dibujarFondo();
         if (c.fase === 'resultado' && c.eficaz) {
-            TS(-150, -16, i18n.t('A llegaba por aquí'), { fs: 13, a: 'middle', c: THEME.textDim }); TS(150, -16, i18n.t('B llegaba por aquí'), { fs: 13, a: 'middle', c: THEME.textDim });
+            TS(-150, -16, i18n.t('A llegaba por aquí'), { fs: 14.5, a: 'middle', c: THEME.textDim }); TS(150, -16, i18n.t('B llegaba por aquí'), { fs: 14.5, a: 'middle', c: THEME.textDim });
         }
     }, dibujar: () => c.dibujar() };
     dibujarModelo(mo.cx, mo.cy, mo.r, null, i18n.t(mo.txt), null, mo.fs, extra);
@@ -278,12 +279,13 @@ function actualizarUI() {
     elId('fila-na').hidden = elId('fila-nb').hidden = compara && S.cmp === 'count';
     const p = PRESETS[S.cmp];
     document.querySelectorAll('.nom-cmp').forEach(n => { n.textContent = i18n.t(p.nom); });
-    const frases = {
-        reaccion: [i18n.t('Solo reaccionan los choques con energía suficiente (más que Eₐ) y con los sitios reactivos de frente.'), i18n.t('El catalizador (K) sujeta A y B ya bien orientadas y les basta menos energía.')],
-        comparar: [i18n.t({ catalyst: 'Solo cambia el catalizador; lo demás es igual en los dos.', energy: 'Solo cambia la temperatura; lo demás es igual en los dos.', count: 'Solo cambia la cantidad de moléculas; lo demás es igual en los dos.' }[S.cmp]), i18n.t('¿Cuál termina antes?')],
-        choque: [i18n.t('Gira cada molécula arrastrándola y lánzalas una contra otra.'), i18n.t('Solo reaccionan si chocan con energía suficiente y con los sitios reactivos de frente.')],
+    // Una sola línea y sin repetir lo que ya cuenta el panel de la escena
+    const frase = {
+        reaccion: '',
+        comparar: i18n.t({ catalyst: 'Solo cambia el catalizador.', energy: 'Solo cambia la temperatura.', count: 'Solo cambia la cantidad de moléculas.' }[S.cmp]) + ' <em>' + i18n.t('¿Cuál termina antes?') + '</em>',
+        choque: i18n.t('Gira cada molécula arrastrándola y lánzalas una contra otra.'),
     }[S.modo];
-    elId('frase').innerHTML = `<strong>${frases[0]}</strong><br><em>${frases[1]}</em>`;
+    elId('frase').innerHTML = frase;
     document.querySelectorAll('input[type=range]').forEach(pintarRelleno);
     mostrarValores();
 }
