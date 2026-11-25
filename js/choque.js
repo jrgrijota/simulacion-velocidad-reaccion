@@ -62,7 +62,7 @@ class Choque {
         this.eficaz = this.energiaOk && this.orientOk;
         this.cx = (this.A.x + this.B.x) / 2; this.cy = (this.A.y + this.B.y) / 2;
         this.angA = this.A.ang; this.angB = this.B.ang;
-        this.angC = (this.A.ang + this.B.ang) / 2;
+        this.angC = Math.PI;                                  // C con A a la izquierda y B a la derecha, como llegaron
         this.t = 0; this.fase = 'resultado'; this.chispas = [];
         this.A.vx = -1.8; this.B.vx = 1.8;
         if (!this.eficaz) for (let i = 0; i < 8; i++) {

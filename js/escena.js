@@ -266,7 +266,7 @@ function dibujarChoque() {
     const extra = { dibujarFondo: () => {
         c.dibujarFondo();
         if (c.fase === 'resultado' && c.eficaz) {
-            TS(-150, -16, i18n.t('A llegaba por aquí'), { fs: 14.5, a: 'middle', c: THEME.textDim }); TS(150, -16, i18n.t('B llegaba por aquí'), { fs: 14.5, a: 'middle', c: THEME.textDim });
+            TS(-138, -64, i18n.t('A llegaba por aquí'), { fs: 14.5, a: 'middle', c: THEME.textDim }); TS(138, -64, i18n.t('B llegaba por aquí'), { fs: 14.5, a: 'middle', c: THEME.textDim });
         }
     }, dibujar: () => c.dibujar() };
     dibujarModelo(mo.cx, mo.cy, mo.r, null, i18n.t(mo.txt), null, mo.fs, extra);
