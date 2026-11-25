@@ -359,6 +359,8 @@ function iniciarEventos(cv) {
             else if (!e.target.checked && document.fullscreenElement) document.exitFullscreen();
         } catch (err) { /* nada */ }
     });
+    // Si la cabecera cambia de alto (el texto se parte en más líneas), se vuelve a encajar la escena
+    if (window.ResizeObserver) { const ro = new ResizeObserver(() => fitCanvas()); document.querySelectorAll('.barra-sup, .barra-sus').forEach(n => ro.observe(n)); }
     document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement) elId('check-pantalla').checked = false; setTimeout(fitCanvas, 100); });
     document.querySelectorAll('.theme-opt').forEach(b => b.addEventListener('click', () => { try { localStorage.setItem('sim-vr-tema', b.dataset.theme); } catch (e) { /* nada */ } _cachePuesto.n = null; }));
     const t = temaActual(), clave = { pizarra: 'dark', dia: 'light', marca: 'marca', contraste: 'contrast' }[t];
