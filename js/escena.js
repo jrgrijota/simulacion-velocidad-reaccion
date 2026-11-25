@@ -258,6 +258,7 @@ function setup() {
     fitCanvas();
     actualizarUI();
 }
+const PASOS_REALES = 60, MAX_PASOS_FOTOGRAMA = 4;
 function avanzar() {
     if (S.modo === 'choque') {
         const c = S.choque, antes = c.fase;
@@ -269,7 +270,14 @@ function avanzar() {
         return;
     }
     if (S.pausado) return;
-    S.mundos.forEach(w => w.paso());
+    // Paso fijo: 60 pasos de simulación por segundo real, pase lo que pase con los fotogramas.
+    // Si el equipo dibuja a 30 fps, se dan 2 pasos por fotograma y la reacción no va a cámara lenta.
+    S.acum = Math.min((S.acum || 0) + Math.min(deltaTime || 16.7, 100) * PASOS_REALES / 1000, MAX_PASOS_FOTOGRAMA);
+    let n = Math.floor(S.acum); S.acum -= n;
+    for (; n > 0; n--) {
+        S.mundos.forEach(w => w.paso());
+        if (S.modo === 'comparar' && S.mundos.some(w => w.tFin != null)) break;   // los dos se paran en el mismo paso
+    }
     if (S.modo === 'reaccion') {
         const w = S.mundos[0];
         if (w.tFin != null && !S.finRegistrado) {

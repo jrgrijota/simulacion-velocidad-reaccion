@@ -103,6 +103,29 @@ function cilindro(cx, cy, r, h, fLado, fTapa, sw = 2.5) {
 
 // ═════════ MOLÉCULAS (con tinta, brillo y sin halos) ═════════
 // s: escala; a: ángulo; el sitio reactivo (extremo claro) apunta hacia a
+// ── Sprites de moléculas: cada tipo se dibuja una vez en un lienzo auxiliar y luego solo se copia girado.
+// Con 60 moléculas por círculo y dos círculos, dibujarlas forma a forma costaba cientos de trazados por fotograma.
+let _SIN_LETRA = false;
+const _sprites = {};
+function spriteMol(t, s, k, llA, llB) {
+    const dpr = pixelDensity(), esc = k * dpr;
+    const clave = [t, s, Math.round(esc * 100), llA ? 1 : 0, llB ? 1 : 0, temaActual()].join('|');
+    let sp = _sprites[clave];
+    if (sp) return sp;
+    const R = (t === 'C' ? 20 : t === 'K' ? 18 : 17) * s, N = Math.ceil(2 * R * esc) + 2;
+    const cv = document.createElement('canvas'); cv.width = cv.height = N;
+    const c = cv.getContext('2d'); c.setTransform(esc, 0, 0, esc, N / 2, N / 2);
+    const antes = CTX_FUERA; CTX_FUERA = c; _SIN_LETRA = true;
+    try {
+        if (t === 'K') molK(0, 0, 0, s, llA, llB); else if (t === 'C') molC(0, 0, 0, s); else molAB(0, 0, 0, t, s);
+    } finally { CTX_FUERA = antes; _SIN_LETRA = false; }
+    return (_sprites[clave] = { cv, R: N / 2 / esc });
+}
+function letraMol(t, x, y, s) {
+    if (t === 'K') T(x, y + 4 * s, 'K', { fs: 11 * s, w: 700, a: 'middle', c: '#1c1240', sys: true });
+    else if (t === 'C') { if (s >= 1 && s < 2) T(x, y + 3.4 * s, 'C', { fs: 9 * s, w: 700, a: 'middle', c: '#eafff3', sys: true }); }
+    else if (s >= .85 && s < 2.2) T(x + .3 * s, y + 3.6 * s, t, { fs: 9.5 * s, w: 700, a: 'middle', c: '#fff', sys: true });
+}
 function molAB(x, y, a, t, s = 1) {
     const ink = tinta(), ca = Math.cos(a), sa = Math.sin(a), sx = x + ca * 10 * s, sy = y + sa * 10 * s, bx = x, by = y;
     const col = t === 'A' ? CF.A : CF.B, tras = t === 'A' ? '#3b72d6' : '#b9561f';
@@ -111,7 +134,7 @@ function molAB(x, y, a, t, s = 1) {
     CC(x, y, 8 * s, { f: t === 'A' ? 'g:molA' : 'g:molB', s: ink, sw: 1.9 * s });
     EE(x - 2.6 * s, y - 3 * s, 2.8 * s, 1.8 * s, -30, { f: '#fff', op: .55 });
     CC(sx, sy, 4.8 * s, { f: 'g:molS', s: ink, sw: 1.7 * s });
-    if (s >= .85 && s < 2.2) T(x + .3 * s, y + 3.6 * s, t, { fs: 9.5 * s, w: 700, a: 'middle', c: '#fff', sys: true });
+    if (!_SIN_LETRA && s >= .85 && s < 2.2) T(x + .3 * s, y + 3.6 * s, t, { fs: 9.5 * s, w: 700, a: 'middle', c: '#fff', sys: true });
 }
 function molC(x, y, a, s = 1) {
     const ink = tinta(), ca = Math.cos(a), sa = Math.sin(a), px = -sa, py = ca, D = 9.6 * s;
@@ -124,7 +147,8 @@ function molC(x, y, a, s = 1) {
         CC(p[0], p[1], r * s, { f, s: ink, sw: 1.7 * s });
         CC(p[0] - r * .32 * s, p[1] - r * .36 * s, r * .28 * s, { f: '#fff', op: .6 });
     });
-    if (s >= 1 && s < 2) T(x, y + 3.4 * s, 'C', { fs: 9 * s, w: 700, a: 'middle', c: '#eafff3', sys: true });
+    if (_SIN_LETRA) { /* la letra se pone aparte, sin girar */ }
+    else if (s >= 1 && s < 2) T(x, y + 3.4 * s, 'C', { fs: 9 * s, w: 700, a: 'middle', c: '#eafff3', sys: true });
     else if (s >= 2) T(x, y + D + 8 * s + 40, 'C', { fs: 20, w: 700, a: 'middle', c: '#7fe3ae' });
 }
 function molK(x, y, a, s = 1, llenaA = false, llenaB = false) {
@@ -135,7 +159,7 @@ function molK(x, y, a, s = 1, llenaA = false, llenaB = false) {
         const cx = x + Math.cos(aa) * r * .98, cy = y + Math.sin(aa) * r * .98;
         CC(cx, cy, 4.2 * s, { f: ll ? '#ffe98a' : '#3e2d7a', s: ink, sw: 1.5 * s });
     });
-    T(x, y + 4 * s, 'K', { fs: 11 * s, w: 700, a: 'middle', c: '#1c1240', sys: true });
+    if (!_SIN_LETRA) T(x, y + 4 * s, 'K', { fs: 11 * s, w: 700, a: 'middle', c: '#1c1240', sys: true });
 }
 
 // ═════════ PUESTO: PLACA CON TERMOSTATO, BALÓN CERRADO, TERMÓMETRO Y CRONÓMETRO ═════════
@@ -338,12 +362,16 @@ function dibujarModelo(cx, cy, r, mundo, texto, zoom, fsR, extra) {
         ctx.globalAlpha = a0;
     });
     if (mundo) {
+        // cada molécula es una copia girada de su sprite; las letras van después, sin girar
+        const base = ctx.getTransform();
         ['A', 'B', 'C', 'K'].forEach(t => mundo.mol.forEach(m => {
             if (m.tipo !== t) return;
-            if (t === 'K') molK(m.x, m.y, m.angulo, ESC_MOL, !!m.slotA, !!m.slotB);
-            else if (t === 'C') molC(m.x, m.y, m.angulo, ESC_MOL);
-            else molAB(m.x, m.y, m.angulo, t, ESC_MOL);
+            const sp = spriteMol(t, ESC_MOL, k, t === 'K' && !!m.slotA, t === 'K' && !!m.slotB);
+            ctx.setTransform(base); ctx.translate(m.x, m.y); ctx.rotate(m.angulo);
+            ctx.drawImage(sp.cv, -sp.R, -sp.R, 2 * sp.R, 2 * sp.R);
         }));
+        ctx.setTransform(base);
+        ['A', 'B', 'C', 'K'].forEach(t => mundo.mol.forEach(m => { if (m.tipo === t) letraMol(t, m.x, m.y, ESC_MOL); }));
     }
     if (extra && extra.dibujar) extra.dibujar();
     ctx.restore();
