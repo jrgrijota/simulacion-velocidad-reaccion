@@ -150,7 +150,8 @@ const ZOOM_P = [PU.FX + 44, PU.FY + 10];
 function puestoBase(o) {
     const { conv, nivel, terminada, sinZoom, sinLeyenda } = o;
     const { PX, PW, PH, PYB, PT, pdx, pdy, DX, DY, DR, FX, FR, FY, NW, NTOP } = PU;
-    const ink = tinta(), gl = .2 + nivel / 10 * .8, ctx = cx2();
+    const ink = tinta(), gl = .2 + nivel / 10 * .8;
+    let ctx = cx2();
     focoD(FX, FY + 30, 230, 210);
     // sombra suave en el suelo
     suave(`M${PX - 4} ${PYB} L${PX + pdx + 10} ${PYB + pdy + 4} H${PX + PW + pdx + 30} L${PX + PW + 26} ${PYB + 8} Z`, '#020b14', .55, 4);
@@ -185,6 +186,7 @@ function puestoBase(o) {
     const RRc = 34, hw = NW, yj = FY - Math.sqrt(FR * FR - hw * hw), xf = hw + 9, yf = FY - Math.sqrt(FR * FR - xf * xf);
     const nx0 = FX - NW, nx1 = FX + NW;
     const cuerpo = `M${nx0} ${NTOP} V${yj - 12} Q${nx0} ${yj - 2} ${FX - xf} ${yf} A${FR} ${FR} 0 1 0 ${FX + xf} ${yf} Q${nx1} ${yj - 2} ${nx1} ${yj - 12} V${NTOP} Z`;
+    PU.cuerpo = cuerpo;
     // anillo de corcho de atrás: solo se ve fuera del balón
     ctx.save(); ctx.clip(new Path2D('M-20 -20H460V400H-20Z ' + cuerpo), 'evenodd');
     cilindro(DX, DY - 4, RRc, 7, 'g:corcho', '#caa070', 2.2);
@@ -204,7 +206,10 @@ function puestoBase(o) {
     const SI = NTOP + 18;
     forma(`M${FX - NW + 2} ${NTOP - 4} L${FX - NW + 3.5} ${SI} ${arcoH(FX, SI, NW - 3.5, Math.PI, 2 * Math.PI, 16).replace(/^M/, 'L')} L${FX + NW - 2} ${NTOP - 4} Z`, { f: 'g:tapon', op: .78, bb: [FX - NW + 2, NTOP - 4, 2 * NW - 4, SI - NTOP + 4 + 5] });
     forma(frenteH(FX, SI, NW - 3.5), { s: ink, sw: 1.6, op: .6 });
-    if (conv > 0) RR(FX - FR, NTOP, 2 * FR, FY + FR - NTOP, 0, { f: 'g:gasC', op: conv * .6 });
+    // Con o.partir, lo de atrás queda en un lienzo y lo de delante en otro: el gas C se pinta en directo entre los dos
+    // (así el balón no se redibuja entero cada vez que cambia la conversión)
+    if (o.partir) { ctx.restore(); o.partir(); ctx = cx2(); ctx.save(); ctx.clip(new Path2D(cuerpo)); }
+    else if (conv > 0) RR(FX - FR, NTOP, 2 * FR, FY + FR - NTOP, 0, { f: 'g:gasC', op: conv * .6 });
     CC(FX, FY, FR, { f: 'g:vidrio' });
     CC(FX, FY, FR - 6, { s: '#d8efff', sw: 1.4, op: .28 });
     linea(`M${nx0 + 4} ${SI + 2} V${yj - 8} M${nx1 - 4} ${SI + 2} V${yj - 8}`, '#d8efff', 1.2, .3);
@@ -279,23 +284,31 @@ function puestoVivo(nomNivel, tiempo, terminada) {
 // Dibuja el puesto en (x, y) a escala esc, con caché de lo que no cambia en cada fotograma
 const _cachePuesto = {};
 function dibujarPuesto(x, y, esc, o) {
-    const dpr = pixelDensity(), conv = Math.round(Math.min(1, o.conv) * 40);
+    const dpr = pixelDensity(), conv = Math.min(1, o.conv);
     const fuente = document.fonts && document.fonts.check('600 16px Fredoka') ? 1 : 0;
-    const key = [temaActual(), o.nivel, conv, o.terminada ? 1 : 0, o.sinZoom ? 1 : 0, o.sinLeyenda ? 1 : 0, dpr, fuente].join('|');
-    // Un lienzo de caché por puesto (en Comparación hay dos con estados distintos: si compartieran caché se redibujarían en cada fotograma)
+    // La caché ya no depende de la conversión: solo del tema, la temperatura y si ha terminado
+    const key = [temaActual(), o.nivel, o.terminada ? 1 : 0, o.sinZoom ? 1 : 0, o.sinLeyenda ? 1 : 0, dpr, fuente].join('|');
+    // Un par de lienzos (fondo y frente) por puesto: en Comparación hay dos puestos con estados distintos
     const clave = [o.sinZoom ? 'z' : 'n', o.sinLeyenda ? 'l' : 'n', Math.round(x), Math.round(y)].join('|');
     let c = _cachePuesto[clave];
-    if (!c) c = _cachePuesto[clave] = { cv: document.createElement('canvas'), key: '' };
+    if (!c) c = _cachePuesto[clave] = { fondo: document.createElement('canvas'), frente: document.createElement('canvas'), key: '' };
     if (c.key !== key) {
-        c.cv.width = Math.ceil(PU.W * dpr); c.cv.height = Math.ceil(PU.H * dpr);
-        const cx = c.cv.getContext('2d'); cx.setTransform(dpr, 0, 0, dpr, 0, 0); cx.clearRect(0, 0, PU.W, PU.H);
-        CTX_FUERA = cx;
-        try { puestoBase({ conv: conv / 40, nivel: o.nivel, terminada: o.terminada, sinZoom: o.sinZoom, sinLeyenda: o.sinLeyenda }); } finally { CTX_FUERA = null; }
+        const prep = cv => { cv.width = Math.ceil(PU.W * dpr); cv.height = Math.ceil(PU.H * dpr); const k = cv.getContext('2d'); k.setTransform(dpr, 0, 0, dpr, 0, 0); k.clearRect(0, 0, PU.W, PU.H); return k; };
+        const kFondo = prep(c.fondo), kFrente = prep(c.frente);
+        CTX_FUERA = kFondo;
+        try { puestoBase({ conv: 0, nivel: o.nivel, terminada: o.terminada, sinZoom: o.sinZoom, sinLeyenda: o.sinLeyenda, partir: () => { CTX_FUERA = kFrente; } }); } finally { CTX_FUERA = null; }
         c.key = key;
     }
     const ctx = drawingContext;
     ctx.save(); ctx.translate(x, y); ctx.scale(esc, esc);
-    ctx.drawImage(c.cv, 0, 0, PU.W, PU.H);
+    ctx.drawImage(c.fondo, 0, 0, PU.W, PU.H);
+    if (conv > 0.005 && PU.cuerpo) {          // gas C de color: se pinta en directo dentro del balón
+        const { FX, FR, FY, NTOP } = PU;
+        ctx.save(); ctx.clip(new Path2D(PU.cuerpo));
+        RR(FX - FR, NTOP, 2 * FR, FY + FR - NTOP, 0, { f: 'g:gasC', op: conv * .6 });
+        ctx.restore();
+    }
+    ctx.drawImage(c.frente, 0, 0, PU.W, PU.H);
     puestoVivo(o.nomNivel, o.tiempo, o.terminada);
     ctx.restore();
 }
