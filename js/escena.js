@@ -47,8 +47,8 @@ function disponerComparar(m) {
         const lados = [0, 1].map(i => {
             const ox = i * 665, esc = .74;
             return { tag: { x: ox + 24, y: 18 }, puesto: { x: ox + 4, y: 112, esc, sinZoom: false, sinLeyenda: i === 1 },
-                modelo: { cx: ox + 480, cy: 236, r: 164, txt: 'Modelo de moléculas', fs: 14.5, zoom: [ox + 4 + ZOOM_P[0] * esc, 112 + ZOOM_P[1] * esc, 10] },
-                barra: { x: ox + 330, y: 432, w: 300 }, texto: { x: ox + 480, y: 468 }, mando: { x: ox + 28, y: 498, w: 608 } };
+                modelo: { cx: ox + 466, cy: 228, r: 186, txt: 'Modelo de moléculas', fs: 14.5, zoom: [ox + 4 + ZOOM_P[0] * esc, 112 + ZOOM_P[1] * esc, 10] },
+                barra: { x: ox + 316, y: 442, w: 300 }, texto: { x: ox + 466, y: 476 }, mando: { x: ox + 28, y: 498, w: 608 } };
         });
         return { w: 1330, h: 728, tarjetas: [{ x: 0, y: 0, w: 1330, h: 556 }], lados, divisor: { x: 665, y1: 24, y2: 532 },
             graf: { x: 0, y: 568, w: 900, h: 160, m: false }, igual: { x: 916, y: 568, w: 414, h: 160 }, sello: { x: 743, y: 650, m: true },
