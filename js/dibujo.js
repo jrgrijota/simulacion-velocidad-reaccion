@@ -37,6 +37,7 @@ Object.assign(GR, {
     molB: ['r', [.35, .3, .75], [[0, '#ffc7a0'], [.55, '#f7823c'], [1, '#c4561c']]],
     molK: ['r', [.35, .3, .75], [[0, '#ddd0ff'], [.55, '#a78bfa'], [1, '#6d50c9']]],
     molS: ['r', [.35, .3, .75], [[0, '#ffffff'], [1, '#f3d98f']]],
+    molG: ['r', [.35, .3, .75], [[0, '#eef1f4'], [.55, '#a4adb7'], [1, '#6b7480']]],
 });
 
 // Colores propios de los objetos en cada tema (lo de alrededor sigue al tema)
@@ -106,13 +107,14 @@ function cilindro(cx, cy, r, h, fLado, fTapa, sw = 2.5) {
 // ── Sprites de moléculas: cada tipo se dibuja una vez en un lienzo auxiliar y luego solo se copia girado.
 // Con 60 moléculas por círculo y dos círculos, dibujarlas forma a forma costaba cientos de trazados por fotograma.
 let _SIN_LETRA = false;
+let FORMA_DIBUJO = 'media';           // forma de A, B y C que se dibuja ahora (sencilla | media | compleja)
 const _sprites = {};
 function spriteMol(t, s, k, llA, llB) {
     const dpr = pixelDensity(), esc = k * dpr;
-    const clave = [t, s, Math.round(esc * 100), llA ? 1 : 0, llB ? 1 : 0, temaActual()].join('|');
+    const clave = [t, s, Math.round(esc * 100), llA ? 1 : 0, llB ? 1 : 0, temaActual(), t === 'K' ? '' : FORMA_DIBUJO].join('|');
     let sp = _sprites[clave];
     if (sp) return sp;
-    const R = (t === 'C' ? 20 : t === 'K' ? 18 : 17) * s, N = Math.ceil(2 * R * esc) + 2;
+    const R = (t === 'C' ? 20 : t === 'K' ? 18 : 17) * s * (t !== 'K' && FORMA_DIBUJO === 'compleja' ? 1.45 : 1), N = Math.ceil(2 * R * esc) + 2;
     const cv = document.createElement('canvas'); cv.width = cv.height = N;
     const c = cv.getContext('2d'); c.setTransform(esc, 0, 0, esc, N / 2, N / 2);
     const antes = CTX_FUERA; CTX_FUERA = c; _SIN_LETRA = true;
@@ -126,9 +128,23 @@ function letraMol(t, x, y, s) {
     else if (t === 'C') { if (s >= 1 && s < 2) T(x, y + 3.4 * s, 'C', { fs: 9 * s, w: 700, a: 'middle', c: '#eafff3', sys: true }); }
     else if (s >= .85 && s < 2.2) T(x + .3 * s, y + 3.6 * s, t, { fs: 9.5 * s, w: 700, a: 'middle', c: '#fff', sys: true });
 }
+// Átomo gris de las moléculas complejas (rodea al átomo grande y esconde el sitio reactivo)
+function atomoG(px, py, x, y, s, ink) {
+    const d = `M${x} ${y} L${px} ${py}`;
+    forma(d, { s: ink, sw: 6.5 * s, lc: 'round' }); forma(d, { s: '#c3cad2', sw: 3.2 * s, lc: 'round' });
+    CC(px, py, 5.6 * s, { f: 'g:molG', s: ink, sw: 1.6 * s });
+}
 function molAB(x, y, a, t, s = 1) {
     const ink = tinta(), ca = Math.cos(a), sa = Math.sin(a), sx = x + ca * 10 * s, sy = y + sa * 10 * s, bx = x, by = y;
     const col = t === 'A' ? CF.A : CF.B, tras = t === 'A' ? '#3b72d6' : '#b9561f';
+    if (FORMA_DIBUJO === 'sencilla') {      // esférica: toda la superficie es sitio reactivo (anillo claro)
+        CC(x, y, 10.6 * s, { f: CF.sitio, s: ink, sw: 1.6 * s });
+        CC(x, y, 8.6 * s, { f: t === 'A' ? 'g:molA' : 'g:molB', s: ink, sw: 1.2 * s });
+        EE(x - 2.8 * s, y - 3.2 * s, 3 * s, 1.9 * s, -30, { f: '#fff', op: .55 });
+        if (!_SIN_LETRA && s >= .85 && s < 2.2) T(x + .3 * s, y + 3.6 * s, t, { fs: 9.5 * s, w: 700, a: 'middle', c: '#fff', sys: true });
+        return;
+    }
+    if (FORMA_DIBUJO === 'compleja') [2.25, -2.25].forEach(da => atomoG(x + Math.cos(a + da) * 11 * s, y + Math.sin(a + da) * 11 * s, x, y, s, ink));
     const d = `M${bx} ${by} L${sx} ${sy}`;
     forma(d, { s: ink, sw: 8 * s, lc: 'round' }); forma(d, { s: col, sw: 4.4 * s, lc: 'round' });
     CC(x, y, 8 * s, { f: t === 'A' ? 'g:molA' : 'g:molB', s: ink, sw: 1.9 * s });
@@ -138,6 +154,22 @@ function molAB(x, y, a, t, s = 1) {
 }
 function molC(x, y, a, s = 1) {
     const ink = tinta(), ca = Math.cos(a), sa = Math.sin(a), px = -sa, py = ca, D = 9.6 * s;
+    if (FORMA_DIBUJO === 'sencilla') {      // dos esferas unidas: A y B enteras
+        const d = 8.4 * s;
+        [[x + ca * d, y + sa * d, 'g:molA'], [x - ca * d, y - sa * d, 'g:molB']].forEach(([px2, py2, f]) => {
+            CC(px2, py2, 8.6 * s, { f, s: ink, sw: 1.8 * s });
+            CC(px2 - 2.8 * s, py2 - 3.1 * s, 2.4 * s, { f: '#fff', op: .55 });
+        });
+        if (!_SIN_LETRA && s >= 1 && s < 2) T(x, y + 3.4 * s, 'C', { fs: 9 * s, w: 700, a: 'middle', c: '#eafff3', sys: true });
+        else if (!_SIN_LETRA && s >= 2) T(x, y + D + 8 * s + 40, 'C', { fs: 20, w: 700, a: 'middle', c: '#7fe3ae' });
+        return;
+    }
+    if (FORMA_DIBUJO === 'compleja') {      // los cuatro átomos grises siguen con su átomo grande (se conserva la masa)
+        [[1, .75], [1, -.75], [-1, .75], [-1, -.75]].forEach(([lado, da]) => {
+            const cxA = x + lado * ca * D, cyA = y + lado * sa * D, ang = Math.atan2(lado * sa, lado * ca) + da;
+            atomoG(cxA + Math.cos(ang) * 11 * s, cyA + Math.sin(ang) * 11 * s, cxA, cyA, s, ink);
+        });
+    }
     const a1 = [x + ca * D, y + sa * D], a2 = [x - ca * D, y - sa * D], b1 = [x + px * D, y + py * D], b2 = [x - px * D, y - py * D];
     const rombo = `M${a1.join(' ')} L${b1.join(' ')} L${a2.join(' ')} L${b2.join(' ')} Z`;
     forma(rombo, { s: ink, sw: 6.5 * s, lj: 'round' });
@@ -362,6 +394,7 @@ function dibujarModelo(cx, cy, r, mundo, texto, zoom, fsR, extra) {
         ctx.globalAlpha = a0;
     });
     if (mundo) {
+        FORMA_DIBUJO = mundo.forma;
         // cada molécula es una copia girada de su sprite; las letras van después, sin girar
         const base = ctx.getTransform();
         ['A', 'B', 'C', 'K'].forEach(t => mundo.mol.forEach(m => {
@@ -372,6 +405,7 @@ function dibujarModelo(cx, cy, r, mundo, texto, zoom, fsR, extra) {
         }));
         ctx.setTransform(base);
         ['A', 'B', 'C', 'K'].forEach(t => mundo.mol.forEach(m => { if (m.tipo === t) letraMol(t, m.x, m.y, ESC_MOL); }));
+        FORMA_DIBUJO = 'media';
     }
     if (extra && extra.dibujar) extra.dibujar();
     ctx.restore();

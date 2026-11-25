@@ -16,6 +16,15 @@ const BASE_SIGMA = 2.0;          // px/paso @ nivel 1
 const EA         = 5.8;          // energía de activación (vía térmica)
 const EA_CAT     = 2.9;          // energía de activación (vía catalizada)
 const SITE_CONTACT = 11 * ESC_MOL;
+// Forma de A y B («naturaleza de los reactivos»): cuánto se pueden desviar los sitios reactivos y seguir reaccionando.
+// Sencilla: esféricas, reaccionan por cualquier lado. Media: la de siempre (sitio reactivo en un extremo).
+// Compleja: más átomos alrededor; el sitio reactivo queda más escondido y hay que acertar mejor.
+const FORMAS = {
+    sencilla: { contacto: Infinity,            radio: 11 * ESC_MOL },
+    media:    { contacto: SITE_CONTACT,        radio: MOL_RADIUS },
+    compleja: { contacto: SITE_CONTACT * 0.87, radio: MOL_RADIUS },
+};
+const ORDEN_FORMAS = ['sencilla', 'media', 'compleja'];
 const CAT_ATTRACT_R = 115 * ESC_MOL;
 const CAT_PULL   = 0.11;
 const CAT_CAPTURE_DIST = 18 * ESC_MOL;
@@ -66,7 +75,7 @@ class Molecula {
 
 class Mundo {
     constructor(o) {
-        this.nivel = o.nivel; this.nA = o.nA; this.nB = o.nB; this.nK = o.nK;
+        this.nivel = o.nivel; this.nA = o.nA; this.nB = o.nB; this.nK = o.nK; this.forma = o.forma || 'media';
         this.reiniciar();
     }
     reiniciar() {
@@ -112,7 +121,7 @@ class Mundo {
         return { vx, vy };
     }
     crear(tipo, px, py) {
-        const r = tipo === 'K' ? CAT_RADIUS : MOL_RADIUS;
+        const r = tipo === 'K' ? CAT_RADIUS : FORMAS[this.forma].radio;
         if (px === undefined) {
             let ok = false, k = 0;
             while (!ok && k < 80) {
@@ -124,6 +133,7 @@ class Mundo {
         }
         const v = this.velAleatoria(tipo === 'K' ? 1 : 1);
         const m = new Molecula(px, py, v.vx, v.vy, tipo);
+        if (tipo !== 'K') m.radio = FORMAS[this.forma].radio;
         if (tipo === 'K') m.giro = (Math.random() - 0.5) * 0.02;
         this.mol.push(m);
         return m;
@@ -246,8 +256,8 @@ class Mundo {
                 const dvx = a.vx - b.vx, dvy = a.vy - b.vy, dot = dvx * nx + dvy * ny;
                 if ((a.tipo === 'A' && b.tipo === 'B') || (a.tipo === 'B' && b.tipo === 'A')) {
                     const rel = Math.hypot(dvx, dvy), sa = a.sitio(), sb = b.sitio();
-                    if (dot > 0) this.cont[rel < EA ? 'energia' : Math.hypot(sa.x - sb.x, sa.y - sb.y) <= SITE_CONTACT ? 'eficaz' : 'orient']++;
-                    if (rel >= EA && Math.hypot(sa.x - sb.x, sa.y - sb.y) <= SITE_CONTACT) {
+                    if (dot > 0) this.cont[rel < EA ? 'energia' : Math.hypot(sa.x - sb.x, sa.y - sb.y) <= FORMAS[this.forma].contacto ? 'eficaz' : 'orient']++;
+                    if (rel >= EA && Math.hypot(sa.x - sb.x, sa.y - sb.y) <= FORMAS[this.forma].contacto) {
                         const cx = (a.x + b.x) / 2, cy = (a.y + b.y) / 2;
                         nuevos.push({ x: cx, y: cy, vx: (a.vx + b.vx) / 2, vy: (a.vy + b.vy) / 2 });
                         this.anotar(cx, cy, 'T');
@@ -261,7 +271,7 @@ class Mundo {
         }
         for (const p of nuevos) this.crearProducto(p.x, p.y, p.vx, p.vy);
     }
-    crearProducto(x, y, vx, vy) { this.mol.push(new Molecula(x, y, vx, vy, 'C')); }
+    crearProducto(x, y, vx, vy) { const m = new Molecula(x, y, vx, vy, 'C'); m.radio = FORMAS[this.forma].radio; this.mol.push(m); }
     // Captura en las cavidades y reacción por la vía catalizada (Eₐ rebajada)
     catalisis() {
         const cats = this.mol.filter(m => m.tipo === 'K' && !m.muerta);

@@ -13,14 +13,17 @@ let LAY = null;                    // retícula del modo y del dispositivo actua
 const NOMBRES_NIVEL = ['', 'Muy baja', 'Baja', 'Moderada', 'Normal', 'Alta', 'Muy alta', 'Elevada', 'Intensa', 'Extrema', 'Máxima'];
 const nomNivel = (n) => i18n.t(NOMBRES_NIVEL[n]);
 const textoNivel = (n) => `${nomNivel(n)} (${n})`;
+const NOM_FORMA = { sencilla: 'Sencilla', media: 'Media', compleja: 'Compleja' };
+const formaDe = (v) => ORDEN_FORMAS[Math.max(1, Math.min(3, v)) - 1];
 const COL_IZQ = '#2f6fd0', COL_DER = '#1f9e66';
 const PRESETS = {
     energy:   { nom: 'Temperatura',        min: 1, max: 10, izq: 2, der: 8 },
     count:    { nom: 'Moléculas A = B',    min: 4, max: 30, izq: 8, der: 24 },
     catalyst: { nom: 'Catalizadores',      min: 0, max: 6,  izq: 0, der: 4 },
+    shape:    { nom: 'Forma',              min: 1, max: 3,  izq: 1, der: 3 },
 };
 const S = {
-    modo: 'reaccion', cmp: 'catalyst', pausado: false,
+    modo: 'reaccion', cmp: 'catalyst', pausado: false, formaChoque: 'media',
     mundos: [], choque: new Choque(), tmax: 10, ymax: 1, cmpListo: false, ganador: -1, tSello: 0, finRegistrado: false,
 };
 const elId = (id) => document.getElementById(id);
@@ -53,7 +56,7 @@ function disponerComparar(m) {
             const zx = px + (i ? PU.FX + 44 : PU.FX - 44) * esc, zy = PY + (PU.FY + 10) * esc;
             return { tag: { x: i ? 1306 : 24, y: 18, der: !!i }, puesto: { x: px, y: PY, esc, sinZoom: false, sinLeyenda: true },
                 modelo: { cx, cy: 236, r: 174, txt: 'Modelo de moléculas', fs: 14.5, zoom: [zx, zy, 9] },
-                barra: { x: cx - 150, y: 442, w: 300 }, texto: { x: cx, y: 474 }, mando: { x: i ? 836 : 24, y: 492, w: 470 } };
+                barra: { x: cx - 150, y: 442, w: 300 }, texto: { x: cx, y: 474 }, mando: { x: i ? 846 : 24, y: 492, w: 452 } };
         });
         return { w: 1330, h: 696, tarjetas: [{ x: 0, y: 0, w: 1330, h: 540 }], lados, divisor: { x: 665, y1: 112, y2: 480 },
             selector: { x: 665, y: 20 }, acciones: { x: 665 - 150, y: 492, w: 300 },
@@ -76,13 +79,13 @@ function disponerChoque(m) {
         modelo: { cx: 440, cy: 282, r: 250, txt: 'Modelo: así imaginamos dos moléculas que chocan', fs: 16 },
         panel: { x: 896, y: 0, w: 434, h: 330, m: false },
         tira: { x: 896, y: 346, w: 434, h: 350, m: true }, sello: { x: 440, y: 50, m: true },
-        mandos: { x: 56, y: 590, w: 768, fila: true },
+        mandos: { x: 56, y: 590, w: 768, fila: true }, forma: { x: 18, y: 16 },
     };
     return {
-        w: 370, h: 1386, tarjetas: [{ x: 0, y: 0, w: 370, h: 420 }],
-        modelo: { cx: 185, cy: 206, r: 166, txt: 'Dos moléculas que chocan', fs: 14.5 },
-        panel: { x: 0, y: 436, w: 370, h: 352, m: true }, controles: { x: 0, y: 804, w: 370, h: 226 },
-        tira: { x: 0, y: 1046, w: 370, h: 340, m: true }, sello: { x: 185, y: 30, m: true }, mandos: { x: 14, y: 820, w: 342 },
+        w: 370, h: 1434, tarjetas: [{ x: 0, y: 0, w: 370, h: 468 }],
+        modelo: { cx: 185, cy: 254, r: 166, txt: 'Dos moléculas que chocan', fs: 14.5 }, forma: { x: 14, y: 12 },
+        panel: { x: 0, y: 484, w: 370, h: 352, m: true }, controles: { x: 0, y: 852, w: 370, h: 226 },
+        tira: { x: 0, y: 1094, w: 370, h: 340, m: true }, sello: { x: 185, y: 78, m: true }, mandos: { x: 14, y: 868, w: 342 },
     };
 }
 function calcularEscena() {          // devuelve true si cambia el tamaño del lienzo
@@ -97,7 +100,7 @@ function colocarMandos() {
     if (!LAY) return;
     const c = elId('mandos-comun'), compara = S.modo === 'comparar';
     c.classList.toggle('compacto', !!LAY.mandos.compacto);
-    if (S.modo === 'choque') { colocarSobreLienzo(elId('mandos-choque'), LAY.mandos, CV_W, CV_H); elId('mandos-choque').classList.toggle('en-fila', !!LAY.mandos.fila); }
+    if (S.modo === 'choque') { colocarSobreLienzo(elId('forma-choque'), LAY.forma, CV_W, CV_H); colocarSobreLienzo(elId('mandos-choque'), LAY.mandos, CV_W, CV_H); elId('mandos-choque').classList.toggle('en-fila', !!LAY.mandos.fila); }
     else colocarSobreLienzo(c, LAY.mandos, CV_W, CV_H);
     if (compara) {
         colocarSobreLienzo(elId('mandos-izq'), LAY.lados[0].mando, CV_W, CV_H);
@@ -128,7 +131,7 @@ function colocarMandos() {
 function leerConfig() { return { nivel: +elId('sl-nivel').value, nK: +elId('sl-cat').value, nA: +elId('sl-na').value, nB: +elId('sl-nb').value }; }
 function configLado(i) {
     const c = leerConfig(), v = +elId(i ? 'sl-der' : 'sl-izq').value;
-    if (S.cmp === 'energy') c.nivel = v; else if (S.cmp === 'count') { c.nA = v; c.nB = v; } else c.nK = v;
+    if (S.cmp === 'energy') c.nivel = v; else if (S.cmp === 'count') { c.nA = v; c.nB = v; } else if (S.cmp === 'shape') c.forma = formaDe(v); else c.nK = v;
     return c;
 }
 function construir() {
@@ -146,12 +149,14 @@ function pausar(v) {
 }
 // Bajo el sello de Comparación: por qué ha ganado (o aviso si esta vez ha ganado el azar)
 function explicarCarrera(M) {
-    const vi = +elId('sl-izq').value, vd = +elId('sl-der').value, esperado = vi === vd ? -1 : (vd > vi ? 1 : 0);
+    const vi = +elId('sl-izq').value, vd = +elId('sl-der').value, inv = S.cmp === 'shape';   // en Forma gana la más sencilla
+    const esperado = vi === vd ? -1 : ((vd > vi) !== inv ? 1 : 0);
     const txt = esperado >= 0 && S.ganador !== esperado
         ? i18n.t('Esta vez ha ganado el azar: pulsa Reiniciar y repítelo.')
         : { catalyst: i18n.t('El catalizador rebaja la energía necesaria: sirven más choques.'),
             energy: i18n.t('Más temperatura: moléculas más rápidas y más choques con energía suficiente.'),
-            count: i18n.t('Más concentración: más choques por segundo en el mismo balón.') }[S.cmp];
+            count: i18n.t('Más concentración: más choques por segundo en el mismo balón.'),
+            shape: i18n.t('Cuanto más sencilla es la molécula, más choques llegan bien orientados.') }[S.cmp];
     if (esperado < 0) return;
     const m = LAY.sello.m, fs = m ? 14.5 : 16, lin = partir(txt, M.r * 1.45, { fs, w: 600 });
     const lh = fs + 6, h = lin.length * lh + 16, w = Math.max(...lin.map(l => ancho(l, { fs, w: 600 }))) + 28, y0 = M.cy + (m ? 26 : 40);
@@ -162,6 +167,7 @@ function etiquetaLado(i) {
     const v = +elId(i ? 'sl-der' : 'sl-izq').value, pre = i ? '▶ ' : '◀ ';
     if (S.cmp === 'energy') return pre + i18n.t('Temperatura {n}', { n: nomNivel(v) });
     if (S.cmp === 'count') return pre + i18n.t('{n} A + {n} B', { n: v });
+    if (S.cmp === 'shape') return pre + i18n.t({ sencilla: 'Moléculas sencillas', media: 'Moléculas medias', compleja: 'Moléculas complejas' }[formaDe(v)]);
     return pre + (v === 0 ? i18n.t('Sin catalizador') : v === 1 ? i18n.t('Con 1 catalizador') : i18n.t('Con {n} catalizadores', { n: v }));
 }
 
@@ -255,6 +261,7 @@ function dibujarComparar() {
 }
 function dibujarChoque() {
     const c = S.choque, mo = LAY.modelo, k = mo.r / R_MODELO;
+    FORMA_DIBUJO = S.formaChoque;
     LAY.tarjetas.forEach(t => tarj(t));
     const extra = { dibujarFondo: () => {
         c.dibujarFondo();
@@ -269,6 +276,7 @@ function dibujarChoque() {
     const tr = LAY.tira; dibujarTiraChoques(tr.x, tr.y, tr.w, tr.h, c.historial, tr.m);
     if (c.fase === 'resultado' && c.eficaz) selloVR(i18n.t('¡CHOQUE EFICAZ!'), 'A + B → C', LAY.sello.x, LAY.sello.y, S.tSello, LAY.sello.m);
     anunciar({ tag: mensajeChoque(c).tag, txt: mensajeChoque(c).msg });
+    FORMA_DIBUJO = 'media';
 }
 
 // ── Bucle ────────────────────────────────────────────────────────────
@@ -333,6 +341,7 @@ function draw() {
 function actualizarUI() {
     document.body.classList.remove('modo-reaccion', 'modo-comparar', 'modo-choque');
     document.body.classList.add('modo-' + S.modo);
+    document.body.classList.toggle('cmp-texto', S.cmp === 'energy' || S.cmp === 'shape');
     const compara = S.modo === 'comparar';
     document.querySelectorAll('[data-modo]').forEach(b => { const on = b.dataset.modo === S.modo; b.classList.toggle('active', on); b.setAttribute('aria-selected', String(on)); });
     document.querySelectorAll('[data-cmp]').forEach(b => { const on = b.dataset.cmp === S.cmp; b.classList.toggle('active', on); b.setAttribute('aria-checked', String(on)); });
@@ -344,7 +353,7 @@ function actualizarUI() {
     // Una sola línea y sin repetir lo que ya cuenta el panel de la escena
     const frase = {
         reaccion: '',
-        comparar: i18n.t({ catalyst: 'Solo cambia el catalizador.', energy: 'Solo cambia la temperatura.', count: 'Solo cambia la concentración: más o menos moléculas en el mismo balón.' }[S.cmp]),
+        comparar: i18n.t({ catalyst: 'Solo cambia el catalizador.', energy: 'Solo cambia la temperatura.', count: 'Solo cambia la concentración: más o menos moléculas en el mismo balón.', shape: 'Solo cambia la forma de las moléculas.' }[S.cmp]),
         choque: i18n.t('Gira cada molécula arrastrándola y lánzalas una contra otra.'),
     }[S.modo];
     elId('frase').innerHTML = frase;
@@ -354,11 +363,13 @@ function actualizarUI() {
 function mostrarValores() {
     elId('val-nivel').textContent = textoNivel(+elId('sl-nivel').value);
     ['cat', 'na', 'nb', 'energia'].forEach(k => { elId('val-' + k).textContent = elId('sl-' + k).value; });
-    ['izq', 'der'].forEach(k => { const v = +elId('sl-' + k).value; elId('val-' + k).textContent = S.cmp === 'energy' ? textoNivel(v) : String(v); });
+    ['izq', 'der'].forEach(k => { const v = +elId('sl-' + k).value; elId('val-' + k).textContent = S.cmp === 'energy' ? textoNivel(v) : S.cmp === 'shape' ? i18n.t(NOM_FORMA[formaDe(v)]) : String(v); });
 }
 function configurarPar() {
     const p = PRESETS[S.cmp];
     [['izq', p.izq], ['der', p.der]].forEach(([k, v]) => { const s = elId('sl-' + k); s.min = p.min; s.max = p.max; s.value = v; });
+    // Las esféricas reaccionan casi al instante a temperatura Normal: en Forma se empieza en Baja para que la carrera se vea
+    if (S.cmp === 'shape' && +elId('sl-nivel').value > 2) elId('sl-nivel').value = 2;
 }
 function cambiarModo(m) {
     if (m === S.modo) return;
@@ -379,6 +390,10 @@ function coordsLienzo(e) {
 function iniciarEventos(cv) {
     document.querySelectorAll('[data-modo]').forEach(b => b.addEventListener('click', () => cambiarModo(b.dataset.modo)));
     document.querySelectorAll('[data-cmp]').forEach(b => b.addEventListener('click', () => cambiarComparacion(b.dataset.cmp)));
+    document.querySelectorAll('[data-forma]').forEach(b => b.addEventListener('click', () => {
+        S.formaChoque = b.dataset.forma; S.choque.colocar();
+        document.querySelectorAll('[data-forma]').forEach(o => { const on = o === b; o.classList.toggle('active', on); o.setAttribute('aria-checked', String(on)); });
+    }));
     elId('btn-pausa').addEventListener('click', () => pausar(!S.pausado));
     elId('btn-reiniciar').addEventListener('click', construir);
     // Mandos del gas
@@ -444,7 +459,7 @@ function iniciarEventos(cv) {
     aplicarParametrosUrl({
         tema:        (v) => { const t = { simulaciencia: 'marca', marca: 'marca', claro: 'light', oscuro: 'dark', contraste: 'contrast' }[v]; const b = t && document.querySelector(`.theme-opt[data-theme="${t}"]`); if (b) b.click(); },
         modo:        alias({ 'reacción': 'reaccion', comparacion: 'comparar', 'comparación': 'comparar' }, (v) => { if (['reaccion', 'comparar', 'choque'].includes(v)) cambiarModo(v); }),
-        comparar:    alias({ catalizador: 'catalyst', temperatura: 'energy', cantidad: 'count' }, (v) => { if (PRESETS[v]) cambiarComparacion(v); }),
+        comparar:    alias({ catalizador: 'catalyst', temperatura: 'energy', cantidad: 'count', concentracion: 'count', forma: 'shape' }, (v) => { if (PRESETS[v]) cambiarComparacion(v); }),
         temperatura: urlParam.range('sl-nivel'),
         a:           urlParam.range('sl-na'),
         b:           urlParam.range('sl-nb'),

@@ -10,11 +10,11 @@ const RETOS_VR = crearRetos({
         { id: 'rapida', txt: 'Completa una reacción en menos de 10 s', pista: 'Los catalizadores ayudan mucho.' },
         { id: 'fria', txt: 'Consigue ese tiempo con la temperatura en «Baja» o menos, usando catalizadores' },
         { id: 'sobra', txt: 'Termina una reacción en la que sobre reactivo (A y B distintos) y averigua cuál era el limitante' },
-        { id: 'comparar', n: 3, txt: 'En Comparación, averigua con cada una de las tres variables cuál hace reaccionar más deprisa' },
+        { id: 'comparar', n: 4, txt: 'En Comparación, averigua con cada una de las cuatro variables cuál hace reaccionar más deprisa' },
         { id: 'choques', n: 3, txt: 'En Choque, consigue los tres resultados: eficaz, poca energía y mal orientadas' },
     ],
     progreso: (r, d) => {
-        if (r.id === 'comparar') return Object.keys(d.cmp || {}).length / 3;
+        if (r.id === 'comparar') return Object.keys(d.cmp || {}).length / 4;
         if (r.id === 'choques') return ['eficaz', 'energia', 'orient'].filter(k => (d.ch || {})[k]).length / 3;
         return d.hechos[r.id] ? 1 : 0;
     },

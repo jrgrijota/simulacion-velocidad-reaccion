@@ -90,6 +90,7 @@
             <button type="button" class="carril-btn" data-cmp="catalyst" role="radio" aria-checked="true">Catalizador</button>
             <button type="button" class="carril-btn" data-cmp="energy" role="radio" aria-checked="false">Temperatura</button>
             <button type="button" class="carril-btn" data-cmp="count" role="radio" aria-checked="false">Concentración</button>
+            <button type="button" class="carril-btn" data-cmp="shape" role="radio" aria-checked="false">Forma</button>
         </div>
         <div class="acciones-sim only-sim">
             <button id="btn-pausa" type="button" class="boton-suelto">❚❚ Pausar</button>
@@ -112,6 +113,11 @@
                 <div id="mandos-izq" class="mandos-lienzo mandos-fila only-comparar"><div class="fila-deslizador"><label for="sl-izq" class="nom-cmp">Catalizadores</label><input type="range" id="sl-izq" min="0" max="6" value="0" step="1"><span class="valor" id="val-izq">0</span></div></div>
                 <div id="mandos-der" class="mandos-lienzo mandos-fila only-comparar"><div class="fila-deslizador"><label for="sl-der" class="nom-cmp">Catalizadores</label><input type="range" id="sl-der" min="0" max="6" value="4" step="1"><span class="valor" id="val-der">4</span></div></div>
                 <!-- Choque -->
+                <div id="forma-choque" class="carril forma-choque only-choque" role="radiogroup" aria-label="Forma de las moléculas">
+                    <button type="button" class="carril-btn" data-forma="sencilla" role="radio" aria-checked="false">Sencillas</button>
+                    <button type="button" class="carril-btn" data-forma="media" role="radio" aria-checked="true">Medias</button>
+                    <button type="button" class="carril-btn" data-forma="compleja" role="radio" aria-checked="false">Complejas</button>
+                </div>
                 <div id="mandos-choque" class="mandos-lienzo only-choque">
                     <div class="fila-slider"><label for="sl-energia">Energía del choque</label><span class="valor-slider" id="val-energia">5</span></div>
                     <input type="range" id="sl-energia" min="1" max="10" value="5" step="1">
@@ -134,6 +140,7 @@
             <li data-i18n="vr-cond"><strong>Dos condiciones a la vez:</strong> que el choque tenga energía mayor que la <strong>energía de activación Eₐ</strong> y que los <strong>sitios reactivos</strong> (el extremo claro de A y de B) se toquen de frente.</li>
             <li data-i18n="vr-temp"><strong>Temperatura:</strong> más temperatura, moléculas más rápidas y más choques con energía suficiente: en el panel bajan los choques con poca energía.</li>
             <li data-i18n="vr-conc"><strong>Concentración:</strong> con más moléculas en el mismo balón (más concentración) hay más choques por segundo.</li>
+            <li data-i18n="vr-forma"><strong>Forma de las moléculas</strong> (en Comparación y en Choque): cuanto más sencilla es la molécula, más fácil es que choque bien orientada. Las esféricas reaccionan por cualquier lado; en las complejas el sitio reactivo está más escondido.</li>
             <li data-i18n="vr-cat"><strong>Catalizador (K):</strong> sujeta una A y una B ya bien orientadas y les ofrece un camino con <strong>menos energía de activación</strong>. Sale intacto y puede volver a actuar.</li>
             <li data-i18n="vr-gas"><strong>El color del balón:</strong> A y B son gases invisibles; C es un gas de color. El balón se tiñe según la cantidad de C que hay, no según la temperatura.</li>
         </ul>

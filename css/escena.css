@@ -50,6 +50,8 @@ body .mandos-fila .fila-deslizador label { display: flex; align-items: center; g
 #mandos-comun.compacto { --col-nom: calc(var(--u) * 126); --col-val: calc(var(--u) * 88); }
 #mandos-comun.compacto .fila-deslizador { height: calc(var(--u) * 36); }
 #mandos-izq, #mandos-der { --col-nom: calc(var(--u) * 126); --col-val: calc(var(--u) * 40); width: calc(100% * 616 / 1330); }
+/* Temperatura y Forma muestran el valor con palabras («Intensa (8)», «Compleja»): columna más ancha */
+body.cmp-texto #mandos-izq, body.cmp-texto #mandos-der { --col-val: calc(var(--u) * 92); }
 .punto-sl { display: inline-block; flex: none; width: calc(var(--u) * 14); height: calc(var(--u) * 14); border-radius: 50%; background: var(--c); border: calc(var(--u) * 2) solid #071a2b; }
 
 /* ── Choque: energía (nombre y valor arriba, barra, extremos), botones y nota ── */
@@ -85,6 +87,8 @@ body #mandos-choque .fila-slider label { font: 600 calc(var(--u) * 17.5) var(--f
     body .barra-sus { min-height: 0; grid-template-columns: minmax(0, 1fr); padding: 0 10px 10px; gap: 8px; }
     body .barra-sus .cmpvar { grid-column: 1; grid-row: 1; justify-self: stretch; }
     body .barra-sus .cmpvar .carril-btn { flex: 1; justify-content: center; }
+    /* cuatro variables: en dos filas para que quepan en el móvil */
+    body .barra-sus .cmpvar { display: grid; grid-template-columns: 1fr 1fr; height: auto; border-radius: 22px; }
     body .barra-sus .acciones-sim { grid-column: 1; grid-row: 2; justify-self: stretch; }
     body .barra-sus .acciones-sim .boton-suelto { flex: 1; justify-content: center; }
     body .barra-sus .sus-info { grid-column: 1; grid-row: 3; font-size: .9rem; }
@@ -92,6 +96,7 @@ body #mandos-choque .fila-slider label { font: 600 calc(var(--u) * 17.5) var(--f
     body.modo-choque .barra-sus .sus-info { grid-row: 1; }
     .album-tabla .mat-fila { grid-template-columns: repeat(2, 1fr); }
     #mandos-izq, #mandos-der { width: calc(100% * 342 / 370); --col-nom: calc(var(--u) * 112); --col-val: calc(var(--u) * 28); }
+    body.cmp-texto #mandos-izq, body.cmp-texto #mandos-der { --col-val: calc(var(--u) * 84); }
 }
 body .barra-sus #frase:empty { display: none; }
 
@@ -106,6 +111,9 @@ body.modo-choque #escena .acciones-sim { display: none; }
 #escena .cmpvar.en-lienzo { position: absolute; transform: translateX(-50%); height: calc(var(--u) * 44); padding: calc(var(--u) * 3); gap: calc(var(--u) * 2); }
 #escena .cmpvar.en-lienzo .carril-btn { height: calc(var(--u) * 36); padding: 0 calc(var(--u) * 20); font-size: calc(var(--u) * 16.5); }
 body:not(.modo-comparar) #escena .cmpvar { display: none; }
+/* Choque: forma de las moléculas, arriba a la izquierda de la zona de trabajo */
+#escena .forma-choque { position: absolute; height: calc(var(--u) * 42); padding: calc(var(--u) * 3); gap: calc(var(--u) * 2); }
+#escena .forma-choque .carril-btn { height: calc(var(--u) * 34); padding: 0 calc(var(--u) * 16); font-size: calc(var(--u) * 15.5); }
 @media (max-width: 1180px) { .ecuacion { display: none; } }
 /* El título no cabe junto a los modos por debajo de ~1080 px: los modos bajan a su propia fila */
 @media (max-width: 1080px) {
