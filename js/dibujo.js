@@ -104,11 +104,10 @@ function cilindro(cx, cy, r, h, fLado, fTapa, sw = 2.5) {
 // ═════════ MOLÉCULAS (con tinta, brillo y sin halos) ═════════
 // s: escala; a: ángulo; el sitio reactivo (extremo claro) apunta hacia a
 function molAB(x, y, a, t, s = 1) {
-    const ink = tinta(), ca = Math.cos(a), sa = Math.sin(a), sx = x + ca * 10 * s, sy = y + sa * 10 * s, bx = x - ca * 7.5 * s, by = y - sa * 7.5 * s;
+    const ink = tinta(), ca = Math.cos(a), sa = Math.sin(a), sx = x + ca * 10 * s, sy = y + sa * 10 * s, bx = x, by = y;
     const col = t === 'A' ? CF.A : CF.B, tras = t === 'A' ? '#3b72d6' : '#b9561f';
     const d = `M${bx} ${by} L${sx} ${sy}`;
     forma(d, { s: ink, sw: 8 * s, lc: 'round' }); forma(d, { s: col, sw: 4.4 * s, lc: 'round' });
-    CC(bx, by, 4.8 * s, { f: tras, s: ink, sw: 1.7 * s });
     CC(x, y, 8 * s, { f: t === 'A' ? 'g:molA' : 'g:molB', s: ink, sw: 1.9 * s });
     EE(x - 2.6 * s, y - 3 * s, 2.8 * s, 1.8 * s, -30, { f: '#fff', op: .55 });
     CC(sx, sy, 4.8 * s, { f: 'g:molS', s: ink, sw: 1.7 * s });
