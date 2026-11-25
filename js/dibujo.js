@@ -119,9 +119,10 @@ function molC(x, y, a, s = 1) {
     const rombo = `M${a1.join(' ')} L${b1.join(' ')} L${a2.join(' ')} L${b2.join(' ')} Z`;
     forma(rombo, { s: ink, sw: 6.5 * s, lj: 'round' });
     forma(rombo, { f: CF.Cv, fo: .35, s: '#9fe3bf', sw: 3 * s, lj: 'round' });
-    [[a1, 'g:molA'], [a2, 'g:molA'], [b1, 'g:molB'], [b2, 'g:molB']].forEach(([p, f]) => {
-        CC(p[0], p[1], 5.6 * s, { f, s: ink, sw: 1.7 * s });
-        CC(p[0] - 1.8 * s, p[1] - 2 * s, 1.6 * s, { f: '#fff', op: .6 });
+    // mismos átomos que A y B: uno azul, uno naranja y los dos pequeños blancos (se conserva la masa)
+    [[a1, 'g:molA', 5.6], [b1, 'g:molS', 3.6], [a2, 'g:molB', 5.6], [b2, 'g:molS', 3.6]].forEach(([p, f, r]) => {
+        CC(p[0], p[1], r * s, { f, s: ink, sw: 1.7 * s });
+        CC(p[0] - r * .32 * s, p[1] - r * .36 * s, r * .28 * s, { f: '#fff', op: .6 });
     });
     if (s >= 1 && s < 2) T(x, y + 3.4 * s, 'C', { fs: 9 * s, w: 700, a: 'middle', c: '#eafff3', sys: true });
     else if (s >= 2) T(x, y + D + 5.6 * s + 22, 'C', { fs: 20, w: 700, a: 'middle', c: '#7fe3ae' });
