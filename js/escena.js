@@ -30,16 +30,18 @@ function disponerReaccion(m) {
     if (!m) return {
         w: 1330, h: 696, tarjetas: [{ x: 0, y: 0, w: 1330, h: 556 }],
         puestos: [{ x: 0, y: 0, esc: 1, sinZoom: false, sinLeyenda: false }],
-        modelos: [{ cx: 664, cy: 262, r: 222, txt: 'Modelo: así imaginamos las moléculas', zoom: [ZOOM_P[0], ZOOM_P[1], 13], fs: 16 }],
+        modelos: [{ cx: 664, cy: 250, r: 216, txt: 'Modelo: así imaginamos las moléculas', zoom: [ZOOM_P[0], ZOOM_P[1], 13], fs: 16 }],
+        acciones: { x: 664 - 150, y: 500, w: 300 },
         panel: { x: 910, y: 20, w: 400, h: 516, m: false }, graf: { x: 0, y: 568, w: 1330, h: 128, m: false },
         sello: { x: 1167, y: 628, m: false }, mandos: { x: 22, y: 372, w: 384 },
     };
     return {
-        w: 370, h: 1590, tarjetas: [{ x: 0, y: 0, w: 370, h: 500 }, { x: 0, y: 1018, w: 370, h: 396 }],
+        w: 370, h: 1640, tarjetas: [{ x: 0, y: 0, w: 370, h: 500 }, { x: 0, y: 1018, w: 370, h: 446 }],
         puestos: [{ x: 4, y: 10, esc: .86, sinZoom: true, sinLeyenda: false }],
         modelos: [{ cx: 185, cy: 1202, r: 166, txt: 'Modelo de moléculas', zoom: null, fs: 14.5 }],
-        panel: { x: 0, y: 516, w: 370, h: 486, m: true }, graf: { x: 0, y: 1430, w: 370, h: 160, m: true, tit: 'Velocidad de reacción (reacciones/s)' },
-        sello: { x: 185, y: 1410, m: true }, mandos: { x: 14, y: 324, w: 342 },
+        acciones: { x: 24, y: 1402, w: 322 },
+        panel: { x: 0, y: 516, w: 370, h: 486, m: true }, graf: { x: 0, y: 1480, w: 370, h: 160, m: true, tit: 'Velocidad de reacción (reacciones/s)' },
+        sello: { x: 185, y: 1460, m: true }, mandos: { x: 14, y: 324, w: 342 },
     };
 }
 function disponerComparar(m) {
@@ -95,6 +97,16 @@ function colocarMandos() {
     if (compara) {
         colocarSobreLienzo(elId('mandos-izq'), LAY.lados[0].mando, CV_W, CV_H);
         colocarSobreLienzo(elId('mandos-der'), LAY.lados[1].mando, CV_W, CV_H);
+    }
+    // Pausar y Reiniciar: en Reacción bajo el círculo del modelo (sin franja propia en la cabecera); en Comparación, en la cabecera
+    const acc = document.querySelector('.acciones-sim'), barra = document.querySelector('.barra-sus');
+    if (LAY.acciones) {
+        if (acc.parentElement !== elId('escena')) elId('escena').appendChild(acc);
+        acc.classList.add('en-lienzo');
+        colocarSobreLienzo(acc, LAY.acciones, CV_W, CV_H);
+    } else if (acc.parentElement !== barra) {
+        barra.appendChild(acc); acc.classList.remove('en-lienzo');
+        acc.style.left = acc.style.top = acc.style.width = '';
     }
 }
 
