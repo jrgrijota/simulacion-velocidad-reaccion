@@ -25,12 +25,12 @@ class Choque {
     }
     // Al empezar, cada molécula mira hacia un lado al azar, pero nunca de frente:
     // el primer choque sin girarlas sale «mal orientadas» y obliga a pensar en la orientación.
+    formaActual() { try { return S.formaChoque; } catch (e) { return 'media'; } }   // S aún no existe al crear el primer Choque
     orientarAlAzar() {
         const d = CH_CONTACTO / 2;
         for (let k = 0; k < 50; k++) {
             const a = Math.random() * Math.PI * 2, b = Math.random() * Math.PI * 2;
-            const sa = { x: -d + Math.cos(a) * CH_SITIO, y: Math.sin(a) * CH_SITIO }, sb = { x: d + Math.cos(b) * CH_SITIO, y: Math.sin(b) * CH_SITIO };
-            if (Math.hypot(sa.x - sb.x, sa.y - sb.y) > CH_ORIENT * 1.6) { this.A.ang = a; this.B.ang = b; return; }
+            if (distSitios(-d, 0, a, d, 0, b, CH_SITIO, FORMAS[this.formaActual()].sitios) > CH_ORIENT * 1.6) { this.A.ang = a; this.B.ang = b; return; }
         }
         this.A.ang = Math.PI / 2; this.B.ang = -Math.PI / 2;
     }
@@ -56,8 +56,8 @@ class Choque {
         }
     }
     evaluar() {
-        const rel = Math.abs(this.A.vx - this.B.vx), sa = this.sitio(this.A), sb = this.sitio(this.B);
-        const dsit = Math.hypot(sa.x - sb.x, sa.y - sb.y);
+        const rel = Math.abs(this.A.vx - this.B.vx);
+        const dsit = distSitios(this.A.x, this.A.y, this.A.ang, this.B.x, this.B.y, this.B.ang, CH_SITIO, FORMAS[S.formaChoque].sitios);
         this.energiaOk = rel >= EA; this.orientOk = S.formaChoque === 'sencilla' || dsit <= CH_ORIENT * FORMAS[S.formaChoque].contacto / SITE_CONTACT;
         this.eficaz = this.energiaOk && this.orientOk;
         this.cx = (this.A.x + this.B.x) / 2; this.cy = (this.A.y + this.B.y) / 2;

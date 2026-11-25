@@ -13,7 +13,7 @@ let LAY = null;                    // retícula del modo y del dispositivo actua
 const NOMBRES_NIVEL = ['', 'Muy baja', 'Baja', 'Moderada', 'Normal', 'Alta', 'Muy alta', 'Elevada', 'Intensa', 'Extrema', 'Máxima'];
 const nomNivel = (n) => i18n.t(NOMBRES_NIVEL[n]);
 const textoNivel = (n) => `${nomNivel(n)} (${n})`;
-const NOM_FORMA = { sencilla: 'Sencilla', media: 'Media', compleja: 'Compleja' };
+const NOM_FORMA = { sencilla: 'Esférica', media: 'Simple', compleja: 'Compleja' };
 const formaDe = (v) => ORDEN_FORMAS[Math.max(1, Math.min(3, v)) - 1];
 const COL_IZQ = '#2f6fd0', COL_DER = '#1f9e66';
 const PRESETS = {
@@ -156,7 +156,7 @@ function explicarCarrera(M) {
         : { catalyst: i18n.t('El catalizador rebaja la energía necesaria: sirven más choques.'),
             energy: i18n.t('Más temperatura: moléculas más rápidas y más choques con energía suficiente.'),
             count: i18n.t('Más concentración: más choques por segundo en el mismo balón.'),
-            shape: i18n.t('Cuanto más sencilla es la molécula, más choques llegan bien orientados.') }[S.cmp];
+            shape: i18n.t('Cuantos más lados reactivos ofrece la molécula, más choques llegan bien orientados.') }[S.cmp];
     if (esperado < 0) return;
     const m = LAY.sello.m, fs = m ? 14.5 : 16, lin = partir(txt, M.r * 1.45, { fs, w: 600 });
     const lh = fs + 6, h = lin.length * lh + 16, w = Math.max(...lin.map(l => ancho(l, { fs, w: 600 }))) + 28, y0 = M.cy + (m ? 26 : 40);
@@ -167,7 +167,7 @@ function etiquetaLado(i) {
     const v = +elId(i ? 'sl-der' : 'sl-izq').value, pre = i ? '▶ ' : '◀ ';
     if (S.cmp === 'energy') return pre + i18n.t('Temperatura {n}', { n: nomNivel(v) });
     if (S.cmp === 'count') return pre + i18n.t('{n} A + {n} B', { n: v });
-    if (S.cmp === 'shape') return pre + i18n.t({ sencilla: 'Moléculas sencillas', media: 'Moléculas medias', compleja: 'Moléculas complejas' }[formaDe(v)]);
+    if (S.cmp === 'shape') return pre + i18n.t({ sencilla: 'Moléculas esféricas', media: 'Moléculas simples', compleja: 'Moléculas complejas' }[formaDe(v)]);
     return pre + (v === 0 ? i18n.t('Sin catalizador') : v === 1 ? i18n.t('Con 1 catalizador') : i18n.t('Con {n} catalizadores', { n: v }));
 }
 
@@ -417,7 +417,7 @@ function iniciarEventos(cv) {
             const w = S.mundos[i], v = +s.value; if (!w) return;
             if (S.cmp === 'energy') w.cambiarNivel(v); else if (S.cmp === 'catalyst') w.cambiarCatalizadores(v);
         });
-        s.addEventListener('change', () => { if (S.cmp === 'count') construir(); });
+        s.addEventListener('change', () => { if (S.cmp === 'count' || S.cmp === 'shape') construir(); });
     });
     // Choque
     elId('sl-energia').addEventListener('input', () => { pintarRelleno(elId('sl-energia')); mostrarValores(); });

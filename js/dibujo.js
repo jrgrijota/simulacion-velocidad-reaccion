@@ -145,11 +145,12 @@ function molAB(x, y, a, t, s = 1) {
         return;
     }
     if (FORMA_DIBUJO === 'compleja') [2.25, -2.25].forEach(da => atomoG(x + Math.cos(a + da) * 11 * s, y + Math.sin(a + da) * 11 * s, x, y, s, ink));
-    const d = `M${bx} ${by} L${sx} ${sy}`;
-    forma(d, { s: ink, sw: 8 * s, lc: 'round' }); forma(d, { s: col, sw: 4.4 * s, lc: 'round' });
+    // simple: un sitio reactivo en cada extremo; compleja: uno solo, entre átomos grises
+    const extremos = FORMA_DIBUJO === 'media' ? [[sx, sy], [x - ca * 10 * s, y - sa * 10 * s]] : [[sx, sy]];
+    extremos.forEach(([ex, ey]) => { const d = `M${bx} ${by} L${ex} ${ey}`; forma(d, { s: ink, sw: 8 * s, lc: 'round' }); forma(d, { s: col, sw: 4.4 * s, lc: 'round' }); });
     CC(x, y, 8 * s, { f: t === 'A' ? 'g:molA' : 'g:molB', s: ink, sw: 1.9 * s });
     EE(x - 2.6 * s, y - 3 * s, 2.8 * s, 1.8 * s, -30, { f: '#fff', op: .55 });
-    CC(sx, sy, 4.8 * s, { f: 'g:molS', s: ink, sw: 1.7 * s });
+    extremos.forEach(([ex, ey]) => CC(ex, ey, 4.8 * s, { f: 'g:molS', s: ink, sw: 1.7 * s }));
     if (!_SIN_LETRA && s >= .85 && s < 2.2) T(x + .3 * s, y + 3.6 * s, t, { fs: 9.5 * s, w: 700, a: 'middle', c: '#fff', sys: true });
 }
 function molC(x, y, a, s = 1) {
@@ -171,6 +172,13 @@ function molC(x, y, a, s = 1) {
         });
     }
     const a1 = [x + ca * D, y + sa * D], a2 = [x - ca * D, y - sa * D], b1 = [x + px * D, y + py * D], b2 = [x - px * D, y - py * D];
+    if (FORMA_DIBUJO === 'media') {         // simples: cada átomo grande conserva su otro átomo pequeño, hacia fuera
+        [[a1, 1, CF.A], [a2, -1, CF.B]].forEach(([p, l, col]) => {
+            const e = [p[0] + l * ca * 10 * s, p[1] + l * sa * 10 * s], d = `M${p[0]} ${p[1]} L${e[0]} ${e[1]}`;
+            forma(d, { s: ink, sw: 8 * s, lc: 'round' }); forma(d, { s: col, sw: 4.4 * s, lc: 'round' });
+            CC(e[0], e[1], 4.8 * s, { f: 'g:molS', s: ink, sw: 1.7 * s });
+        });
+    }
     const rombo = `M${a1.join(' ')} L${b1.join(' ')} L${a2.join(' ')} L${b2.join(' ')} Z`;
     forma(rombo, { s: ink, sw: 6.5 * s, lj: 'round' });
     forma(rombo, { f: CF.Cv, fo: .35, s: '#9fe3bf', sw: 3 * s, lj: 'round' });

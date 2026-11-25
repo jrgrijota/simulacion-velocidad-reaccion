@@ -17,13 +17,22 @@ const EA         = 5.8;          // energía de activación (vía térmica)
 const EA_CAT     = 2.9;          // energía de activación (vía catalizada)
 const SITE_CONTACT = 11 * ESC_MOL;
 // Forma de A y B («naturaleza de los reactivos»): cuánto se pueden desviar los sitios reactivos y seguir reaccionando.
-// Sencilla: esféricas, reaccionan por cualquier lado. Media: la de siempre (sitio reactivo en un extremo).
-// Compleja: más átomos alrededor; el sitio reactivo queda más escondido y hay que acertar mejor.
+// Claves internas → nombres en pantalla: sencilla = «esférica» (reacciona por cualquier lado),
+// media = «simple» (un sitio reactivo en cada extremo), compleja = «compleja» (un solo sitio, escondido entre átomos grises).
 const FORMAS = {
-    sencilla: { contacto: Infinity,            radio: 11 * ESC_MOL },
-    media:    { contacto: SITE_CONTACT,        radio: MOL_RADIUS },
-    compleja: { contacto: SITE_CONTACT * 0.87, radio: MOL_RADIUS },
+    sencilla: { contacto: Infinity,            radio: 11 * ESC_MOL, sitios: 1 },
+    media:    { contacto: SITE_CONTACT,        radio: MOL_RADIUS,   sitios: 2 },
+    compleja: { contacto: SITE_CONTACT * 0.87, radio: MOL_RADIUS,   sitios: 1 },
 };
+// Distancia mínima entre los sitios reactivos de dos moléculas (con dos sitios, el segundo está en el extremo opuesto).
+function distSitios(xa, ya, aa, xb, yb, ab, r, n) {
+    let m = Infinity;
+    for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) {
+        const pa = aa + i * Math.PI, pb = ab + j * Math.PI;
+        m = Math.min(m, Math.hypot(xa + Math.cos(pa) * r - xb - Math.cos(pb) * r, ya + Math.sin(pa) * r - yb - Math.sin(pb) * r));
+    }
+    return m;
+}
 const ORDEN_FORMAS = ['sencilla', 'media', 'compleja'];
 const CAT_ATTRACT_R = 115 * ESC_MOL;
 const CAT_PULL   = 0.11;
@@ -255,9 +264,9 @@ class Mundo {
                 a.x -= nx * ov; a.y -= ny * ov; b.x += nx * ov; b.y += ny * ov;
                 const dvx = a.vx - b.vx, dvy = a.vy - b.vy, dot = dvx * nx + dvy * ny;
                 if ((a.tipo === 'A' && b.tipo === 'B') || (a.tipo === 'B' && b.tipo === 'A')) {
-                    const rel = Math.hypot(dvx, dvy), sa = a.sitio(), sb = b.sitio();
-                    if (dot > 0) this.cont[rel < EA ? 'energia' : Math.hypot(sa.x - sb.x, sa.y - sb.y) <= FORMAS[this.forma].contacto ? 'eficaz' : 'orient']++;
-                    if (rel >= EA && Math.hypot(sa.x - sb.x, sa.y - sb.y) <= FORMAS[this.forma].contacto) {
+                    const F = FORMAS[this.forma], rel = Math.hypot(dvx, dvy), bien = distSitios(a.x, a.y, a.angulo, b.x, b.y, b.angulo, SITE_DIST, F.sitios) <= F.contacto;
+                    if (dot > 0) this.cont[rel < EA ? 'energia' : bien ? 'eficaz' : 'orient']++;
+                    if (rel >= EA && bien) {
                         const cx = (a.x + b.x) / 2, cy = (a.y + b.y) / 2;
                         nuevos.push({ x: cx, y: cy, vx: (a.vx + b.vx) / 2, vy: (a.vy + b.vy) / 2 });
                         this.anotar(cx, cy, 'T');
