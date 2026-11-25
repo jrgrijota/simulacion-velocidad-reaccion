@@ -57,7 +57,7 @@ function disponerComparar(m) {
         });
         return { w: 1330, h: 696, tarjetas: [{ x: 0, y: 0, w: 1330, h: 540 }], lados, divisor: { x: 665, y1: 112, y2: 480 },
             pregunta: { x: 665, y: 46 }, selector: { x: 665, y: 60 }, acciones: { x: 665 - 150, y: 492, w: 300 },
-            graf: { x: 0, y: 552, w: 900, h: 144, m: false }, igual: { x: 916, y: 552, w: 414, h: 144 }, sello: { x: 743, y: 634, m: true },
+            graf: { x: 0, y: 552, w: 900, h: 144, m: false }, igual: { x: 916, y: 552, w: 414, h: 144 }, sello: { m: false },
             mandos: { x: 938, y: 588, w: 372, compacto: true } };
     }
     const lados = [0, 1].map(i => {
@@ -68,7 +68,7 @@ function disponerComparar(m) {
     });
     return { w: 370, h: 1776, tarjetas: [{ x: 0, y: 0, w: 370, h: 676 }, { x: 0, y: 692, w: 370, h: 676 }], lados,
         graf: { x: 0, y: 1384, w: 370, h: 200, m: true, tit: 'Velocidad de reacción (reacciones/s)', filaLeyenda: true },
-        igual: { x: 0, y: 1600, w: 370, h: 176 }, sello: { x: 185, y: 1360, m: true }, mandos: { x: 14, y: 1636, w: 342, compacto: true } };
+        igual: { x: 0, y: 1600, w: 370, h: 176 }, sello: { m: true }, mandos: { x: 14, y: 1636, w: 342, compacto: true } };
 }
 function disponerChoque(m) {
     if (!m) return {
@@ -224,7 +224,8 @@ function dibujarComparar() {
     T(ig.x + 22, ig.y + 28, i18n.t('Igual en los dos'), { fs: 16.5, w: 600, c: THEME.textDim });
     if (S.cmpListo && S.ganador >= 0) {
         const w = S.mundos[S.ganador], L = etiquetaLado(S.ganador).replace(/^[◀▶] /, '');
-        selloVR(i18n.t('¡TERMINA ANTES!'), `${L}: ${coma(w.tFin)} s`, LAY.sello.x, LAY.sello.y, S.tSello, LAY.sello.m);
+        const M = LAY.lados[S.ganador].modelo; // sobre el círculo de la reacción ganadora
+        selloVR(i18n.t('¡TERMINA ANTES!'), `${L}: ${coma(w.tFin)} s`, M.cx, M.cy, S.tSello, LAY.sello.m);
     }
 }
 function dibujarChoque() {
