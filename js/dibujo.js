@@ -386,8 +386,15 @@ function dibujarModelo(cx, cy, r, mundo, texto, zoom, fsR, extra) {
 
 // ═════════ PANEL DE ESTADO ═════════
 // Contador real: de los últimos choques A + B, cuántos llevan más energía que Eₐ
-function dibujarContadorChoques(x, y, w, h, ult, conCat, m) {
+const ROJO_NO = '#e5484d';            // carmesí: no se confunde con el naranja de B
+function dibujarContadorChoques(x, y, w, h, ult, conCat, m, enEspera) {
     const ink = tinta(), n = ult.length, si = ult.filter(Boolean).length;
+    if (enEspera) {
+        T(x, y + 32, i18n.t('Pulsa Empezar para contar choques'), { fs: m ? 17 : 18.5, w: 600, c: THEME.textDim });
+        const paso = w / CHOQUES_VISTOS, r = Math.min(8, paso * .38);
+        for (let i = 0; i < CHOQUES_VISTOS; i++) CC(x + paso * (i + .5), y + 64, r, { s: THEME.border, sw: 1.5, dash: [2, 3] });
+        return;
+    }
     const fsN = m ? 30 : 34, txtN = i18n.t('{a} de {b}', { a: si, b: CHOQUES_VISTOS });
     T(x, y + 34, txtN, { fs: fsN, w: 700, c: n ? '#34e3a8' : THEME.textDim });
     const sub = n < CHOQUES_VISTOS ? i18n.t('contando choques…') : i18n.t('superan Eₐ');
@@ -396,11 +403,12 @@ function dibujarContadorChoques(x, y, w, h, ult, conCat, m) {
     for (let i = 0; i < CHOQUES_VISTOS; i++) {
         const cx = x + paso * (i + .5), v = ult[i];
         if (v === undefined) CC(cx, cy, r, { s: THEME.border, sw: 1.5, dash: [2, 3] });
-        else CC(cx, cy, r, { f: v ? '#34c782' : CF.no, s: ink, sw: 1.5 });
+        else if (v) { CC(cx, cy, r, { f: '#34c782', s: ink, sw: 1.5 }); T(cx, cy + r * .45, '✓', { fs: r * 1.3, w: 700, a: 'middle', c: '#071a2b', sys: true }); }
+        else { CC(cx, cy, r - 1, { s: ROJO_NO, sw: 2.2 }); const q = (r - 1) * .7; forma(`M${cx - q} ${cy + q} L${cx + q} ${cy - q}`, { s: ROJO_NO, sw: 2.2, lc: 'round' }); }
     }
-    const nota = conCat ? i18n.t('Con catalizador les basta menos energía: también reaccionan choques que no llegan a Eₐ.')
-                        : i18n.t('Verde: más energía que Eₐ. Rojo: menos. Sube la temperatura y verás más verdes.');
-    partir(nota, w, { fs: m ? 14.5 : 15, sys: true }).slice(0, 2).forEach((l, i) => TS(x, y + 98 + i * 20, l, { fs: m ? 14.5 : 15, c: THEME.textDim }));
+    const nota = conCat ? i18n.t('Verde: supera Eₐ; rojo: no. Con catalizador, A y B sujetas en él reaccionan sin llegar a Eₐ.')
+                        : i18n.t('Verde: supera Eₐ; rojo: no. De los verdes, solo reaccionan los que chocan de frente.');
+    partir(nota, w, { fs: m ? 14.5 : 15, sys: true }).slice(0, 3).forEach((l, i) => TS(x, y + 98 + i * 20, l, { fs: m ? 14.5 : 15, c: THEME.textDim }));
 }
 // e = { tag, col, msg, nivel, cat, n:[A,B,C,K], pie }
 function panelEstado(x, y, w, h, e, m) {
@@ -413,7 +421,7 @@ function panelEstado(x, y, w, h, e, m) {
     let dy = y + 86 + (Math.max(lineas.length, 4) - 1) * lh + 24;
     linea(`M${px} ${dy} H${px + iw}`, THEME.border, 1.5);
     TS(px, dy + 26, i18n.t('Últimos {n} choques entre A y B', { n: CHOQUES_VISTOS }), { fs: 15.5, c: THEME.textDim });
-    const dh = 124; dibujarContadorChoques(px, dy + 38, iw, dh, e.ult, e.cat, m);
+    const dh = 124; dibujarContadorChoques(px, dy + 38, iw, dh, e.ult, e.cat, m, e.enEspera);
     dy += 38 + dh + 18;
     linea(`M${px} ${dy} H${px + iw}`, THEME.border, 1.5);
     const sp = iw / 4;
@@ -429,12 +437,12 @@ function panelEstado(x, y, w, h, e, m) {
 
 // ═════════ TIRA: VELOCIDAD DE REACCIÓN EN PAPEL (toda la reacción) ═════════
 // curvas: [{ pts:[[t, v]…], c, area, fin:'texto', lab:'texto', lx, ly, dash }]
-function dibujarGrafica(x, y, w, h, curvas, tmax, ymax, m, titulo, filaLeyenda) {
+function dibujarGrafica(x, y, w, h, curvas, tmax, ymax, m, titulo, filaLeyenda, meta) {
     const ink = tinta();
     forma(R(x + 4, y + 5, w, h, 16), { f: ink, op: .55 });
     forma(R(x, y, w, h, 16), { f: THEME.paper, s: ink, sw: 3 });
-    const gx = x + (m ? 40 : 64), gx1 = x + w - (m ? 18 : 30), gy = y + (m ? 46 : 40) + (filaLeyenda ? 30 : 0), gb = y + h - (m ? 30 : 26);
-    T(x + (m ? 16 : 20), y + 26, titulo || i18n.t('Velocidad de reacción · reacciones por segundo'), { fs: m ? 14.5 : 16, w: 600, c: THEME.paperInk });
+    const gx = x + (m ? 54 : 70), gx1 = x + w - (m ? 18 : 30), gy = y + (m ? 46 : 40) + (filaLeyenda ? 30 : 0), gb = y + h - (m ? 30 : 26);
+    T(x + (m ? 16 : 20), y + 26, titulo || i18n.t('Reactivo transformado (%)'), { fs: m ? 14.5 : 16, w: 600, c: THEME.paperInk });
     const div = tmax % 6 === 0 ? 6 : 5, paso = tmax / div;   // marcas en segundos enteros
     for (let i = 0; i <= div; i++) {
         const t = paso * i, xx = gx + t / tmax * (gx1 - gx);
@@ -444,7 +452,14 @@ function dibujarGrafica(x, y, w, h, curvas, tmax, ymax, m, titulo, filaLeyenda) 
     for (let j = 0; j <= 2; j++) {
         const yy = gb - j * (gb - gy) / 2;
         linea(`M${gx} ${yy} H${gx1}`, THEME.paperGrid, 1);
-        TS(gx - 8, yy + 4, coma(j * ymax / 2, ymax < 2 ? 1 : 0).replace(',0', ''), { fs: 14, a: 'end', c: THEME.paperInk });
+        TS(gx - 8, yy + 4, coma(j * ymax / 2, ymax < 2 ? 1 : 0).replace(',0', '') + (ymax === 100 ? ' %' : ''), { fs: 14, a: 'end', c: THEME.paperInk });
+    }
+    if (meta) {                                             // la mitad: ahí se decide la carrera de Comparación
+        const ym = gb - (gb - gy) / 2;
+        forma(`M${gx} ${ym} H${gx1}`, { s: '#d23f6b', sw: 2.2, dash: [7, 5] });
+        const lt = i18n.t('la mitad'), lw = ancho(lt, { fs: 13, w: 700 }) + 16;
+        forma(R(gx1 - lw, ym - 11, lw, 22, 11), { f: '#d23f6b', s: ink, sw: 1.4 });
+        T(gx1 - lw / 2, ym + 5, lt, { fs: 13, w: 700, a: 'middle', c: '#fff' });
     }
     forma(`M${gx} ${gy - 4} V${gb} H${gx1}`, { s: THEME.paperInk, sw: 2 });
     curvas.forEach(cv => {
@@ -462,6 +477,15 @@ function dibujarGrafica(x, y, w, h, curvas, tmax, ymax, m, titulo, filaLeyenda) 
             forma(R(lx - tw - 14, gy - 8, tw, 26, 13), { f: THEME.paperInk, s: ink, sw: 1.5 });
             T(lx - 14 - tw / 2, gy + 10, cv.fin, { fs: 14, w: 600, a: 'middle', c: THEME.paper });
         } else CC(lx, ly, 8, { f: cv.c, s: ink, sw: 2.5 });
+        if (cv.mitad != null) {                             // dónde cruzó la mitad
+            const mx = gx + cv.mitad / tmax * (gx1 - gx), my = gb - .5 * (gb - gy);
+            CC(mx, my, 7, { f: cv.c, s: ink, sw: 2 });
+            if (cv.labMitad) {
+                const tw = ancho(cv.labMitad, { fs: 14, w: 700 }) + 18;
+                forma(R(mx - tw / 2, my - 38, tw, 24, 12), { f: THEME.paperInk, s: ink, sw: 1.4 });
+                T(mx, my - 21, cv.labMitad, { fs: 14, w: 700, a: 'middle', c: THEME.paper });
+            }
+        }
     });
     // nombres de las curvas en píldoras de color: a la derecha del título (o en una fila propia en el móvil)
     let lx0 = x + w - 20;
@@ -475,21 +499,13 @@ function dibujarGrafica(x, y, w, h, curvas, tmax, ymax, m, titulo, filaLeyenda) 
         if (filaLeyenda) lx0 += tw + 8; else lx0 -= tw + 8;
     });
 }
-// Reacciones por segundo suavizadas (media móvil de 5 s) a partir de la serie del mundo
+// % de reactivo transformado frente al tiempo: un punto por reacción y el instante actual
 function curvaDe(mundo) {
-    const s = mundo.serie, pts = [];
-    if (!s.length) return pts;
-    for (let i = 0; i < s.length; i++) {
-        let a = 0, n = 0;
-        for (let j = Math.max(0, i - 2); j <= Math.min(s.length - 1, i + 2); j++) { a += s[j]; n++; }
-        pts.push([i + 0.5, a / n]);
-    }
-    pts.unshift([0, pts[0][1] * 0.6]);
-    if (mundo.tFin != null) { pts[pts.length - 1][0] = Math.min(pts[pts.length - 1][0], mundo.tFin); pts.push([mundo.tFin, 0]); }
+    const pts = mundo.prog.slice(), t = mundo.tiempo();
+    if (t > pts[pts.length - 1][0]) pts.push([t, mundo.conversion() * 100]);
     return pts;
 }
 const ESCALA_T = [10, 20, 30, 60, 120, 240, 600, 1200, 2400, 6000];
-const ESCALA_Y = [1, 2, 4, 8, 16, 32, 64, 128];
 const sobre = (lista, v) => lista.find(x => x >= v) || lista[lista.length - 1];
 
 // Leyenda del gas en dos líneas, fuera del puesto (Comparación en escritorio, bajo la etiqueta izquierda)

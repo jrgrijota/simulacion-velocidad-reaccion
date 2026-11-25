@@ -10,7 +10,7 @@ const RETOS_VR = crearRetos({
         { id: 'rapida', txt: 'Completa una reacción en menos de 10 s', pista: 'Los catalizadores ayudan mucho.' },
         { id: 'fria', txt: 'Consigue ese tiempo con la temperatura en «Baja» o menos, usando catalizadores' },
         { id: 'sobra', txt: 'Termina una reacción en la que sobre reactivo (A y B distintos) y averigua cuál era el limitante' },
-        { id: 'comparar', n: 3, txt: 'En Comparación, averigua con cada una de las tres variables cuál hace terminar antes' },
+        { id: 'comparar', n: 3, txt: 'En Comparación, averigua con cada una de las tres variables cuál hace reaccionar más deprisa' },
         { id: 'choques', n: 3, txt: 'En Choque, consigue los tres resultados: eficaz, poca energía y mal orientadas' },
     ],
     progreso: (r, d) => {

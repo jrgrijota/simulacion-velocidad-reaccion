@@ -14,7 +14,7 @@ const CH_VELOCIDAD = 1.5;        // v = K · √E (la relativa 2v supera Eₐ a 
 const CH_NIVEL_EA = Math.pow(EA / (2 * CH_VELOCIDAD), 2);   // nivel de energía que equivale a Eₐ (≈ 3,7)
 
 class Choque {
-    constructor() { this.reiniciar(true); }
+    constructor() { this.girado = false; this.reiniciar(true); }
     reiniciar(todo) {
         this.fase = 'listo';                 // 'listo' | 'vuelo' | 'resultado'
         const aA = this.A ? this.A.ang : 0, aB = this.B ? this.B.ang : Math.PI;   // sin «todo», se conserva el giro
@@ -84,7 +84,7 @@ class Choque {
         for (const m of [this.A, this.B]) if (Math.hypot(mx - m.x, my - m.y) < 70) { this.arrastre = m; return true; }
         return false;
     }
-    arrastrar(mx, my) { if (this.arrastre) this.arrastre.ang = Math.atan2(my - this.arrastre.y, mx - this.arrastre.x); }
+    arrastrar(mx, my) { if (this.arrastre) { this.arrastre.ang = Math.atan2(my - this.arrastre.y, mx - this.arrastre.x); this.girado = true; } }
     soltar() { this.arrastre = null; }
 
     // ── Dibujo dentro del círculo (ya trasladado y escalado) ──
@@ -98,6 +98,17 @@ class Choque {
         }
         if (c.fase === 'listo') {
             [c.A, c.B].forEach(m => forma(E(m.x, m.y, 74, 74), { s: THEME.accent, sw: 2, dash: [6, 7], op: c.arrastre === m ? .8 : .35 }));
+            if (!c.girado) {                 // pista hasta el primer giro: flecha curva y «arrastra para girar»
+                const op = .55 + .45 * Math.sin(millis() / 330);
+                [c.A, c.B].forEach((m, i) => {   // arco por el lado de dentro, para que no lo corte el círculo
+                    const r = 84, sg = i ? -1 : 1, a0 = i ? -Math.PI * .4 : -Math.PI * .6, a1 = i ? -Math.PI * .9 : -Math.PI * .1;
+                    const ex = m.x + Math.cos(a1) * r, ey = m.y + Math.sin(a1) * r;
+                    forma(`M${m.x + Math.cos(a0) * r} ${m.y + Math.sin(a0) * r} A${r} ${r} 0 0 ${i ? 0 : 1} ${ex} ${ey}`, { s: THEME.accent, sw: 4, lc: 'round', op });
+                    const ta = a1 + sg * Math.PI / 2, ux = Math.cos(ta), uy = Math.sin(ta), nx = -uy, ny = ux;
+                    forma(`M${ex + ux * 14} ${ey + uy * 14} L${ex + nx * 9} ${ey + ny * 9} L${ex - nx * 9} ${ey - ny * 9} Z`, { f: THEME.accent, op });
+                });
+                TS(0, 128, i18n.t('Arrastra cada molécula para girarla'), { fs: 17, w: 700, a: 'middle', c: THEME.accent });
+            }
         }
     }
     dibujar() {

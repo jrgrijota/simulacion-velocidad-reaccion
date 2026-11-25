@@ -79,6 +79,9 @@ class Mundo {
         this.serie = [];                // reacciones en cada segundo simulado
         this.enSegundo = 0;
         this.ultimos = [];              // últimos choques A + B: true si superan Eₐ (contador del panel)
+        this.prog = [[0, 0]];           // [segundos, % de reactivo transformado] tras cada reacción (gráfica)
+        this.marcas = [];               // instantes de las reacciones (velocidad actual, media de 3 s)
+        this.tMitad = null;             // segundos al llegar al 50 % (carrera de Comparación)
         this.poblar();
     }
     poblar() {
@@ -91,6 +94,12 @@ class Mundo {
     conversion() { return this.limitante ? Math.min(1, this.total / this.limitante) : 0; }
     terminada() { return this.limitante > 0 && this.total >= this.limitante; }
     tiempo() { return (this.tFin != null ? this.tFin : this.pasos / TICKS_S); }
+    // Reacciones por segundo en los últimos 3 s (0 al terminar)
+    velocidadActual() {
+        if (this.tFin != null) return 0;
+        const t = this.tiempo(), v = Math.min(3, Math.max(t, 1));
+        return this.marcas.filter(m => m > t - v).length / v;
+    }
     sigma() { return BASE_SIGMA * Math.sqrt(this.nivel); }
     // Fracción de pares con velocidad relativa mayor que ea (área verde de la curva)
     fraccionSobre(ea) { const s = this.sigma() * Math.SQRT2; return Math.exp(-(ea * ea) / (2 * s * s)); }
@@ -217,6 +226,9 @@ class Mundo {
     anotar(x, y, via) {
         this.destellos.push({ x, y, edad: 0, via });
         this.total++; this.enSegundo++;
+        const t = this.pasos / TICKS_S, p = this.conversion() * 100;
+        this.prog.push([t, p]); this.marcas.push(t);
+        if (this.tMitad == null && p >= 50) this.tMitad = t;
         if (via === 'K') this.catalizadas++; else this.termicas++;
     }
     // Colisiones elásticas y reacción por la vía térmica (energía + orientación)
