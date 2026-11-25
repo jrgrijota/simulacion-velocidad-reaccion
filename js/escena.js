@@ -136,9 +136,14 @@ function construir() {
     else if (S.modo === 'comparar') S.mundos = [new Mundo(configLado(0)), new Mundo(configLado(1))];
     else S.mundos = [];
     S.tmax = 10; S.ymax = 1; S.cmpListo = false; S.ganador = -1; S.finRegistrado = false; S.tSello = 0;
-    pausar(false);
+    pausar(true);                       // cada reacción empieza parada: el alumno pulsa «Empezar»
 }
-function pausar(v) { S.pausado = v; elId('btn-pausa').textContent = v ? i18n.t('▶ Reanudar') : i18n.t('❚❚ Pausar'); }
+function pausar(v) {
+    S.pausado = v;
+    const inicio = v && S.mundos.length && S.mundos.every(w => w.pasos === 0), b = elId('btn-pausa');
+    b.textContent = inicio ? i18n.t('▶ Empezar') : v ? i18n.t('▶ Reanudar') : i18n.t('❚❚ Pausar');
+    b.classList.toggle('boton-lanzar', !!inicio);
+}
 function etiquetaLado(i) {
     const v = +elId(i ? 'sl-der' : 'sl-izq').value, pre = i ? '▶ ' : '◀ ';
     if (S.cmp === 'energy') return pre + i18n.t('Temperatura {n}', { n: nomNivel(v) });
