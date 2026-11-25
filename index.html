@@ -1,661 +1,179 @@
 <!DOCTYPE html>
-<html lang="es" data-theme="dark" data-ui="compact">
+<html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Simulación: Velocidad de reacción</title>
-  <!-- Página pública de esta simulación: simulaciencia.es. Esta dirección (github.io) es la que carga la web dentro de un iframe; la canónica evita que los buscadores la indexen como página aparte. -->
-  <meta name="description" content="Cómo afectan temperatura, concentración y catalizador a la rapidez de una reacción, con un modo choque que muestra por qué hacen falta energía y orientación.">
-  <link rel="canonical" id="canonical" href="https://simulaciencia.es/simulaciones/velocidad-reaccion/">
-  <script>(function(){var d={"en":"en/simulations/","ca":"ca/simulacions/","eu":"eu/simulazioak/","gl":"gl/simulacions/"}[new URLSearchParams(location.search).get('lang')];if(d)document.getElementById('canonical').href='https://simulaciencia.es/'+d+'velocidad-reaccion/';})();</script>
-  <script src="js/i18n-en.js"></script>
-  <script src="js/i18n-ca.js"></script>
-  <script src="js/i18n-eu.js"></script>
-  <script src="js/i18n-gl.js"></script>
-  <script src="js/i18n.js"></script>
-  <script src="js/vendor/p5.min.js"></script>
-  <script>
-    (function () {
-      try {
-        var t = localStorage.getItem("sim-ui-theme-vr");
-        var d = localStorage.getItem("sim-ui-density-vr");
-        if (t) document.documentElement.setAttribute("data-theme", t);
-        if (d) document.documentElement.setAttribute("data-ui", d);
-      } catch (e) {}
-    })();
-  </script>
-
-  <style>
-    :root {
-      --bg-body: #0e1018;
-      --bg-container: #161a26;
-      --bg-card: #1e2334;
-      --bg-card-hover: #252b40;
-      --bg-input: #11141f;
-      --border-main: #2b3147;
-      --border-strong: #394264;
-      --border-canvas: #3f476a;
-      --text-main: #eef2f8;
-      --text-muted: #9aa6bd;
-      --text-label: #cdd6e6;
-      --accent: #3b82f6;
-      --accent-strong: #2563eb;
-      --accent-soft: rgba(59,130,246,0.14);
-      --success: #10b981;
-      --success-hover: #059669;
-      --btn-secondary: #2c3450;
-      --btn-secondary-hover: #3a456a;
-      --shadow-card: 0 1px 2px rgba(0,0,0,0.18);
-      --shadow-pop: 0 12px 28px -6px rgba(0,0,0,0.45);
-
-      --panel-w: 318px;
-      --panel-gap: 9px;
-      --card-pad: 12px;
-      --radius: 10px;
-      --logo-size: 38px;
-      --fs-title: 15.5px;
-      --fs-subtitle: 11.5px;
-      --fs-h2: 11px;
-      --fs-trigger: 11px;
-      --fs-label: 12px;
-      --fs-readout: 11.5px;
-      --fs-input: 13px;
-      --fs-hint: 11px;
-      --fs-info-label: 10.5px;
-      --fs-info: 12px;
-      --group-mb: 10px;
-    }
-
-    [data-theme="light"] {
-      --bg-body: #c8d0da;
-      --bg-container: #dde3ec;
-      --bg-card: #e8edf5;
-      --bg-card-hover: #d4dbe7;
-      --bg-input: #cdd5e0;
-      --border-main: #b0baca;
-      --border-strong: #8fa0b5;
-      --border-canvas: #8fa0b5;
-      --text-main: #1a2236;
-      --text-muted: #4a5a72;
-      --text-label: #2a3a55;
-      --accent: #1d57c8;
-      --accent-strong: #1446a8;
-      --accent-soft: rgba(29,87,200,0.12);
-      --success: #0e8a5f;
-      --success-hover: #0b7050;
-      --btn-secondary: #c2ccda;
-      --btn-secondary-hover: #b0bccd;
-      --shadow-card: 0 1px 2px rgba(0,0,0,0.08);
-      --shadow-pop: 0 12px 28px -6px rgba(0,0,0,0.18);
-    }
-
-    [data-theme="high-contrast"] {
-      --bg-body: #000000;
-      --bg-container: #000000;
-      --bg-card: #111111;
-      --bg-card-hover: #1a1a1a;
-      --bg-input: #0a0a0a;
-      --border-main: #ffff00;
-      --border-strong: #ffff00;
-      --border-canvas: #ffff00;
-      --text-main: #ffffff;
-      --text-muted: #cccccc;
-      --text-label: #ffffff;
-      --accent: #ffff00;
-      --accent-strong: #ffee00;
-      --accent-soft: rgba(255,255,0,0.18);
-      --success: #00ff88;
-      --success-hover: #00dd77;
-      --btn-secondary: #222200;
-      --btn-secondary-hover: #333300;
-      --shadow-card: 0 0 0 1px #ffff00;
-      --shadow-pop: 0 0 0 2px #ffff00;
-    }
-
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { height: 100%; overflow: hidden; }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: var(--bg-body);
-      color: var(--text-main);
-      display: flex;
-      align-items: stretch;
-      height: 100dvh;
-    }
-
-    /* ── SIDEBAR ── */
-    .sidebar {
-      width: var(--panel-w);
-      flex-shrink: 0;
-      background: var(--bg-container);
-      border-right: 1px solid var(--border-main);
-      display: flex;
-      flex-direction: column;
-      overflow-y: auto;
-      overflow-x: hidden;
-    }
-
-    .sidebar-inner {
-      padding: 14px 12px 18px;
-      display: flex;
-      flex-direction: column;
-      gap: var(--panel-gap);
-    }
-
-    /* ── HEADER ── */
-    .sim-header {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding-bottom: 2px;
-    }
-    .sim-logo {
-      width: var(--logo-size); height: var(--logo-size);
-      border-radius: 9px;
-      background: var(--accent-soft);
-      border: 1.5px solid var(--accent);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 20px;
-      flex-shrink: 0;
-    }
-    .sim-title { font-size: var(--fs-title); font-weight: 700; line-height: 1.25; }
-    .sim-subtitle { font-size: var(--fs-subtitle); color: var(--text-muted); margin-top: 2px; }
-
-    /* ── CARDS ── */
-    .card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-main);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow-card);
-      overflow: hidden;
-    }
-    .card-trigger {
-      width: 100%; background: none; border: none; cursor: pointer;
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 9px var(--card-pad);
-      color: var(--text-muted);
-      font-size: var(--fs-trigger);
-      font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;
-    }
-    .card-trigger:hover { color: var(--text-main); }
-    .card-chevron { font-size: 10px; transition: transform 0.2s; }
-    .card.is-expanded .card-chevron { transform: rotate(180deg); }
-    .card-body { display: none; padding: 0 var(--card-pad) var(--card-pad); }
-    .card.is-expanded .card-body { display: block; }
-
-    /* ── CONTROL GROUPS ── */
-    .control-group { margin-bottom: var(--group-mb); }
-    .control-group:last-child { margin-bottom: 0; }
-
-    .field-label {
-      display: flex; justify-content: space-between; align-items: center;
-      font-size: var(--fs-label); font-weight: 600; color: var(--text-label);
-      margin-bottom: 5px;
-    }
-    .field-readout {
-      font-size: var(--fs-readout); font-weight: 500; color: var(--text-muted);
-      font-variant-numeric: tabular-nums;
-    }
-    .field-hint { font-size: var(--fs-hint); color: var(--text-muted); margin-top: 4px; }
-
-    input[type="range"] {
-      -webkit-appearance: none; appearance: none;
-      width: 100%; height: 5px; border-radius: 3px;
-      background: var(--border-strong); outline: none; cursor: pointer;
-    }
-    input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 16px; height: 16px; border-radius: 50%;
-      background: var(--accent); border: 2px solid var(--bg-card);
-      box-shadow: 0 0 0 1px var(--accent);
-    }
-    input[type="range"]::-moz-range-thumb {
-      width: 16px; height: 16px; border-radius: 50%;
-      background: var(--accent); border: 2px solid var(--bg-card);
-    }
-
-    /* ── BOTONES ── */
-    .btn-primary {
-      width: 100%; padding: 8px 0;
-      background: var(--accent-strong); color: #fff;
-      border: none; border-radius: 7px; cursor: pointer;
-      font-size: var(--fs-input); font-weight: 600;
-      transition: background 0.15s;
-    }
-    /* Fondo un tono más oscuro que el acento para que el texto blanco se lea bien (contraste 4,5:1) */
-    .btn-primary:hover { filter: brightness(0.88); }
-    [data-theme="high-contrast"] .btn-primary { color: #000; }
-
-    .btn-secondary {
-      width: 100%; padding: 7px 0;
-      background: var(--btn-secondary); color: var(--text-label);
-      border: 1px solid var(--border-main);
-      border-radius: 7px; cursor: pointer;
-      font-size: var(--fs-input); font-weight: 600;
-      transition: background 0.15s;
-    }
-    .btn-secondary:hover { background: var(--btn-secondary-hover); }
-
-    /* ── TOGGLE ON/OFF ── */
-    .btn-emission-toggle {
-      width: 100%;
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 7px 12px;
-      background: var(--btn-secondary);
-      color: var(--text-label);
-      border: 1px solid var(--border-main);
-      border-radius: 8px; cursor: pointer;
-      font-size: var(--fs-label); font-weight: 600;
-      transition: background 0.15s, border-color 0.15s;
-      position: relative;
-    }
-    .btn-emission-toggle:hover { background: var(--btn-secondary-hover); }
-    .toggle-pill {
-      width: 38px; height: 20px; border-radius: 12px;
-      position: relative; flex-shrink: 0;
-      background: var(--border-strong);
-      transition: background 0.2s;
-    }
-    .toggle-pill::after {
-      content: "";
-      position: absolute; top: 3px; left: 3px;
-      width: 14px; height: 14px; border-radius: 50%;
-      background: #fff;
-      transition: left 0.2s;
-    }
-    .btn-emission-toggle.is-off .toggle-pill { background: var(--border-strong); }
-    .btn-emission-toggle.is-off .toggle-pill::after { left: 3px; }
-    .btn-emission-toggle.is-on  .toggle-pill { background: var(--success); }
-    .btn-emission-toggle.is-on  .toggle-pill::after { left: 21px; }
-
-    /* ── ESTADÍSTICAS ── */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 6px;
-    }
-    .stat-item {
-      background: var(--bg-input);
-      border: 1px solid var(--border-main);
-      border-radius: 7px;
-      padding: 7px 10px;
-    }
-    .stat-label {
-      font-size: var(--fs-info-label); color: var(--text-muted);
-      text-transform: uppercase; letter-spacing: 0.05em;
-    }
-    .stat-value {
-      font-size: 18px; font-weight: 700; color: var(--text-main);
-      font-variant-numeric: tabular-nums;
-    }
-    .stat-item.accent-a .stat-value { color: #4f8ef7; }
-    .stat-item.accent-b .stat-value { color: #f7823c; }
-    [data-theme="light"] .stat-item.accent-a .stat-value { color: #1446a8; }
-    [data-theme="light"] .stat-item.accent-b .stat-value { color: #8a3a0c; }
-    .stat-item.accent-c .stat-value { color: #34c782; }
-    .stat-item.accent-r .stat-value { color: var(--success); }
-
-    /* ── SECCIÓN DE LEYENDA ── */
-    .legend-row {
-      display: flex; align-items: center; gap: 8px;
-      font-size: var(--fs-label); color: var(--text-label);
-      margin-bottom: 5px;
-    }
-    .legend-dot {
-      width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0;
-    }
-
-    /* ── INFO COLLAPSIBLE ── */
-    .info-section { margin-top: 2px; }
-    .info-section p {
-      font-size: var(--fs-info); color: var(--text-muted);
-      line-height: 1.55; margin-bottom: 7px;
-    }
-    .info-section p:last-child { margin-bottom: 0; }
-    .info-section b { color: var(--text-label); }
-
-    /* ── DROPDOWN DE CONFIGURACIÓN ── */
-    .toolbar-row {
-      display: flex; justify-content: flex-end; margin-bottom: -4px;
-    }
-    #ui-dropdown-container { position: relative; }
-    #ui-dropdown-trigger {
-      width: 30px; height: 30px;
-      background: var(--bg-card); border: 1px solid var(--border-main);
-      border-radius: 7px; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 15px; color: var(--text-muted);
-      transition: background 0.15s;
-    }
-    #ui-dropdown-trigger:hover { background: var(--bg-card-hover); color: var(--text-main); }
-    .dropdown-card {
-      display: none;
-      position: absolute; right: 0; top: 36px;
-      width: 210px;
-      background: var(--bg-container);
-      border: 1px solid var(--border-strong);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow-pop);
-      padding: 12px;
-      z-index: 100;
-    }
-    #ui-dropdown-container.is-active .dropdown-card { display: block; }
-    .dropdown-label {
-      font-size: var(--fs-info-label); font-weight: 600;
-      color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em;
-      margin-bottom: 6px;
-    }
-    select {
-      width: 100%; padding: 6px 8px;
-      background: var(--bg-input); color: var(--text-main);
-      border: 1px solid var(--border-strong); border-radius: 6px;
-      font-size: var(--fs-input); cursor: pointer; outline: none;
-    }
-    select:focus { border-color: var(--accent); }
-
-    /* ── CANVAS ── */
-    #canvas-holder {
-      flex: 1;
-      min-width: 0;
-      overflow: hidden;
-      position: relative;
-    }
-    #canvas-holder canvas { display: block; }
-
-    /* ── PANTALLAS ESTRECHAS (móvil) ──
-       La simulación arriba a todo el ancho y el panel debajo. El lienzo toma el
-       tamaño de #canvas-holder y computeLayout() reparte cámara y gráfica. */
-    @media (max-width: 760px) {
-      html, body { height: auto; overflow: auto; }
-      body { flex-direction: column; }
-      #canvas-holder { order: -1; flex: none; width: 100%; height: clamp(360px, 68svh, 640px); }
-      html:not([data-theme="high-contrast"]) #canvas-holder { height: clamp(420px, 78svh, 700px); }
-      .sidebar { width: 100%; border-right: none; border-top: 1px solid var(--border-main); overflow: visible; }
-    }
-  </style>
-  <link rel="stylesheet" href="css/estilo-juego.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulación: Velocidad de reacción</title>
+    <meta name="description" content="Cómo afectan temperatura, concentración y catalizador a la rapidez de una reacción: un balón con cronómetro, el modelo de moléculas y un modo choque que muestra por qué hacen falta energía y orientación.">
+    <link rel="canonical" id="canonical" href="https://simulaciencia.es/simulaciones/velocidad-reaccion/">
+    <script>(function(){var d={"en":"en/simulations/","ca":"ca/simulacions/","eu":"eu/simulazioak/","gl":"gl/simulacions/"}[new URLSearchParams(location.search).get('lang')];if(d)document.getElementById('canonical').href='https://simulaciencia.es/'+d+'velocidad-reaccion/';})();</script>
+    <script src="js/i18n-en.js"></script>
+    <script src="js/i18n-ca.js"></script>
+    <script src="js/i18n-eu.js"></script>
+    <script src="js/i18n-gl.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/vendor/p5.min.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/estilo-juego.css">
+    <link rel="stylesheet" href="css/escena-comun.css">
+    <link rel="stylesheet" href="css/escena.css">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <script src="js/estadisticas.js" data-sim="sim-velocidad-reaccion"></script>
-    <script src="js/sello.js" data-contenedor="#canvas-holder" data-esquina="bl"></script>
+    <script src="js/sello.js" data-contenedor="main.simulation-panel" data-esquina="br" data-margen-derecho="14"></script>
 </head>
-<body>
+<body class="modo-reaccion">
+    <!-- Tema guardado, antes de pintar: Pizarra (oscuro) por defecto; ?tema=simulaciencia|claro|oscuro|contraste manda -->
+    <script>(function(){var t=null;try{t=localStorage.getItem('sim-vr-tema');}catch(e){}var q={simulaciencia:'marca',marca:'marca',claro:'light',contraste:'contrast',oscuro:'dark'}[new URLSearchParams(location.search).get('tema')];if(q)t=q;var c=document.body.classList;if(t==='marca')c.add('theme-light','theme-marca');else if(t==='light'||t==='contrast')c.add('theme-'+t);})();</script>
 
-<!-- ── SIDEBAR ─────────────────────────────────────────────────────────── -->
-<aside class="sidebar">
-  <div class="sidebar-inner">
+    <!-- ── CABECERA COMÚN ─────────────────────────────────────── -->
+    <header class="barra-sup">
+        <div class="marca-sim">
+            <svg class="header-icon-svg" width="42" height="42" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <rect x="1.2" y="1.2" width="37.6" height="37.6" rx="11" fill="#1f5d8c" stroke="#071a2b" stroke-width="2.4"/>
+                <path d="M16 7 h8 v8 l8 14 a3 3 0 0 1 -3 4 h-18 a3 3 0 0 1 -3 -4 l8 -14 Z" fill="#cfe9a0" fill-opacity=".55" stroke="#071a2b" stroke-width="2"/>
+                <circle cx="15" cy="27" r="3.6" fill="#4f8ef7" stroke="#071a2b" stroke-width="1.4"/><circle cx="24" cy="28" r="3.6" fill="#f7823c" stroke="#071a2b" stroke-width="1.4"/><circle cx="20" cy="21" r="2.2" fill="#fff5d2" stroke="#071a2b" stroke-width="1.2"/>
+            </svg>
+            <h1>Velocidad de reacción</h1>
+        </div>
+        <div class="carril modos" role="tablist" aria-label="Modo">
+            <button type="button" class="carril-btn" data-modo="reaccion" role="tab" aria-selected="true">Reacción</button>
+            <button type="button" class="carril-btn" data-modo="comparar" role="tab" aria-selected="false">Comparar</button>
+            <button type="button" class="carril-btn" data-modo="choque" role="tab" aria-selected="false">Choque</button>
+        </div>
+        <div class="botones-sup">
+            <button id="btn-ayuda" type="button" class="boton-suelto boton-redondo" aria-expanded="false" aria-controls="panel-ayuda" title="¿Cómo funciona?" aria-label="¿Cómo funciona?">?</button>
+            <button id="btn-retos" type="button" class="boton-suelto boton-retos" aria-expanded="false" aria-controls="panel-retos"><span aria-hidden="true">★</span> <span class="btn-retos-txt">Retos</span></button>
+            <button id="theme-btn" class="theme-btn" title="Ajustes" aria-label="Ajustes" aria-expanded="false">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58
+                    c0.18-0.14,0.23-0.41,0.12-0.61l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96
+                    c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41h-3.84
+                    c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33
+                    c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58
+                    C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58c-0.18,0.14-0.23,0.41-0.12,0.61
+                    l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94
+                    l0.36,2.54c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54
+                    c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32
+                    c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z
+                    M12,15.6c-1.98,0-3.6-1.62-3.6-3.6s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
+                </svg>
+            </button>
+            <div id="theme-panel" class="theme-panel" aria-hidden="true">
+                <label class="check-row" for="check-pantalla">
+                    <input type="checkbox" id="check-pantalla">
+                    <span>Pantalla completa</span>
+                </label>
+                <p class="theme-panel-title">Tema visual</p>
+                <div class="theme-options">
+                    <button class="theme-opt" data-theme="marca">
+                        <span class="theme-swatch marca-swatch"></span>SimulaCiencia
+                    </button>
+                    <button class="theme-opt active" data-theme="dark">
+                        <span class="theme-swatch dark-swatch"></span>Oscuro
+                    </button>
+                    <button class="theme-opt" data-theme="light">
+                        <span class="theme-swatch light-swatch"></span>Claro
+                    </button>
+                    <button class="theme-opt" data-theme="contrast">
+                        <span class="theme-swatch contrast-swatch"></span>Alto contraste
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
 
-    <!-- Header -->
-    <div class="sim-header">
-      <div class="sim-logo"><svg viewBox="0 0 46 46" fill="none" aria-hidden="true">
-        <!-- A y B chocando por sus sitios reactivos, con el destello -->
-        <path d="M23 6 l2.2 5.2 5.6 .4 -4.3 3.6 1.4 5.4 -4.9 -3 -4.9 3 1.4 -5.4 -4.3 -3.6 5.6 -.4z" fill="#ffd84a" stroke="#071a2b" stroke-width="1.6" stroke-linejoin="round"/>
-        <line x1="8" y1="34" x2="18" y2="28" stroke="#4f8ef7" stroke-width="4" stroke-linecap="round"/>
-        <circle cx="7" cy="35" r="4" fill="#4f8ef7" stroke="#071a2b" stroke-width="1.6"/>
-        <circle cx="13" cy="31" r="6.5" fill="#4f8ef7" stroke="#071a2b" stroke-width="1.8"/>
-        <circle cx="19.5" cy="27.5" r="3.4" fill="#fff5d2" stroke="#071a2b" stroke-width="1.5"/>
-        <line x1="38" y1="34" x2="28" y2="28" stroke="#f7823c" stroke-width="4" stroke-linecap="round"/>
-        <circle cx="39" cy="35" r="4" fill="#ad5b2a" stroke="#071a2b" stroke-width="1.6"/>
-        <circle cx="33" cy="31" r="6.5" fill="#f7823c" stroke="#071a2b" stroke-width="1.8"/>
-        <circle cx="26.5" cy="27.5" r="3.4" fill="#fff5d2" stroke="#071a2b" stroke-width="1.5"/>
-        <circle cx="11" cy="29" r="1.8" fill="#fff" opacity=".6"/><circle cx="31" cy="29" r="1.8" fill="#fff" opacity=".6"/>
-      </svg></div>
-      <div>
-        <h1 class="sim-title">Velocidad de reacción</h1>
-        <div class="sim-subtitle">Teoría de colisiones · A + B → C</div>
-      </div>
+    <!-- ── FILA DE CONTEXTO: etiqueta · carril de opciones · frase guía · botón de acción ── -->
+    <div class="barra-sus">
+        <span class="ecuacion" aria-label="A más B da C"><b class="ea">A</b> <span>+</span> <b class="eb">B</b> <span>→</span> <b class="ec">C</b></span>
+        <span class="barra-sus-label only-comparar" id="lbl-cmp">Comparar</span>
+        <div class="carril cmpvar only-comparar" role="radiogroup" aria-labelledby="lbl-cmp">
+            <button type="button" class="carril-btn" data-cmp="catalyst" role="radio" aria-checked="true">Catalizador</button>
+            <button type="button" class="carril-btn" data-cmp="energy" role="radio" aria-checked="false">Temperatura</button>
+            <button type="button" class="carril-btn" data-cmp="count" role="radio" aria-checked="false">Cantidad</button>
+        </div>
+        <p id="frase" class="sus-info"></p>
+        <button id="btn-pausa" type="button" class="boton-suelto only-sim">❚❚ Pausar</button>
+        <button id="btn-reiniciar" type="button" class="boton-suelto only-sim">↺ Reiniciar</button>
     </div>
 
-    <!-- Configuración (engranaje) -->
-    <div class="toolbar-row">
-      <div id="ui-dropdown-container">
-        <button id="ui-dropdown-trigger" title="Configuración de visualización" aria-label="Configuración de visualización">⚙</button>
-        <div class="dropdown-card">
-          <div class="dropdown-label">Apariencia</div>
-          <select id="ui-theme-select" aria-label="Apariencia">
-            <option value="dark">Oscuro</option>
-            <option value="light">Claro</option>
-            <option value="high-contrast">Alto contraste</option>
-          </select>
-        </div>
-      </div>
+    <div class="app-container">
+        <main class="simulation-panel">
+            <div id="escena" class="escena">
+                <div id="canvas-container"></div>
+                <!-- Los cuatro mandos del gas (en Comparar quedan los que no se comparan) -->
+                <div id="mandos-comun" class="mandos-lienzo mandos-fila">
+                    <div class="fila-deslizador" id="fila-nivel"><label for="sl-nivel">Temperatura</label><input type="range" id="sl-nivel" min="1" max="10" value="4" step="1"><span class="valor" id="val-nivel">Normal (4)</span></div>
+                    <div class="fila-deslizador" id="fila-cat"><label for="sl-cat"><i class="punto-sl" style="--c:#a78bfa"></i>Catalizadores</label><input type="range" id="sl-cat" min="0" max="6" value="0" step="1"><span class="valor" id="val-cat">0</span></div>
+                    <div class="fila-deslizador" id="fila-na"><label for="sl-na"><i class="punto-sl" style="--c:#4f8ef7"></i>Moléculas A</label><input type="range" id="sl-na" min="4" max="30" value="16" step="1"><span class="valor" id="val-na">16</span></div>
+                    <div class="fila-deslizador" id="fila-nb"><label for="sl-nb"><i class="punto-sl" style="--c:#f7823c"></i>Moléculas B</label><input type="range" id="sl-nb" min="4" max="30" value="16" step="1"><span class="valor" id="val-nb">16</span></div>
+                </div>
+                <!-- Comparar: el mando de la variable bajo cada balón -->
+                <div id="mandos-izq" class="mandos-lienzo mandos-fila only-comparar"><div class="fila-deslizador"><label for="sl-izq" class="nom-cmp">Catalizadores</label><input type="range" id="sl-izq" min="0" max="6" value="0" step="1"><span class="valor" id="val-izq">0</span></div></div>
+                <div id="mandos-der" class="mandos-lienzo mandos-fila only-comparar"><div class="fila-deslizador"><label for="sl-der" class="nom-cmp">Catalizadores</label><input type="range" id="sl-der" min="0" max="6" value="4" step="1"><span class="valor" id="val-der">4</span></div></div>
+                <!-- Choque -->
+                <div id="mandos-choque" class="mandos-lienzo only-choque">
+                    <div class="fila-deslizador"><label for="sl-energia">Energía del choque</label><input type="range" id="sl-energia" min="1" max="10" value="5" step="1"><span class="valor" id="val-energia">5</span></div>
+                    <div class="botones-choque">
+                        <button type="button" id="btn-lanzar" class="boton-suelto boton-lanzar">▶ Lanzar</button>
+                        <button type="button" id="btn-colocar" class="boton-suelto">↺ <span class="solo-ancho">Colocar otra vez</span><span class="solo-movil">Colocar</span></button>
+                    </div>
+                    <p class="nota-mando">Arrastra una molécula para girarla.<br>Eₐ equivale más o menos al nivel 4.</p>
+                </div>
+            </div>
+            <div id="anuncio" class="sr-only" aria-live="polite"></div>
+        </main>
     </div>
 
-    <!-- Selector de modo -->
-    <div class="card is-expanded">
-      <button class="card-trigger">
-        Modo
-        <span class="card-chevron">▼</span>
-      </button>
-      <div class="card-body">
-        <div class="control-group">
-          <select id="ui-mode-select" aria-label="Modo">
-            <option value="single">Modo reacción</option>
-            <option value="compare">Modo comparación</option>
-            <option value="collision">Modo choque</option>
-          </select>
-        </div>
-        <p class="field-hint" id="mode-hint-reaction">Una cámara con A, B y opcionalmente catalizadores.</p>
-        <p class="field-hint" id="mode-hint-compare" style="display:none;">Dos cámaras: elige una variable a comparar; las otras dos quedan iguales en ambas.</p>
-        <p class="field-hint" id="mode-hint-collision" style="display:none;">Dos moléculas grandes. Rótalas arrastrando y lánzalas una contra la otra para ver si el choque es efectivo.</p>
-      </div>
+    <!-- ── AYUDA ── -->
+    <div id="panel-ayuda" class="panel-flotante panel-ayuda" hidden>
+        <div class="panel-cab"><h2>¿Cómo funciona?</h2><button type="button" class="boton-cerrar" data-cerrar="panel-ayuda" aria-label="Cerrar">✕</button></div>
+        <p data-i18n="vr-intro">Una reacción <strong>A + B → C</strong> solo ocurre cuando dos moléculas chocan, y no todos los choques sirven. Cuantos más choques eficaces por segundo, más deprisa reacciona.</p>
+        <ul class="key-ideas">
+            <li data-i18n="vr-cond"><strong>Dos condiciones a la vez:</strong> que el choque tenga energía mayor que la <strong>energía de activación Eₐ</strong> y que los <strong>sitios reactivos</strong> (el extremo claro de A y de B) se toquen de frente.</li>
+            <li data-i18n="vr-temp"><strong>Temperatura:</strong> más temperatura, moléculas más rápidas y más choques con energía suficiente (el área verde de la curva).</li>
+            <li data-i18n="vr-conc"><strong>Cantidad:</strong> con más moléculas en el mismo balón hay más choques por segundo.</li>
+            <li data-i18n="vr-cat"><strong>Catalizador (K):</strong> sujeta una A y una B ya bien orientadas y les ofrece un camino con <strong>menos energía de activación</strong>. Sale intacto y puede volver a actuar.</li>
+            <li data-i18n="vr-gas"><strong>El color del balón:</strong> A y B son gases invisibles; C es un gas de color. El balón se tiñe según la cantidad de C que hay, no según la temperatura.</li>
+        </ul>
+        <p class="nota" data-i18n="vr-nota">Los segundos son de simulación: 22 pasos de cálculo son 1 s. En un equipo lento la animación va más despacio, pero los tiempos son los mismos. El modelo de moléculas es una ampliación imaginada de lo que pasa dentro del balón.</p>
     </div>
 
-    <!-- Parámetros -->
-    <div class="card is-expanded">
-      <button class="card-trigger">
-        Parámetros
-        <span class="card-chevron">▼</span>
-      </button>
-      <div class="card-body">
-
-        <!-- Temperatura -->
-        <div class="control-group" id="group-temp">
-          <label class="field-label" for="ui-temp-slider">
-            Temperatura
-            <span class="field-readout" id="temp-val">Normal (4)</span>
-          </label>
-          <input type="range" id="ui-temp-slider" min="1" max="10" value="4" step="1">
-          <p class="field-hint">Controla la energía cinética media de las moléculas.</p>
+    <!-- ── RETOS Y ÁLBUM (ocultos por defecto) ──────────────────── -->
+    <aside id="panel-retos" class="panel-retos" hidden aria-labelledby="titulo-retos">
+        <div class="panel-cab"><h2 id="titulo-retos">Retos <small id="retos-modo" class="retos-modo"></small></h2><button type="button" class="boton-cerrar" data-cerrar="panel-retos" aria-label="Cerrar">✕</button></div>
+        <ol id="lista-retos" class="lista-retos"></ol>
+        <div class="album-cab"><h2>Álbum de sellos</h2><span id="album-cuenta" class="album-cuenta">0 / 0</span></div>
+        <div id="album-mini" class="album-mini album-vr"></div>
+        <p class="nota" id="nota-album">Cada sello se gana con un resultado distinto.</p>
+        <div class="retos-botones">
+            <button type="button" id="btn-ver-album" class="boton-suelto">Ver el álbum</button>
+            <button type="button" id="btn-borrar" class="boton-suelto boton-peligro">↺ Borrar lo conseguido</button>
         </div>
-
-        <!-- nA -->
-        <div class="control-group" id="group-na">
-          <label class="field-label" for="ui-na-slider">
-            Moléculas A (reactivo)
-            <span class="field-readout"><span id="na-val">16</span></span>
-          </label>
-          <input type="range" id="ui-na-slider" min="4" max="30" value="16" step="1">
+        <div id="confirmar-borrar" class="confirmar" hidden>
+            <p>¿Borrar los retos y sellos conseguidos en este navegador?</p>
+            <div class="retos-botones">
+                <button type="button" id="btn-borrar-si" class="boton-suelto boton-peligro">Sí, borrar</button>
+                <button type="button" id="btn-borrar-no" class="boton-suelto">Cancelar</button>
+            </div>
         </div>
-
-        <!-- nB -->
-        <div class="control-group" id="group-nb">
-          <label class="field-label" for="ui-nb-slider">
-            Moléculas B (reactivo)
-            <span class="field-readout"><span id="nb-val">16</span></span>
-          </label>
-          <input type="range" id="ui-nb-slider" min="4" max="30" value="16" step="1">
+    </aside>
+    <div id="album" class="album-modal" hidden role="dialog" aria-modal="true" aria-labelledby="titulo-album">
+        <div class="album-caja">
+            <div class="panel-cab"><h2 id="titulo-album">Álbum de sellos</h2><button type="button" class="boton-cerrar" data-cerrar="album" aria-label="Cerrar">✕</button></div>
+            <p class="nota">Seis sellos: tres resultados del modo Choque y tres hitos de las reacciones (completarla, usar catalizador y averiguar el reactivo limitante).</p>
+            <div id="album-tabla" class="album-tabla"></div>
         </div>
-
-        <!-- Catalizadores -->
-        <div class="control-group" id="group-cat" style="margin-top:4px;">
-          <label class="field-label" for="ui-cat-slider">
-            Catalizadores
-            <span class="field-readout"><span id="cat-val">0</span></span>
-          </label>
-          <input type="range" id="ui-cat-slider" min="0" max="6" value="0" step="1">
-          <p class="field-hint">Moléculas que sujetan A y B ya bien orientadas y les ofrecen un camino con menor energía de activación.</p>
-        </div>
-
-        <!-- Play/pausa + Reset (modos reacción y comparación) -->
-        <div class="control-group" style="margin-top:8px; display:flex; gap:8px;" id="group-play-reset">
-          <button id="ui-btn-playpause" class="btn-primary">⏸ Pausar</button>
-          <button id="ui-btn-reset" class="btn-secondary">↺ Reiniciar</button>
-        </div>
-
-        <!-- Controles del modo choque (ocultos por defecto) -->
-        <div id="group-collision-controls" style="display:none;">
-          <div class="control-group" style="margin-top:6px;">
-            <label class="field-label" for="ui-collision-energy">
-              Energía del choque
-              <span class="field-readout"><span id="collision-energy-val">5</span></span>
-            </label>
-            <input type="range" id="ui-collision-energy" min="1" max="10" value="5" step="1">
-            <p class="field-hint" data-i18n="hint-energia-choque">Controla la velocidad al lanzar. La energía de activación E<sub>a</sub> equivale aproximadamente al nivel 4.</p>
-          </div>
-          <div class="control-group" style="display:flex; gap:8px;">
-            <button id="ui-btn-launch" class="btn-primary">▶ Lanzar</button>
-            <button id="ui-btn-collision-reset" class="btn-secondary">↺ Reset</button>
-          </div>
-        </div>
-
-      </div>
     </div>
 
-    <!-- Comparación (visible solo en modo comparación) -->
-    <div class="card is-expanded" id="card-compare" style="display:none;">
-      <button class="card-trigger">
-        Comparación
-        <span class="card-chevron">▼</span>
-      </button>
-      <div class="card-body">
-        <div id="compare-extra">
-          <div class="control-group">
-            <label class="field-label" for="ui-compare-var">Variable a comparar</label>
-            <select id="ui-compare-var">
-              <option value="catalyst">Presencia de catalizador</option>
-              <option value="energy">Energía (temperatura)</option>
-              <option value="count">Cantidad de moléculas</option>
-            </select>
-            <p class="field-hint">Las otras dos variables quedan bloqueadas (iguales en ambas cámaras) con los sliders de arriba.</p>
-          </div>
-
-          <div class="control-group">
-            <label class="field-label" for="ui-cmp-left">
-              <span><span class="cmp-var-name">Catalizadores</span> · <span data-i18n="◀ Izquierda">◀ Izquierda</span></span>
-              <span class="field-readout"><span id="cmpl-val">0</span></span>
-            </label>
-            <input type="range" id="ui-cmp-left" min="0" max="6" value="0" step="1">
-          </div>
-
-          <div class="control-group">
-            <label class="field-label" for="ui-cmp-right">
-              <span><span class="cmp-var-name">Catalizadores</span> · <span data-i18n="▶ Derecha">▶ Derecha</span></span>
-              <span class="field-readout"><span id="cmpr-val">4</span></span>
-            </label>
-            <input type="range" id="ui-cmp-right" min="0" max="6" value="4" step="1">
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Estadísticas -->
-    <div class="card is-expanded">
-      <button class="card-trigger">
-        Estadísticas
-        <span class="card-chevron">▼</span>
-      </button>
-      <div class="card-body">
-        <div class="stats-grid">
-          <div class="stat-item accent-a">
-            <div class="stat-label">Moléculas A</div>
-            <div class="stat-value" id="count-a">—</div>
-          </div>
-          <div class="stat-item accent-b">
-            <div class="stat-label">Moléculas B</div>
-            <div class="stat-value" id="count-b">—</div>
-          </div>
-          <div class="stat-item accent-c">
-            <div class="stat-label">Producto C</div>
-            <div class="stat-value" id="count-c">—</div>
-          </div>
-          <div class="stat-item accent-r">
-            <div class="stat-label">Reacciones</div>
-            <div class="stat-value" id="count-total">0</div>
-          </div>
-        </div>
-        <div style="margin-top:8px;">
-          <div class="field-label">
-            Tasa actual
-            <span class="field-readout" id="count-rate">—</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Leyenda -->
-    <div class="card is-expanded">
-      <button class="card-trigger">
-        Leyenda
-        <span class="card-chevron">▼</span>
-      </button>
-      <div class="card-body">
-        <div class="legend-row">
-          <div class="legend-dot" style="background:#4f8ef7;"></div>
-          <span>Molécula A (reactivo)</span>
-        </div>
-        <div class="legend-row">
-          <div class="legend-dot" style="background:#f7823c;"></div>
-          <span>Molécula B (reactivo)</span>
-        </div>
-        <div class="legend-row">
-          <div class="legend-dot" style="background:#34c782;"></div>
-          <span>Molécula C (producto)</span>
-        </div>
-        <div class="legend-row">
-          <div class="legend-dot" style="background:#a78bfa;"></div>
-          <span>Catalizador (K)</span>
-        </div>
-        <div class="legend-row" style="margin-top:6px;">
-          <div class="legend-dot" style="background:#fff5d2; border:1.5px solid #ffc859;"></div>
-          <span>Sitio reactivo (extremo activo)</span>
-        </div>
-        <div class="legend-row">
-          <div class="legend-dot" style="background:#ffd700; border-radius: 3px;"></div>
-          <span>Destello de reacción</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Información -->
-    <div class="card" id="ui-panel-info">
-      <button class="card-trigger" id="ui-info-trigger">
-        ¿Cómo funciona?
-        <span class="card-chevron">▼</span>
-      </button>
-      <div class="card-body">
-        <div class="info-section">
-          <p data-i18n="info-1">Las moléculas <b>A</b> y <b>B</b> son <b>poliatómicas</b>: tienen una orientación y un <b>sitio reactivo</b> (el extremo claro resaltado). Sus velocidades siguen la <b>distribución de Maxwell-Boltzmann</b> y aumentan con la temperatura.</p>
-          <p data-i18n="info-2"><b>Vía térmica.</b> Una colisión directa solo produce C si se cumplen <b>dos</b> condiciones a la vez: que la velocidad relativa supere la <b>energía de activación E<sub>a</sub></b> (energía suficiente) <b>y</b> que ambos sitios reactivos choquen de frente (<b>orientación correcta</b>). Por eso es poco frecuente.</p>
-          <p data-i18n="info-3"><b>Vía catalizada.</b> El <b>catalizador (K)</b> atrae a una A y a una B hacia sus dos cavidades. Cuando ambas quedan acopladas, ya están bien orientadas y les basta una <b>energía de activación menor</b> (la línea violeta del recuadro), así que reaccionan casi siempre. El catalizador se libera intacto para volver a actuar.</p>
-          <p data-i18n="info-4">El recuadro muestra cómo se reparten las velocidades relativas de los choques; el área verde, a la derecha de E<sub>a</sub>, son los que tienen energía suficiente; el gráfico inferior, la <b>velocidad de reacción</b> (reacciones/s) a medida que avanza.</p>
-          <p>Los segundos son de simulación: cada uno son 60 pasos. En un equipo lento la animación va más despacio, pero las cifras son las mismas.</p>
-          <p data-i18n="info-6"><b>Modo comparación.</b> Divide la pantalla en dos cámaras. Eliges <b>una</b> variable a comparar —energía, cantidad de moléculas o catalizador— y se aplica un valor distinto a cada cámara; las otras dos quedan <b>bloqueadas e iguales</b>. El gráfico inferior superpone las dos curvas (◀ izquierda / ▶ derecha) para comparar directamente la velocidad de reacción.</p>
-        </div>
-      </div>
-    </div>
-
-  </div>
-</aside>
-
-<!-- ── CANVAS ──────────────────────────────────────────────────────────── -->
-<div id="canvas-holder"></div>
-<div id="anuncio" class="sr-only" aria-live="polite"></div>
-
-<script src="js/estilo-juego.js"></script>
-<script src="js/Molecule.js"></script>
-<script src="js/World.js"></script>
-<script src="js/CollisionMode.js"></script>
-<script src="js/parametros.js"></script>
-    <script src="js/sketch.js"></script>
-
-<script>
-  // Card toggles
-  document.querySelectorAll(".card-trigger").forEach(btn => {
-    btn.addEventListener("click", () => {
-      btn.closest(".card").classList.toggle("is-expanded");
-    });
-  });
-</script>
+    <script src="js/escena-comun.js"></script>
+    <script src="js/arranque-comun.js"></script>
+    <script src="js/dibujo-comun.js"></script>
+    <script src="js/parametros.js"></script>
+    <script src="js/retos-comun.js"></script>
+    <script src="js/retos.js"></script>
+    <script src="js/fisica.js"></script>
+    <script src="js/dibujo.js"></script>
+    <script src="js/choque.js"></script>
+    <script src="js/escena.js"></script>
 </body>
 </html>

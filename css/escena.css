@@ -1,0 +1,59 @@
+/* ════════════════════════════════════════════════════
+   ESCENA PROPIA DE «VELOCIDAD DE REACCIÓN»
+   Lo común (cabecera, carril, botones, paneles, retos, mandos sobre el
+   lienzo, móvil) está en css/escena-comun.css, que se carga antes.
+════════════════════════════════════════════════════ */
+[hidden] { display: none !important; }
+
+/* Lo que solo se ve en cada modo */
+body:not(.modo-comparar) .only-comparar { display: none !important; }
+body:not(.modo-choque) .only-choque { display: none !important; }
+body.modo-choque .only-sim, body.modo-choque #mandos-comun { display: none !important; }
+
+/* Ecuación A + B → C en la fila de contexto */
+.ecuacion { display: inline-flex; gap: 8px; align-items: baseline; font: 700 1.3rem var(--font-fun); color: var(--muted); white-space: nowrap; }
+.ecuacion b.ea { color: #7fb0ff; } .ecuacion b.eb { color: #ffb07a; } .ecuacion b.ec { color: #7fe3ae; }
+body.theme-marca .ecuacion b.ea { color: #1d4ed8; } body.theme-marca .ecuacion b.eb { color: #c2410c; } body.theme-marca .ecuacion b.ec { color: #047857; }
+body.theme-light:not(.theme-marca) .ecuacion b.ea { color: #1f5fbf; } body.theme-light:not(.theme-marca) .ecuacion b.eb { color: #c2410c; } body.theme-light:not(.theme-marca) .ecuacion b.ec { color: #0a7d58; }
+.barra-sus .sus-info { flex: 1; min-width: 0; }
+
+/* ── Mandos del gas: nombre · barra · valor (alto 40 como en el boceto) ── */
+.mandos-fila { gap: calc(var(--u) * 2); }
+.mandos-fila .fila-deslizador { height: calc(var(--u) * 40); gap: calc(var(--u) * 12); }
+.mandos-fila .fila-deslizador label { display: flex; align-items: center; gap: calc(var(--u) * 8); width: calc(var(--u) * 150); min-width: 0; flex: none; color: var(--title); font: 600 calc(var(--u) * 16) var(--font-fun); white-space: nowrap; }
+.mandos-fila .fila-deslizador .valor { min-width: 0; width: calc(var(--u) * 40); font-size: calc(var(--u) * 16.5); }
+#val-nivel { width: calc(var(--u) * 100); }
+#mandos-comun.compacto .fila-deslizador { height: calc(var(--u) * 36); }
+#mandos-comun.compacto .fila-deslizador label { width: calc(var(--u) * 130); }
+.punto-sl { display: inline-block; flex: none; width: calc(var(--u) * 14); height: calc(var(--u) * 14); border-radius: 50%; background: var(--c); border: calc(var(--u) * 2) solid #071a2b; }
+#mandos-izq .fila-deslizador label, #mandos-der .fila-deslizador label { width: calc(var(--u) * 150); }
+#mandos-izq .valor, #mandos-der .valor { width: calc(var(--u) * 90); }
+#mandos-izq, #mandos-der { width: calc(100% * 608 / 1330); }
+
+/* ── Choque: botones y nota ── */
+.botones-choque { display: flex; gap: calc(var(--u) * 16); margin-top: calc(var(--u) * 8); }
+.botones-choque .boton-suelto { height: calc(var(--u) * 40); font-size: calc(var(--u) * 16); padding: 0 calc(var(--u) * 16); justify-content: center; flex: 1; white-space: nowrap; }
+.boton-lanzar { border: 3px solid var(--accent); color: var(--accent); }
+#mandos-choque .nota-mando { margin: calc(var(--u) * 14) 0 0; font-size: calc(var(--u) * 14); line-height: 1.45; }
+#mandos-choque { gap: calc(var(--u) * 6); }
+#mandos-choque .fila-deslizador label { width: calc(var(--u) * 170); flex: none; color: var(--title); font: 600 calc(var(--u) * 16) var(--font-fun); }
+#mandos-choque .fila-deslizador .valor { width: calc(var(--u) * 40); min-width: 0; }
+
+/* ── Álbum: seis sellos ── */
+.album-mini.album-vr { grid-template-columns: repeat(6, 1fr); gap: 6px; }
+.album-vr .sello { width: 38px; height: 38px; font-size: .85rem; }
+.album-vr .sello.ganado { color: #061523; font-weight: 700; }
+.album-vr .sello.nuevo { box-shadow: 0 0 0 5px color-mix(in srgb, var(--change) 45%, transparent); }
+.album-tabla .mat-fila { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px 14px; }
+.album-tabla .mat-celda { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
+.album-tabla .mat-celda strong { color: var(--title); font: 600 1rem var(--font-fun); }
+.album-tabla .mat-celda small { color: var(--muted); }
+
+@media (max-width: 760px) {
+    .ecuacion { font-size: 1.15rem; }
+    .barra-sus .sus-info { order: 4; flex-basis: 100%; }
+    .album-tabla .mat-fila { grid-template-columns: repeat(2, 1fr); }
+    #mandos-izq, #mandos-der { width: calc(100% * 342 / 370); }
+    #mandos-izq .fila-deslizador label, #mandos-der .fila-deslizador label { width: calc(var(--u) * 112); }
+    #mandos-izq .valor, #mandos-der .valor { width: calc(var(--u) * 80); }
+}
