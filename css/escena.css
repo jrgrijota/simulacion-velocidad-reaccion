@@ -59,6 +59,12 @@ body #mandos-choque .fila-slider label { font: 600 calc(var(--u) * 17.5) var(--f
 #mandos-choque .valor-slider { min-width: calc(var(--u) * 28); text-align: right; }
 #mandos-choque input[type="range"] { width: 100%; margin: calc(var(--u) * 6) 0 calc(var(--u) * 2); }
 #mandos-choque .slider-bounds { margin-bottom: calc(var(--u) * 10); font-size: calc(var(--u) * 14.5); }
+/* Escritorio: los mandos de Choque en una fila bajo el círculo */
+#mandos-choque.en-fila { display: grid; grid-template-columns: 1fr auto; column-gap: calc(var(--u) * 28); align-items: center; }
+#mandos-choque.en-fila > :not(.botones-choque) { grid-column: 1; }
+#mandos-choque.en-fila .slider-bounds { margin-bottom: 0; }
+#mandos-choque.en-fila .botones-choque { grid-column: 2; grid-row: 1 / span 3; grid-template-columns: auto auto; }
+#mandos-choque.en-fila .botones-choque .boton-suelto { height: calc(var(--u) * 44); font-size: calc(var(--u) * 17); padding: 0 calc(var(--u) * 22); }
 .botones-choque { display: grid; grid-template-columns: 1fr 1fr; gap: calc(var(--u) * 14); }
 .botones-choque .boton-suelto { height: calc(var(--u) * 38); font-size: calc(var(--u) * 16); padding: 0 calc(var(--u) * 12); justify-content: center; white-space: nowrap; }
 .boton-lanzar { border: 3px solid var(--accent); color: var(--accent); }

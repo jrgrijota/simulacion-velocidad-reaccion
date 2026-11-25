@@ -71,19 +71,18 @@ function disponerComparar(m) {
         igual: { x: 0, y: 1600, w: 370, h: 176 }, sello: { m: true }, mandos: { x: 14, y: 1636, w: 342, compacto: true } };
 }
 function disponerChoque(m) {
-    if (!m) return {
-        w: 1330, h: 696, tarjetas: [{ x: 0, y: 0, w: 880, h: 556 }],
-        modelo: { cx: 262, cy: 268, r: 222, txt: 'Modelo: así imaginamos dos moléculas que chocan', fs: 16 },
-        perfil: { x: 520, y: 40, w: 346, h: 470, m: false },
-        panel: { x: 896, y: 0, w: 434, h: 330, m: false }, controles: { x: 896, y: 346, w: 434, h: 210 },
-        tira: { x: 0, y: 568, w: 1330, h: 128, m: false }, sello: { x: 262, y: 60, m: true }, mandos: { x: 920, y: 360, w: 386 },
+    if (!m) return {          // zona de trabajo: círculo grande con sus mandos debajo; a la derecha, panel e historial
+        w: 1330, h: 696, tarjetas: [{ x: 0, y: 0, w: 880, h: 696 }],
+        modelo: { cx: 440, cy: 282, r: 250, txt: 'Modelo: así imaginamos dos moléculas que chocan', fs: 16 },
+        panel: { x: 896, y: 0, w: 434, h: 330, m: false },
+        tira: { x: 896, y: 346, w: 434, h: 350, m: true }, sello: { x: 440, y: 50, m: true },
+        mandos: { x: 56, y: 590, w: 768, fila: true },
     };
     return {
-        w: 370, h: 1666, tarjetas: [{ x: 0, y: 0, w: 370, h: 700 }],
+        w: 370, h: 1386, tarjetas: [{ x: 0, y: 0, w: 370, h: 420 }],
         modelo: { cx: 185, cy: 206, r: 166, txt: 'Dos moléculas que chocan', fs: 14.5 },
-        perfil: { x: 16, y: 424, w: 338, h: 262, m: true },
-        panel: { x: 0, y: 716, w: 370, h: 352, m: true }, controles: { x: 0, y: 1084, w: 370, h: 226 },
-        tira: { x: 0, y: 1326, w: 370, h: 340, m: true }, sello: { x: 185, y: 30, m: true }, mandos: { x: 14, y: 1100, w: 342 },
+        panel: { x: 0, y: 436, w: 370, h: 352, m: true }, controles: { x: 0, y: 804, w: 370, h: 226 },
+        tira: { x: 0, y: 1046, w: 370, h: 340, m: true }, sello: { x: 185, y: 30, m: true }, mandos: { x: 14, y: 820, w: 342 },
     };
 }
 function calcularEscena() {          // devuelve true si cambia el tamaño del lienzo
@@ -98,7 +97,7 @@ function colocarMandos() {
     if (!LAY) return;
     const c = elId('mandos-comun'), compara = S.modo === 'comparar';
     c.classList.toggle('compacto', !!LAY.mandos.compacto);
-    if (S.modo === 'choque') colocarSobreLienzo(elId('mandos-choque'), LAY.mandos, CV_W, CV_H);
+    if (S.modo === 'choque') { colocarSobreLienzo(elId('mandos-choque'), LAY.mandos, CV_W, CV_H); elId('mandos-choque').classList.toggle('en-fila', !!LAY.mandos.fila); }
     else colocarSobreLienzo(c, LAY.mandos, CV_W, CV_H);
     if (compara) {
         colocarSobreLienzo(elId('mandos-izq'), LAY.lados[0].mando, CV_W, CV_H);
@@ -240,10 +239,9 @@ function dibujarChoque() {
         }
     }, dibujar: () => c.dibujar() };
     dibujarModelo(mo.cx, mo.cy, mo.r, null, i18n.t(mo.txt), null, mo.fs, extra);
-    const PF = LAY.perfil; dibujarPerfil(PF.x, PF.y, PF.w, PF.h, c, +elId('sl-energia').value, PF.m);
     const P = LAY.panel;
     dibujarPanelChoque(P.x, P.y, P.w, P.h, c, +elId('sl-energia').value, P.m);
-    tarj(LAY.controles, THEME.cardBg, 20);
+    if (LAY.controles) tarj(LAY.controles, THEME.cardBg, 20);
     const tr = LAY.tira; dibujarTiraChoques(tr.x, tr.y, tr.w, tr.h, c.historial, tr.m);
     if (c.fase === 'resultado' && c.eficaz) selloVR(i18n.t('¡CHOQUE EFICAZ!'), 'A + B → C', LAY.sello.x, LAY.sello.y, S.tSello, LAY.sello.m);
     anunciar({ tag: mensajeChoque(c).tag, txt: mensajeChoque(c).msg });

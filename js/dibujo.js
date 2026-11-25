@@ -396,10 +396,10 @@ function dibujarContadorChoques(x, y, w, h, ult, conCat, m) {
     for (let i = 0; i < CHOQUES_VISTOS; i++) {
         const cx = x + paso * (i + .5), v = ult[i];
         if (v === undefined) CC(cx, cy, r, { s: THEME.border, sw: 1.5, dash: [2, 3] });
-        else CC(cx, cy, r, v ? { f: '#34c782', s: ink, sw: 1.5 } : { f: THEME.hundido, s: THEME.textDim, sw: 1.5 });
+        else CC(cx, cy, r, { f: v ? '#34c782' : CF.no, s: ink, sw: 1.5 });
     }
     const nota = conCat ? i18n.t('Con catalizador les basta menos energía: también reaccionan choques que no llegan a Eₐ.')
-                        : i18n.t('Verde: el choque lleva más energía que Eₐ. Sube la temperatura y verás más.');
+                        : i18n.t('Verde: más energía que Eₐ. Rojo: menos. Sube la temperatura y verás más verdes.');
     partir(nota, w, { fs: m ? 14.5 : 15, sys: true }).slice(0, 2).forEach((l, i) => TS(x, y + 98 + i * 20, l, { fs: m ? 14.5 : 15, c: THEME.textDim }));
 }
 // e = { tag, col, msg, nivel, cat, n:[A,B,C,K], pie }
@@ -508,11 +508,12 @@ function dibujarTiraChoques(x, y, w, h, hist, m) {
     T(x + 24, y + 32, i18n.t('Tus choques'), { fs: 17.5, w: 600, c: THEME.text });
     const ef = hist.filter(c => c.ok).length;
     TS(x + 24 + ancho(i18n.t('Tus choques'), { fs: 17.5, w: 600 }) + 16, y + 32, hist.length ? (hist.length === 1 ? i18n.t('1 lanzamiento') : i18n.t('{n} lanzamientos', { n: hist.length })) + ' · ' + (ef === 1 ? i18n.t('1 eficaz') : i18n.t('{e} eficaces', { e: ef })) : i18n.t('Todavía no has lanzado'), { fs: 15.5, c: THEME.textDim });
-    const items = hist.slice(-4);
-    for (let i = 0; i < 4; i++) {
-        const c = items[i - (4 - items.length)];                // los vacíos primero; el último, a la derecha (o abajo)
-        const [cx, cy, cw, ch] = m ? [x + 14, y + 52 + i * 66, w - 28, 58] : [x + 24 + i * 322, y + 48, 306, 60];
-        if (c) celdaChoque(cx, cy, cw, ch, c, i === 3);
+    const N = 3, items = hist.slice(-N);                     // los tres últimos lanzamientos
+    const fh = m ? Math.min(96, (h - 66) / N) : 0;
+    for (let i = 0; i < N; i++) {
+        const c = items[i - (N - items.length)];                // los vacíos primero; el último, a la derecha (o abajo)
+        const [cx, cy, cw, ch] = m ? [x + 14, y + 52 + i * fh, w - 28, fh - 10] : [x + 24 + i * 430, y + 48, 414, 60];
+        if (c) celdaChoque(cx, cy, cw, ch, c, i === N - 1);
         else forma(R(cx, cy, cw, ch, 14), { s: THEME.border, sw: 1.5, dash: [6, 6], op: .6 });
     }
 }
