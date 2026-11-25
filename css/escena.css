@@ -96,7 +96,7 @@ body #mandos-choque .fila-slider label { font: 600 calc(var(--u) * 17.5) var(--f
 body .barra-sus #frase:empty { display: none; }
 
 /* Reacción: sin franja de contexto; Pausar y Reiniciar viven bajo el círculo del modelo */
-body.modo-reaccion .barra-sus { display: none; }
+body.modo-reaccion .barra-sus, body.modo-choque .barra-sus { display: none; }
 #escena .acciones-sim.en-lienzo { position: absolute; display: flex; gap: calc(var(--u) * 14); }
 #escena .acciones-sim.en-lienzo .boton-suelto { flex: 1; justify-content: center; height: calc(var(--u) * 40); font-size: calc(var(--u) * 16); padding: 0 calc(var(--u) * 16); white-space: nowrap; }
 body.modo-choque #escena .acciones-sim { display: none; }
